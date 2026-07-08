@@ -6,14 +6,14 @@
       "title": "Test Entry",
       "notes": "",
       "importance": true,
-      "urgency": true,
+      "urgency": false,
       "assignee": "me",
       "due": null,
       "tags": [],
       "subtasks": [],
       "completed": false,
       "completedAt": null,
-      "quadrantEnteredAt": "2026-07-08T23:39:24.500Z",
+      "quadrantEnteredAt": "2026-07-08T23:43:59.472Z",
       "activity": []
     }
   ]
