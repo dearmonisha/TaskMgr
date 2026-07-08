@@ -22,14 +22,20 @@
       "notes": "",
       "importance": true,
       "urgency": true,
-      "assignee": "me",
+      "assignee": "shared",
       "due": null,
       "tags": [],
       "subtasks": [],
       "completed": false,
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-08T23:44:54.784Z",
-      "activity": []
+      "activity": [
+        {
+          "id": "a845ba0e-c28c-4eac-a43b-ca6a4e94da3f",
+          "text": "Reassigned to Shared",
+          "ts": "2026-07-08T23:47:54.174Z"
+        }
+      ]
     }
   ]
 }
