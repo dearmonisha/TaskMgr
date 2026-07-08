@@ -272,7 +272,7 @@
       <div class="filters-search">
         <div class="pill-tabs" id="person-tabs">
           <button data-person="all" class="active">All</button>
-          <button data-person="me">You</button>
+          <button data-person="me">Shiva</button>
           <button data-person="monisha">Monisha</button>
           <button data-person="shared">Shared</button>
         </div>
@@ -566,12 +566,12 @@
   /* ================= RENDER: MATRIX / LIST / ARCHIVE ================= */
   function avatarHtml(assignee){
     if(assignee === 'shared'){
-      return '<span class="tc-avatars"><span class="avatar you">Y</span><span class="avatar monisha">M</span></span>';
+      return '<span class="tc-avatars"><span class="avatar you">S</span><span class="avatar monisha">M</span></span>';
     }
     if(assignee === 'monisha'){
       return '<span class="tc-avatars"><span class="avatar monisha" style="margin-left:0">M</span></span>';
     }
-    return '<span class="tc-avatars"><span class="avatar you">Y</span></span>';
+    return '<span class="tc-avatars"><span class="avatar you">S</span></span>';
   }
   function metaPillsHtml(t){
     var pills = '';
@@ -885,7 +885,7 @@
       + '<input class="modal-title-input" id="m-title" value="'+escapeHtml(t.title)+'">'
       + '<div class="field-label">Priority</div><div class="priority-grid">'+priorityBtns+'</div>'
       + '<div class="field-label">Assigned to</div><div class="seg3" id="m-assignee">'
-      + '<button data-a="me" class="'+(t.assignee==='me'?'active':'')+'">You</button>'
+      + '<button data-a="me" class="'+(t.assignee==='me'?'active':'')+'">Shiva</button>'
       + '<button data-a="monisha" class="'+(t.assignee==='monisha'?'active':'')+'">Monisha</button>'
       + '<button data-a="shared" class="'+(t.assignee==='shared'?'active':'')+'">Shared</button>'
       + '</div>'
@@ -932,7 +932,7 @@
         var prev = t.assignee;
         t.assignee = btn.dataset.a;
         if(t.assignee !== prev && (t.assignee === 'shared' || prev === 'shared')){
-          logActivity(t, 'Reassigned to '+(t.assignee==='me'?'You':t.assignee==='monisha'?'Monisha':'Shared'));
+          logActivity(t, 'Reassigned to '+(t.assignee==='me'?'Shiva':t.assignee==='monisha'?'Monisha':'Shared'));
         }
         openTaskModal(id);
       });
