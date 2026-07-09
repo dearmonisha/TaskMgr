@@ -1,4 +1,20 @@
 {
   "version": 1,
-  "tasks": []
+  "tasks": [
+    {
+      "id": "33dd9815-f0ab-46c7-9a1e-ceb789ad6ce3",
+      "title": "Plan for Meetings during PTO",
+      "notes": "",
+      "importance": true,
+      "urgency": false,
+      "assignee": "me",
+      "due": null,
+      "tags": [],
+      "subtasks": [],
+      "completed": false,
+      "completedAt": null,
+      "quadrantEnteredAt": "2026-07-09T02:45:45.423Z",
+      "activity": []
+    }
+  ]
 }
