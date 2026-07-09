@@ -113,24 +113,18 @@
       ]
     },
     {
-      "id": "9829805d-c063-4ab0-a87e-65aef0db6c85",
-      "title": "Call Terry",
+      "id": "ec49a5c2-dddf-4995-8434-6a8cd2efa131",
+      "title": "Execute Will and Trust",
       "notes": "",
       "importance": true,
       "urgency": false,
-      "assignee": "monisha",
-      "due": "2026-07-09",
+      "assignee": "me",
+      "due": null,
       "tags": [],
-      "subtasks": [
-        {
-          "id": "64295d1e-6cce-4638-8c04-85b70d9c9a14",
-          "text": "Complete Report",
-          "done": false
-        }
-      ],
+      "subtasks": [],
       "completed": false,
       "completedAt": null,
-      "quadrantEnteredAt": "2026-07-09T04:58:36.576Z",
+      "quadrantEnteredAt": "2026-07-09T13:33:51.675Z",
       "activity": []
     }
   ]
