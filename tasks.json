@@ -121,7 +121,18 @@
       "assignee": "me",
       "due": null,
       "tags": [],
-      "subtasks": [],
+      "subtasks": [
+        {
+          "id": "2e7c7d49-85c5-4ed2-bdb0-2e9b784f089b",
+          "text": "Inform Mortgage before executing",
+          "done": false
+        },
+        {
+          "id": "db011b78-a6e2-46d1-9b1e-3ce986db7903",
+          "text": "Identify 2 witnesses",
+          "done": false
+        }
+      ],
       "completed": false,
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-09T13:33:51.675Z",
