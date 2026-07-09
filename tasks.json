@@ -111,6 +111,21 @@
           "ts": "2026-07-09T03:13:36.151Z"
         }
       ]
+    },
+    {
+      "id": "9829805d-c063-4ab0-a87e-65aef0db6c85",
+      "title": "Call Terry",
+      "notes": "",
+      "importance": true,
+      "urgency": false,
+      "assignee": "me",
+      "due": null,
+      "tags": [],
+      "subtasks": [],
+      "completed": false,
+      "completedAt": null,
+      "quadrantEnteredAt": "2026-07-09T04:23:59.359Z",
+      "activity": []
     }
   ]
 }
