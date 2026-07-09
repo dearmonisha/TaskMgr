@@ -1,5 +1,20 @@
 {
   "version": 1,
-  "family": [],
+  "family": [
+    {
+      "id": "0830eb44-81fc-4b2a-847d-da8bdf2782cc",
+      "name": "Monisha",
+      "color": "#13808a",
+      "email": "dearmonisha@gmail.com",
+      "role": "adult"
+    },
+    {
+      "id": "e5e49f02-3223-4434-8158-3ed41b9858f0",
+      "name": "Tanvi",
+      "color": "#955c82",
+      "email": "tanviverma2023@gmail.com",
+      "role": "kid"
+    }
+  ],
   "events": []
 }
