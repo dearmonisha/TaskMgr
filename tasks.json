@@ -90,6 +90,27 @@
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-09T02:52:40.462Z",
       "activity": []
+    },
+    {
+      "id": "cd6a0825-6a11-42d6-99e8-15b6d4cad1e8",
+      "title": "Print Luggage Tags for Cruise",
+      "notes": "",
+      "importance": true,
+      "urgency": true,
+      "assignee": "shared",
+      "due": "2026-07-09",
+      "tags": [],
+      "subtasks": [],
+      "completed": false,
+      "completedAt": null,
+      "quadrantEnteredAt": "2026-07-09T03:13:20.529Z",
+      "activity": [
+        {
+          "id": "9e3c59ca-756e-4ddb-a86e-285a68717ec3",
+          "text": "Reassigned to Shared",
+          "ts": "2026-07-09T03:13:36.151Z"
+        }
+      ]
     }
   ]
 }
