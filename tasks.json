@@ -36,14 +36,14 @@
       "title": "Update CRM one pager for Tom",
       "notes": "",
       "importance": true,
-      "urgency": false,
+      "urgency": true,
       "assignee": "me",
       "due": null,
       "tags": [],
       "subtasks": [],
       "completed": false,
       "completedAt": null,
-      "quadrantEnteredAt": "2026-07-09T02:46:09.755Z",
+      "quadrantEnteredAt": "2026-07-09T02:46:22.812Z",
       "activity": []
     },
     {
