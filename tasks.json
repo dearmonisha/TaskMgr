@@ -45,6 +45,21 @@
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-09T02:46:09.755Z",
       "activity": []
+    },
+    {
+      "id": "8caf4d6b-288f-4638-a993-d5f4d1fd8804",
+      "title": "Kickoff Deck for User Advisory Group",
+      "notes": "",
+      "importance": true,
+      "urgency": false,
+      "assignee": "me",
+      "due": null,
+      "tags": [],
+      "subtasks": [],
+      "completed": false,
+      "completedAt": null,
+      "quadrantEnteredAt": "2026-07-09T02:46:20.429Z",
+      "activity": []
     }
   ]
 }
