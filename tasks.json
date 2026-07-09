@@ -30,6 +30,21 @@
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-09T02:45:59.482Z",
       "activity": []
+    },
+    {
+      "id": "0c42dd71-9145-4bce-a99a-5f3d08083a40",
+      "title": "Update CRM one pager for Tom",
+      "notes": "",
+      "importance": true,
+      "urgency": false,
+      "assignee": "me",
+      "due": null,
+      "tags": [],
+      "subtasks": [],
+      "completed": false,
+      "completedAt": null,
+      "quadrantEnteredAt": "2026-07-09T02:46:09.755Z",
+      "activity": []
     }
   ]
 }
