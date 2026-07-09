@@ -60,6 +60,21 @@
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-09T02:46:20.429Z",
       "activity": []
+    },
+    {
+      "id": "2c1a325d-25b5-48a6-9c8f-78b4738c83bb",
+      "title": "F/w Blake and Brandon on Doc Force access via Dynamics",
+      "notes": "",
+      "importance": true,
+      "urgency": false,
+      "assignee": "me",
+      "due": null,
+      "tags": [],
+      "subtasks": [],
+      "completed": false,
+      "completedAt": null,
+      "quadrantEnteredAt": "2026-07-09T02:52:19.950Z",
+      "activity": []
     }
   ]
 }
