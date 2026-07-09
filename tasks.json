@@ -117,14 +117,14 @@
       "title": "Call Terry",
       "notes": "",
       "importance": true,
-      "urgency": false,
+      "urgency": true,
       "assignee": "me",
       "due": null,
       "tags": [],
       "subtasks": [],
       "completed": false,
       "completedAt": null,
-      "quadrantEnteredAt": "2026-07-09T04:23:59.359Z",
+      "quadrantEnteredAt": "2026-07-09T04:24:15.179Z",
       "activity": []
     }
   ]
