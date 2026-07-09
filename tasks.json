@@ -113,27 +113,6 @@
       ]
     },
     {
-      "id": "9829805d-c063-4ab0-a87e-65aef0db6c85",
-      "title": "Call Terry",
-      "notes": "",
-      "importance": true,
-      "urgency": false,
-      "assignee": "monisha",
-      "due": "2026-07-09",
-      "tags": [],
-      "subtasks": [
-        {
-          "id": "64295d1e-6cce-4638-8c04-85b70d9c9a14",
-          "text": "Complete Report",
-          "done": false
-        }
-      ],
-      "completed": false,
-      "completedAt": null,
-      "quadrantEnteredAt": "2026-07-09T04:58:36.576Z",
-      "activity": []
-    },
-    {
       "id": "731f55bc-7aab-4207-b68d-92d5f17eb86e",
       "title": "Schedule multi client testing by COO",
       "notes": "",
