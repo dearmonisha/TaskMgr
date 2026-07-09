@@ -79,6 +79,8 @@
   .quick-add input:focus{border-color:var(--schedule);}
   .quick-add button{border:none;background:var(--primary-btn);color:#fff;padding:9px 20px;border-radius:var(--radius-pill);font-size:13px;font-weight:600;white-space:nowrap;}
   .quick-add button:hover{opacity:0.9;}
+  .quick-add button.btn-add-detail{background:transparent;border:1.5px solid var(--primary-btn);color:var(--primary-btn);padding:8px 16px;}
+  .quick-add button.btn-add-detail:hover{background:rgba(70,44,25,0.06);opacity:1;}
 
   .stats-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;align-items:center;}
   .stat-pill{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--hairline);padding:5px 12px;border-radius:var(--radius-pill);font-size:12px;font-weight:600;color:var(--ink-muted);}
@@ -158,6 +160,17 @@
     .quadrant{width:100%;}
   }
 
+  /* below 480px: modal fields stop fighting for width on phones */
+  @media (max-width:480px){
+    .scrim{padding:0;align-items:stretch;}
+    .modal{max-width:100%;min-height:100%;border-radius:0;padding:18px 16px 24px;}
+    .modal-title-input{font-size:19px;}
+    .row-2{flex-direction:column;gap:16px;}
+    .priority-grid{gap:6px;}
+    .priority-btn{font-size:12px;padding:9px 8px;}
+    .seg3 button{font-size:11.5px;padding:9px 2px;}
+  }
+
   /* ---------- List view ---------- */
   .list-view{margin-top:22px;display:flex;flex-direction:column;gap:18px;}
   .list-group{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius-panel);overflow:hidden;}
@@ -184,19 +197,19 @@
   .modal-title-input:focus{border-color:var(--schedule);}
   .field-label{font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-muted);margin:18px 0 8px;}
   .priority-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-  .priority-btn{border:1.5px solid var(--hairline);background:var(--surface);padding:10px;border-radius:8px;font-size:12.5px;font-weight:700;text-align:left;}
+  .priority-btn{min-width:0;border:1.5px solid var(--hairline);background:var(--surface);padding:10px;border-radius:8px;font-size:12.5px;font-weight:700;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .priority-btn.sel-do-first{border-color:var(--do-first);background:var(--do-first-tint);color:var(--do-first);}
   .priority-btn.sel-schedule{border-color:var(--schedule);background:var(--schedule-tint);color:var(--schedule);}
   .priority-btn.sel-delegate{border-color:var(--delegate);background:var(--delegate-tint);color:var(--delegate);}
   .priority-btn.sel-eliminate{border-color:var(--eliminate);background:var(--eliminate-tint);color:var(--eliminate);}
 
   .seg3{display:flex;border:1.5px solid var(--hairline);border-radius:var(--radius-pill);overflow:hidden;}
-  .seg3 button{flex:1;border:none;background:var(--surface);padding:9px;font-size:12.5px;font-weight:600;color:var(--ink-muted);}
+  .seg3 button{flex:1;min-width:0;border:none;background:var(--surface);padding:9px 4px;font-size:12.5px;font-weight:600;color:var(--ink-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .seg3 button.active{background:var(--primary-btn);color:#fff;}
 
   .row-2{display:flex;gap:12px;}
-  .row-2 > div{flex:1;}
-  input[type=date],.text-input{width:100%;border:1.5px solid var(--hairline);border-radius:8px;padding:9px 12px;font-size:13px;outline:none;background:var(--surface);color:var(--ink);}
+  .row-2 > div{flex:1;min-width:0;}
+  input[type=date],.text-input{width:100%;max-width:100%;box-sizing:border-box;border:1.5px solid var(--hairline);border-radius:8px;padding:9px 12px;font-size:13px;outline:none;background:var(--surface);color:var(--ink);}
   input[type=date]:focus,.text-input:focus{border-color:var(--schedule);}
   .status-toggle{width:100%;border:1.5px solid var(--hairline);background:var(--surface);border-radius:8px;padding:9px;font-size:13px;font-weight:600;}
   .status-toggle.complete{background:var(--eliminate);border-color:var(--eliminate);color:#fff;}
@@ -284,6 +297,7 @@
       <div class="quick-add">
         <input type="text" id="quick-add-input" placeholder="Quick add a task… try 'urgent' or 'tomorrow'">
         <button id="quick-add-btn">Add</button>
+        <button id="add-task-full-btn" class="btn-add-detail" title="Add a task with all details set up front">Add Task…</button>
       </div>
     </div>
 
@@ -377,8 +391,32 @@
     search: '',
     ghSha: null,
     syncStatus: 'idle', // idle | busy | ok | err | local
-    deletedBuffer: null // {task, index} for undo
+    deletedBuffer: null, // {task, index} for undo
+    currentUserEmail: null // filled in from Cloudflare Access identity, if available
   };
+
+  var SHIVA_EMAIL = 'dearshiva@gmail.com';
+  var pendingNewTaskId = null; // set while the Add Task modal is open for a not-yet-confirmed task
+
+  /* ================= IDENTITY (Cloudflare Access) ================= */
+  function defaultAssignee(){
+    return (state.currentUserEmail === SHIVA_EMAIL) ? 'me' : 'monisha';
+  }
+  function loadIdentity(){
+    try{
+      return fetch('/cdn-cgi/access/get-identity', { credentials: 'include' })
+        .then(function(res){ return res.ok ? res.json() : null; })
+        .then(function(data){
+          state.currentUserEmail = (data && data.email) ? String(data.email).toLowerCase() : null;
+        })
+        .catch(function(){
+          state.currentUserEmail = null;
+        });
+    }catch(e){
+      state.currentUserEmail = null;
+      return Promise.resolve();
+    }
+  }
 
   /* ================= CONFIG / GITHUB ================= */
   function getConfig(){
@@ -817,7 +855,7 @@
     text = text.trim();
     if(!text) return;
     var guess = guessQuadrantFromText(text);
-    var assignee = state.person === 'monisha' ? 'monisha' : (state.person === 'me' ? 'me' : 'me');
+    var assignee = defaultAssignee();
     var task = {
       id: uid(), title: text, notes: '',
       importance: guess.importance, urgency: guess.urgency,
@@ -851,9 +889,24 @@
   }
 
   /* ================= TASK MODAL ================= */
+  function openAddTaskModal(){
+    var t = {
+      id: uid(), title: '', notes: '',
+      importance: true, urgency: false, // default: Schedule quadrant, same "no signal" default as quick-add
+      assignee: defaultAssignee(), due: null, tags: [],
+      subtasks: [], completed: false, completedAt: null,
+      quadrantEnteredAt: nowISO(), activity: []
+    };
+    state.tasks.push(t);
+    pendingNewTaskId = t.id;
+    render();
+    openTaskModal(t.id);
+  }
+
   function openTaskModal(id){
     var t = findTask(id);
     if(!t) return;
+    var isNew = (pendingNewTaskId === id);
     var qkey = quadrantOf(t);
     var priorityBtns = QUADRANT_ORDER.map(function(k){
       var q = QUADRANTS[k];
@@ -882,7 +935,7 @@
     var html = ''
       + '<div class="scrim" id="scrim">'
       + '<div class="modal">'
-      + '<input class="modal-title-input" id="m-title" value="'+escapeHtml(t.title)+'">'
+      + '<input class="modal-title-input" id="m-title" placeholder="Task title" value="'+escapeHtml(t.title)+'">'
       + '<div class="field-label">Priority</div><div class="priority-grid">'+priorityBtns+'</div>'
       + '<div class="field-label">Assigned to</div><div class="seg3" id="m-assignee">'
       + '<button data-a="me" class="'+(t.assignee==='me'?'active':'')+'">Shiva</button>'
@@ -907,7 +960,25 @@
 
     document.getElementById('modal-root').innerHTML = html;
 
-    function closeModal(){ document.getElementById('modal-root').innerHTML = ''; persist(); render(); }
+    if(isNew){
+      var titleEl = document.getElementById('m-title');
+      titleEl.focus();
+    }
+
+    function closeModal(){
+      document.getElementById('modal-root').innerHTML = '';
+      if(pendingNewTaskId === id){
+        pendingNewTaskId = null;
+        if(!t.title || !t.title.trim()){
+          state.tasks = state.tasks.filter(function(x){ return x.id !== id; });
+          persist(); render();
+          return;
+        }
+        var addedQ = quadrantOf(t);
+        showToast('Added to '+QUADRANTS[addedQ].title, false, 2400);
+      }
+      persist(); render();
+    }
 
     document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id === 'scrim') closeModal(); });
     document.getElementById('m-close').addEventListener('click', closeModal);
@@ -988,6 +1059,7 @@
 
     document.getElementById('m-delete').addEventListener('click', function(){
       document.getElementById('modal-root').innerHTML = '';
+      if(pendingNewTaskId === id) pendingNewTaskId = null;
       deleteTask(id);
     });
   }
@@ -1074,6 +1146,7 @@
     }
   });
   document.getElementById('open-settings').addEventListener('click', openSettingsModal);
+  document.getElementById('add-task-full-btn').addEventListener('click', openAddTaskModal);
   document.getElementById('setup-banner-connect').addEventListener('click', openSettingsModal);
   document.getElementById('setup-banner-dismiss').addEventListener('click', function(){
     document.getElementById('setup-banner').classList.add('hidden');
@@ -1100,6 +1173,7 @@
 
   /* ================= INIT ================= */
   loadMeta();
+  loadIdentity();
   loadFromGitHub();
 
 })();
