@@ -94,6 +94,11 @@
   .sync-status.busy .dot{background:#c9922f;}
   .settings-gear{border:1px solid var(--hairline);background:var(--surface);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;}
 
+  .cal-nav{display:flex;align-items:center;gap:6px;}
+  .cal-nav button{border:1px solid var(--hairline);background:var(--surface);border-radius:var(--radius-pill);padding:6px 12px;font-size:13px;font-weight:600;color:var(--ink);}
+  .cal-nav #cal-prev,.cal-nav #cal-next{width:30px;padding:6px 0;text-align:center;}
+  .cal-period-label{font-family:var(--font-serif);font-weight:600;font-size:14px;margin-left:4px;white-space:nowrap;}
+
   /* ---------- Matrix ---------- */
   .matrix-outer{margin-top:22px;}
   .matrix-cross{display:grid;grid-template-columns:28px 1fr 1fr;grid-template-rows:24px 1fr 1fr;column-gap:var(--gap);row-gap:var(--gap);}
@@ -190,6 +195,72 @@
   .btn-sm:hover{background:rgba(50,35,24,0.05);}
   .btn-sm.danger{border-color:var(--overdue);color:var(--overdue);}
 
+  /* ---------- Calendar module ---------- */
+  .cal-wrap{margin-top:22px;}
+
+  /* Countdown strip */
+  .countdown-strip{display:flex;gap:12px;overflow-x:auto;padding-bottom:10px;margin-bottom:20px;}
+  .countdown-card{flex:none;min-width:150px;background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius-panel);padding:14px 16px;box-shadow:0 2px 6px rgba(50,35,24,0.1);cursor:pointer;}
+  .countdown-card .cc-icon{font-size:20px;}
+  .countdown-card .cc-title{font-family:var(--font-serif);font-weight:700;font-size:14px;margin-top:6px;line-height:1.2;}
+  .countdown-card .cc-when{font-size:11.5px;color:var(--ink-muted);margin-top:4px;font-weight:600;}
+  .countdown-card .cc-when.today{color:var(--overdue);}
+
+  /* Event chip (shared by month/week/agenda) */
+  .event-chip{display:flex;align-items:center;gap:5px;padding:3px 8px;border-radius:var(--radius-pill);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;}
+  .event-chip .ec-icon{flex:none;}
+  .event-chip .ec-title{overflow:hidden;text-overflow:ellipsis;}
+
+  /* Month grid (Fridge Calendar) */
+  .month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+  .month-weekday{text-align:center;font-size:11px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-muted);padding-bottom:6px;}
+  .month-cell{background:var(--surface);border:1px solid var(--hairline);border-radius:8px;min-height:96px;padding:6px;display:flex;flex-direction:column;gap:3px;min-width:0;}
+  .month-cell.outside{background:rgba(213,204,196,0.15);opacity:0.55;}
+  .month-cell.today{border-color:var(--schedule);border-width:2px;}
+  .month-cell .mc-num{font-size:11.5px;font-weight:700;color:var(--ink-muted);}
+  .month-cell.today .mc-num{color:var(--schedule);}
+  .month-more{font-size:10.5px;color:var(--ink-muted);font-weight:600;cursor:pointer;padding:2px 4px;}
+
+  /* Week lanes (Family Lanes) */
+  .week-wrap{overflow-x:auto;}
+  .week-grid{display:grid;grid-template-columns:110px repeat(7,minmax(110px,1fr));gap:6px;min-width:700px;}
+  .week-head{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-muted);text-align:center;padding-bottom:6px;}
+  .week-head.today{color:var(--schedule);}
+  .week-lane-label{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;padding:8px 4px;}
+  .week-lane-label .adot{width:10px;height:10px;border-radius:50%;flex:none;}
+  .week-cell{background:var(--surface);border:1px solid var(--hairline);border-radius:8px;min-height:64px;padding:5px;display:flex;flex-direction:column;gap:3px;min-width:0;}
+  .week-cell.today{border-color:var(--schedule);border-width:2px;}
+
+  /* Agenda rail */
+  .agenda-rail{display:flex;flex-direction:column;gap:22px;}
+  .agenda-day-label{font-family:var(--font-serif);font-weight:700;font-size:16px;display:flex;align-items:center;gap:8px;}
+  .agenda-day-label .today-badge{background:var(--schedule);color:#fff;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:var(--radius-pill);}
+  .agenda-cards{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+  .agenda-card{display:flex;align-items:flex-start;gap:12px;background:var(--surface);border:1px solid var(--hairline);border-left:4px solid var(--ink-muted);border-radius:var(--radius-card);padding:12px 14px;box-shadow:0 2px 6px rgba(50,35,24,0.1);cursor:pointer;}
+  .agenda-card .ac-icon{font-size:18px;flex:none;}
+  .agenda-card .ac-body{flex:1;min-width:0;}
+  .agenda-card .ac-title{font-weight:600;font-size:13.5px;}
+  .agenda-card .ac-meta{font-size:11.5px;color:var(--ink-muted);margin-top:3px;}
+  .agenda-card .ac-avatars{flex:none;display:flex;}
+  .agenda-empty{font-style:italic;color:var(--ink-muted);font-size:12.5px;}
+
+  /* Kid mode: bigger touch targets across the calendar */
+  body.kid-mode .cal-wrap .event-chip{font-size:12.5px;padding:5px 10px;}
+  body.kid-mode .cal-wrap .agenda-card{padding:16px 18px;}
+  body.kid-mode .cal-wrap .agenda-card .ac-title{font-size:16px;}
+  body.kid-mode .cal-wrap .agenda-card .ac-icon{font-size:24px;}
+  body.kid-mode .cal-wrap .cat-btn,
+  body.kid-mode #calendar-toolbar button{font-size:14px;padding:10px 16px;}
+  body.kid-mode .countdown-card{min-width:170px;padding:18px 20px;}
+  body.kid-mode .countdown-card .cc-title{font-size:16px;}
+
+  @media (max-width:640px){
+    .month-grid{grid-template-columns:repeat(7,1fr);gap:3px;}
+    .month-cell{min-height:64px;padding:4px;}
+    .month-cell .mc-num{font-size:10px;}
+    .event-chip{font-size:9.5px;padding:2px 5px;}
+  }
+
   /* ---------- Modal ---------- */
   .scrim{position:fixed;inset:0;background:rgba(50,35,24,0.35);display:flex;align-items:flex-start;justify-content:center;padding:5vh 16px;overflow-y:auto;z-index:100;}
   .modal{background:var(--surface);border-radius:14px;max-width:560px;width:100%;box-shadow:0 20px 60px rgba(50,35,24,0.3);padding:26px;margin:auto;}
@@ -220,6 +291,24 @@
   .dashed-input{border:1.5px dashed var(--hairline);border-radius:var(--radius-pill);padding:6px 14px;font-size:12px;outline:none;background:transparent;width:100%;color:var(--ink);}
   .dashed-input:focus{border-color:var(--schedule);}
 
+  /* ---------- Event modal extras ---------- */
+  .category-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;}
+  .cat-btn{border:1.5px solid var(--hairline);background:var(--surface);border-radius:var(--radius-pill);padding:6px 12px;font-size:12px;font-weight:600;color:var(--ink-muted);white-space:nowrap;}
+  .cat-btn.selected{border-color:var(--primary-btn);background:rgba(70,44,25,0.08);color:var(--ink);}
+  .attendee-chip{cursor:pointer;opacity:0.45;user-select:none;}
+  .attendee-chip.active{opacity:1;}
+  .attendee-chip .adot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .check-inline{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink);padding-top:10px;cursor:pointer;}
+  .check-inline input{width:16px;height:16px;flex:none;}
+  .weekday-picker{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap;}
+  .weekday-picker button{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--hairline);background:var(--surface);font-size:12px;font-weight:700;color:var(--ink-muted);flex:none;}
+  .weekday-picker button.selected{background:var(--primary-btn);color:#fff;border-color:var(--primary-btn);}
+  .ends-row{display:flex;flex-direction:column;gap:8px;margin-top:8px;margin-bottom:16px;}
+  .ends-option{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink);cursor:pointer;}
+  .ends-option input[type=radio]{width:15px;height:15px;flex:none;}
+  .ends-option input[type=date],.ends-option input[type=number]{width:130px;padding:6px 10px;font-size:12px;border:1.5px solid var(--hairline);border-radius:8px;background:var(--surface);color:var(--ink);}
+  .ends-option input:disabled{opacity:0.4;}
+
   .subtask-row{display:flex;align-items:center;gap:8px;padding:4px 0;}
   .subtask-row input[type=checkbox]{width:16px;height:16px;flex:none;}
   .subtask-row .st-text{flex:1;font-size:13px;}
@@ -246,6 +335,18 @@
   .banner{display:flex;align-items:center;gap:10px;background:var(--due-today-bg);border:1px solid #e0c58e;color:var(--due-today);padding:10px 16px;border-radius:8px;font-size:12.5px;margin-bottom:16px;}
   .banner button{margin-left:auto;border:none;background:var(--primary-btn);color:#fff;padding:6px 14px;border-radius:var(--radius-pill);font-size:11.5px;font-weight:600;flex:none;}
   .banner .dismiss{background:transparent;color:var(--due-today);border:1px solid currentColor;}
+
+  .family-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+  .family-row .fam-name{flex:1.2;min-width:0;}
+  .family-row .fam-email{flex:1.6;min-width:0;}
+  .family-row .fam-role{flex:none;width:120px;}
+  .color-swatch{width:28px;height:28px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1.5px var(--hairline);flex:none;padding:0;}
+  .family-row .rm{border:none;background:transparent;color:var(--ink-muted);font-size:14px;flex:none;padding:4px;}
+  @media (max-width:480px){
+    .family-row{flex-wrap:wrap;}
+    .family-row .fam-name,.family-row .fam-email{flex:1 1 100%;}
+    .family-row .fam-role{flex:1;width:auto;}
+  }
 
   /* ---------- Toast ---------- */
   .toast-wrap{position:fixed;bottom:28px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;z-index:200;}
@@ -276,12 +377,13 @@
           <button data-view="matrix" class="active">Matrix</button>
           <button data-view="list">List</button>
           <button data-view="archive">Archive</button>
+          <button data-view="calendar">Calendar</button>
         </div>
         <button class="settings-gear" id="open-settings" title="GitHub sync settings">⚙</button>
       </div>
     </div>
 
-    <div class="header-row2">
+    <div class="header-row2" id="task-toolbar">
       <div class="filters-search">
         <div class="pill-tabs" id="person-tabs">
           <button data-person="all" class="active">All</button>
@@ -298,6 +400,28 @@
         <input type="text" id="quick-add-input" placeholder="Quick add a task… try 'urgent' or 'tomorrow'">
         <button id="quick-add-btn">Add</button>
         <button id="add-task-full-btn" class="btn-add-detail" title="Add a task with all details set up front">Add Task…</button>
+      </div>
+    </div>
+
+    <div class="header-row2 hidden" id="calendar-toolbar">
+      <div class="filters-search">
+        <div class="pill-tabs" id="cal-subview-tabs">
+          <button data-subview="agenda" class="active">Agenda</button>
+          <button data-subview="week">Week</button>
+          <button data-subview="month">Month</button>
+        </div>
+        <div class="cal-nav">
+          <button id="cal-prev" title="Previous">‹</button>
+          <button id="cal-today" title="Jump to today">Today</button>
+          <button id="cal-next" title="Next">›</button>
+          <span class="cal-period-label" id="cal-period-label"></span>
+        </div>
+        <div class="pill-tabs" id="cal-family-tabs"></div>
+      </div>
+      <div class="quick-add">
+        <input type="text" id="cal-search-input" placeholder="Search events">
+        <button id="add-event-btn">Add Event…</button>
+        <button id="open-family-settings" class="btn-add-detail" title="Manage family members">Family…</button>
       </div>
     </div>
 
@@ -325,13 +449,20 @@
   var URGENT_WORDS = ['urgent','asap','today','tomorrow','deadline','!!'];
   var NOT_IMPORTANT_WORDS = ['maybe','someday','minor','low priority','junk','declutter'];
   var LS_TASKS = 'eisenhower_tasks_local_v1';
+  var LS_CALENDAR = 'eisenhower_calendar_local_v1';
   var LS_CONFIG = 'eisenhower_gh_config_v1';
   var LS_META = 'eisenhower_meta_v1'; // title/subtitle
 
   /* ================= UTIL ================= */
   function uid(){ return (crypto.randomUUID ? crypto.randomUUID() : 'id-'+Date.now()+'-'+Math.random().toString(16).slice(2)); }
   function nowISO(){ return new Date().toISOString(); }
-  function todayStr(){ return new Date().toISOString().slice(0,10); }
+  // Local-calendar-day date string (never UTC) -- toISOString() would shift the date near midnight
+  // depending on the viewer's timezone, which is wrong for "today"/due-date/calendar-day logic.
+  function toLocalDateStr(d){
+    var y = d.getFullYear(), m = d.getMonth()+1, day = d.getDate();
+    return y + '-' + (m<10?'0':'') + m + '-' + (day<10?'0':'') + day;
+  }
+  function todayStr(){ return toLocalDateStr(new Date()); }
   function fmtDate(d){
     if(!d) return '';
     var dt = new Date(d+'T00:00:00');
@@ -392,15 +523,59 @@
     ghSha: null,
     syncStatus: 'idle', // idle | busy | ok | err | local
     deletedBuffer: null, // {task, index} for undo
-    currentUserEmail: null // filled in from Cloudflare Access identity, if available
+    currentUserEmail: null, // filled in from Cloudflare Access identity, if available
+
+    // ---- Calendar module ----
+    family: [],           // [{id,name,color,email,role:'adult'|'kid'}]
+    events: [],           // see EVENT SCHEMA below
+    calSha: null,
+    calSubView: 'agenda', // 'agenda' | 'month' | 'week'
+    calAnchor: todayStr(),// reference date for month/week/agenda navigation
+    calFilter: 'all',     // 'all' or a family member id
+    calSearch: '',
+    currentFamilyMember: null // resolved from currentUserEmail against state.family
   };
 
   var SHIVA_EMAIL = 'dearshiva@gmail.com';
   var pendingNewTaskId = null; // set while the Add Task modal is open for a not-yet-confirmed task
 
+  /*
+    EVENT SCHEMA:
+    {
+      id, title, category: 'school'|'sports'|'birthday'|'appointment'|'trip'|'chore'|'other',
+      attendees: ['all'] | [familyMemberId, ...],
+      date: 'YYYY-MM-DD', endDate: null|'YYYY-MM-DD' (inclusive, for multi-day events),
+      allDay: true|false, time: null|'HH:MM',
+      location: '', notes: '',
+      recurrence: null | { freq:'daily'|'weekly'|'monthly'|'yearly', interval:1, byWeekday:null|[0-6], until:null|'YYYY-MM-DD', count:null|number },
+      exceptionDates: [],           // dates skipped from this series (only meaningful when recurrence is set)
+      recurrenceId: null|masterId,  // set on a standalone event that overrides one occurrence of a series
+      overrideDate: null|'YYYY-MM-DD',
+      createdBy: null|familyMemberId, createdAt: iso
+    }
+  */
+  var EVENT_CATEGORIES = {
+    school:      { label:'School',      icon:'🎒', color:'#008fa0' },
+    sports:      { label:'Sports',      icon:'⚽', color:'#3e8f44' },
+    birthday:    { label:'Birthday',    icon:'🎂', color:'#bc5460' },
+    appointment: { label:'Appointment', icon:'🩺', color:'#8765be' },
+    trip:        { label:'Trip',        icon:'✈️', color:'#c9922f' },
+    chore:       { label:'Chore',       icon:'🧹', color:'#6d6059' },
+    other:       { label:'Other',       icon:'📌', color:'#462c19' }
+  };
+  var FAMILY_COLOR_PALETTE = ['#13808a','#955c82','#bc5460','#008fa0','#8765be','#3e8f44','#c9922f','#a8372e'];
+
   /* ================= IDENTITY (Cloudflare Access) ================= */
   function defaultAssignee(){
     return (state.currentUserEmail === SHIVA_EMAIL) ? 'me' : 'monisha';
+  }
+  function resolveCurrentFamilyMember(){
+    state.currentFamilyMember = (state.currentUserEmail
+      ? state.family.find(function(m){ return m.email && m.email.toLowerCase() === state.currentUserEmail; })
+      : null) || null;
+  }
+  function isKidMode(){
+    return !!(state.currentFamilyMember && state.currentFamilyMember.role === 'kid');
   }
   function loadIdentity(){
     try{
@@ -428,8 +603,11 @@
   function clearConfig(){
     localStorage.removeItem(LS_CONFIG);
   }
-  function apiUrl(cfg){
-    return 'https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+'/contents/'+encodeURIComponent(cfg.path)+'?ref='+encodeURIComponent(cfg.branch||'main');
+  function ghContentsUrl(cfg, path){
+    return 'https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+'/contents/'+encodeURIComponent(path);
+  }
+  function ghGetUrl(cfg, path){
+    return ghContentsUrl(cfg, path)+'?ref='+encodeURIComponent(cfg.branch||'main');
   }
   function ghHeaders(cfg){
     return {
@@ -437,7 +615,47 @@
       'Accept': 'application/vnd.github+json'
     };
   }
+  // Generic single-file fetch: resolves {notFound:true} | {data:<github contents api response>}
+  function loadGithubFile(cfg, path){
+    return fetch(ghGetUrl(cfg, path), { headers: ghHeaders(cfg) }).then(function(res){
+      if(res.status === 404) return { notFound:true };
+      if(!res.ok) throw new Error('GitHub error '+res.status);
+      return res.json().then(function(data){ return { data: data }; });
+    });
+  }
+  // Generic single-file save with one 409-conflict retry. Resolves the new sha.
+  function saveGithubFile(cfg, path, sha, contentObj, message){
+    var body = {
+      message: message,
+      content: b64EncodeUnicode(JSON.stringify(contentObj, null, 2)),
+      branch: cfg.branch || 'main'
+    };
+    if(sha) body.sha = sha;
+    function put(b){
+      return fetch(ghContentsUrl(cfg, path), {
+        method: 'PUT',
+        headers: Object.assign({'Content-Type':'application/json'}, ghHeaders(cfg)),
+        body: JSON.stringify(b)
+      });
+    }
+    return put(body).then(function(res){
+      if(res.status === 409){
+        return loadGithubFile(cfg, path).then(function(r){
+          var newSha = r.data ? r.data.sha : null;
+          body.sha = newSha;
+          return put(body);
+        });
+      }
+      return res;
+    }).then(function(res){
+      if(!res.ok) throw new Error('GitHub save error '+res.status);
+      return res.json();
+    }).then(function(data){
+      return data && data.content ? data.content.sha : null;
+    });
+  }
 
+  /* ---- Tasks file ---- */
   function loadFromGitHub(){
     var cfg = getConfig();
     if(!cfg || !cfg.owner || !cfg.repo || !cfg.token){
@@ -448,27 +666,20 @@
       return;
     }
     updateSyncStatus('busy');
-    fetch(apiUrl(cfg), { headers: ghHeaders(cfg) })
-      .then(function(res){
-        if(res.status === 404){
-          // file doesn't exist yet -- create it from local/empty state
+    loadGithubFile(cfg, cfg.path)
+      .then(function(r){
+        if(r.notFound){
           state.ghSha = null;
           state.tasks = loadLocalTasksOnly();
           updateSyncStatus('ok');
           showSetupBanner(false);
           render();
           saveToGitHub();
-          return null;
+          return;
         }
-        if(!res.ok){ throw new Error('GitHub error '+res.status); }
-        return res.json();
-      })
-      .then(function(data){
-        if(!data) return;
-        state.ghSha = data.sha;
-        var text = b64DecodeUnicode(data.content);
+        state.ghSha = r.data.sha;
         var parsed;
-        try{ parsed = JSON.parse(text); }catch(e){ parsed = {tasks:[]}; }
+        try{ parsed = JSON.parse(b64DecodeUnicode(r.data.content)); }catch(e){ parsed = {tasks:[]}; }
         state.tasks = parsed.tasks || [];
         cacheLocal();
         updateSyncStatus('ok');
@@ -491,40 +702,16 @@
       return;
     }
     updateSyncStatus('busy');
-    var body = {
-      message: 'Update tasks.json via Task Manager app',
-      content: b64EncodeUnicode(JSON.stringify({version:1, tasks: state.tasks}, null, 2)),
-      branch: cfg.branch || 'main'
-    };
-    if(state.ghSha) body.sha = state.ghSha;
-    fetch('https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+'/contents/'+encodeURIComponent(cfg.path), {
-      method: 'PUT',
-      headers: Object.assign({'Content-Type':'application/json'}, ghHeaders(cfg)),
-      body: JSON.stringify(body)
-    }).then(function(res){
-      if(res.status === 409){
-        // sha conflict: refetch then retry once
-        return fetch(apiUrl(cfg), {headers: ghHeaders(cfg)}).then(function(r){ return r.json(); }).then(function(d){
-          state.ghSha = d.sha;
-          body.sha = d.sha;
-          return fetch('https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+'/contents/'+encodeURIComponent(cfg.path), {
-            method:'PUT', headers: Object.assign({'Content-Type':'application/json'}, ghHeaders(cfg)), body: JSON.stringify(body)
-          });
-        });
-      }
-      return res;
-    }).then(function(res){
-      if(!res.ok) throw new Error('GitHub save error '+res.status);
-      return res.json();
-    }).then(function(data){
-      if(data && data.content) state.ghSha = data.content.sha;
-      cacheLocal();
-      updateSyncStatus('ok');
-    }).catch(function(err){
-      console.error(err);
-      cacheLocal();
-      updateSyncStatus('err');
-    });
+    saveGithubFile(cfg, cfg.path, state.ghSha, {version:1, tasks: state.tasks}, 'Update tasks.json via Task Manager app')
+      .then(function(sha){
+        state.ghSha = sha;
+        cacheLocal();
+        updateSyncStatus('ok');
+      }).catch(function(err){
+        console.error(err);
+        cacheLocal();
+        updateSyncStatus('err');
+      });
   }, 1200);
 
   function loadLocalTasksOnly(){
@@ -541,6 +728,81 @@
   }
   function persist(){
     saveToGitHub();
+  }
+
+  /* ---- Family calendar file ---- */
+  function loadCalendarFromGitHub(){
+    var cfg = getConfig();
+    if(!cfg || !cfg.owner || !cfg.repo || !cfg.token){
+      loadCalendarLocal();
+      resolveCurrentFamilyMember();
+      if(state.view === 'calendar') render();
+      return;
+    }
+    var path = cfg.calendarPath || 'family-calendar.json';
+    loadGithubFile(cfg, path)
+      .then(function(r){
+        if(r.notFound){
+          state.calSha = null;
+          var localCal = loadCalendarLocalOnly();
+          state.family = localCal.family; state.events = localCal.events;
+          resolveCurrentFamilyMember();
+          if(state.view === 'calendar') render();
+          saveCalendarToGitHub();
+          return;
+        }
+        state.calSha = r.data.sha;
+        var parsed;
+        try{ parsed = JSON.parse(b64DecodeUnicode(r.data.content)); }catch(e){ parsed = {family:[], events:[]}; }
+        state.family = parsed.family || [];
+        state.events = parsed.events || [];
+        cacheCalendarLocal();
+        resolveCurrentFamilyMember();
+        if(state.view === 'calendar') render();
+      })
+      .catch(function(err){
+        console.error(err);
+        loadCalendarLocal();
+        resolveCurrentFamilyMember();
+        if(state.view === 'calendar') render();
+      });
+  }
+
+  var saveCalendarToGitHub = debounce(function(){
+    var cfg = getConfig();
+    if(!cfg || !cfg.owner || !cfg.repo || !cfg.token){
+      cacheCalendarLocal();
+      return;
+    }
+    var path = cfg.calendarPath || 'family-calendar.json';
+    updateSyncStatus('busy');
+    saveGithubFile(cfg, path, state.calSha, {version:1, family: state.family, events: state.events}, 'Update family-calendar.json via Task Manager app')
+      .then(function(sha){
+        state.calSha = sha;
+        cacheCalendarLocal();
+        updateSyncStatus('ok');
+      }).catch(function(err){
+        console.error(err);
+        cacheCalendarLocal();
+        updateSyncStatus('err');
+      });
+  }, 1200);
+
+  function loadCalendarLocalOnly(){
+    try{
+      var raw = JSON.parse(localStorage.getItem(LS_CALENDAR) || 'null');
+      return { family: (raw && raw.family) || [], events: (raw && raw.events) || [] };
+    }catch(e){ return { family: [], events: [] }; }
+  }
+  function loadCalendarLocal(){
+    var c = loadCalendarLocalOnly();
+    state.family = c.family; state.events = c.events;
+  }
+  function cacheCalendarLocal(){
+    localStorage.setItem(LS_CALENDAR, JSON.stringify({family: state.family, events: state.events}));
+  }
+  function persistCalendar(){
+    saveCalendarToGitHub();
   }
 
   function updateSyncStatus(s){
@@ -577,7 +839,7 @@
     document.getElementById('stats-row').innerHTML = html;
     document.getElementById('sync-status').addEventListener('click', function(){
       var cfg = getConfig();
-      if(!cfg){ openSettingsModal(); } else { loadFromGitHub(); }
+      if(!cfg){ openSettingsModal(); } else { loadFromGitHub(); loadCalendarFromGitHub(); }
     });
     updateSyncStatus(state.syncStatus);
   }
@@ -734,7 +996,268 @@
     });
   }
 
+  /* ================= CALENDAR: RENDER ================= */
+  function familyMember(id){ return state.family.find(function(m){ return m.id===id; }); }
+  function categoryOf(occ){ return EVENT_CATEGORIES[occ.category] || EVENT_CATEGORIES.other; }
+
+  function occFromOccurrenceId(occId){
+    var sep = occId.indexOf('::');
+    if(sep === -1){
+      var ev = findEventById(occId);
+      if(!ev) return null;
+      return Object.assign({}, ev, { occurrenceId: ev.id, occurrenceDate: ev.date, isOverride: !!ev.recurrenceId, isVirtual:false });
+    }
+    var masterId = occId.slice(0,sep), date = occId.slice(sep+2);
+    var master = findEventById(masterId);
+    if(!master) return null;
+    var span = eventSpanDays(master);
+    return Object.assign({}, master, {
+      occurrenceId: occId, occurrenceDate: date, date: date,
+      endDate: span ? dateAdd(date, span) : master.endDate,
+      isOverride:false, isVirtual:true, masterId: masterId
+    });
+  }
+
+  function eventMatchesFilter(occ){
+    if(state.calFilter !== 'all'){
+      var att = occ.attendees || ['all'];
+      if(att.indexOf('all') === -1 && att.indexOf(state.calFilter) === -1) return false;
+    }
+    if(state.calSearch){
+      var q = state.calSearch.toLowerCase();
+      var hay = ((occ.title||'')+' '+(occ.location||'')).toLowerCase();
+      if(hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  }
+
+  function attendeeAvatarsHtml(occ){
+    var att = occ.attendees || ['all'];
+    var members = (att.indexOf('all') !== -1) ? state.family.slice(0,4) : att.map(familyMember).filter(Boolean);
+    return members.map(function(m){
+      return '<span class="avatar" style="background:'+m.color+';margin-left:-6px;" title="'+escapeHtml(m.name)+'">'+escapeHtml((m.name||'?')[0])+'</span>';
+    }).join('');
+  }
+
+  function eventChipHtml(occ){
+    var cat = categoryOf(occ);
+    return '<div class="event-chip" style="background:'+cat.color+'" data-occ="'+occ.occurrenceId+'" title="'+escapeHtml(occ.title)+'">'
+      + '<span class="ec-icon">'+cat.icon+'</span><span class="ec-title">'+escapeHtml(occ.title)+'</span></div>';
+  }
+
+  function renderCountdownStrip(){
+    var today = todayStr();
+    var occ = expandOccurrences(today, dateAdd(today,60)).filter(function(o){
+      if(state.calFilter !== 'all'){
+        var att = o.attendees || ['all'];
+        if(att.indexOf('all') === -1 && att.indexOf(state.calFilter) === -1) return false;
+      }
+      return true;
+    }).slice(0,6);
+    if(!occ.length) return '';
+    var cards = occ.map(function(o){
+      var days = dateDiffDays(today, o.occurrenceDate);
+      var when = days===0 ? 'Today' : days===1 ? 'Tomorrow' : 'in '+days+' days';
+      var cat = categoryOf(o);
+      return '<div class="countdown-card" data-occ="'+o.occurrenceId+'">'
+        + '<div class="cc-icon">'+cat.icon+'</div>'
+        + '<div class="cc-title">'+escapeHtml(o.title)+'</div>'
+        + '<div class="cc-when'+(days===0?' today':'')+'">'+when+' · '+fmtDate(o.occurrenceDate)+'</div>'
+        + '</div>';
+    }).join('');
+    return '<div class="countdown-strip">'+cards+'</div>';
+  }
+
+  function renderMonthGrid(rangeStart, rangeEnd, occurrences){
+    var today = todayStr();
+    var byDate = {};
+    occurrences.forEach(function(o){ (byDate[o.occurrenceDate] = byDate[o.occurrenceDate]||[]).push(o); });
+    var monthNum = state.calAnchor.slice(0,7);
+    var weekdayHead = WEEKDAY_LABELS.map(function(l){ return '<div class="month-weekday">'+l+'</div>'; }).join('');
+    var cells = '';
+    var d = rangeStart;
+    for(var i=0;i<42;i++){
+      var inMonth = d.slice(0,7) === monthNum;
+      var isToday = d === today;
+      var dayList = byDate[d] || [];
+      var list = dayList.slice(0,3);
+      var extra = dayList.length - list.length;
+      cells += '<div class="month-cell'+(inMonth?'':' outside')+(isToday?' today':'')+'" data-date="'+d+'">'
+        + '<div class="mc-num">'+parseInt(d.slice(8,10),10)+'</div>'
+        + list.map(eventChipHtml).join('')
+        + (extra>0 ? '<div class="month-more" data-jump="'+d+'">+'+extra+' more</div>' : '')
+        + '</div>';
+      d = dateAdd(d,1);
+    }
+    return '<div class="month-grid">'+weekdayHead+cells+'</div>';
+  }
+
+  function renderWeekLanes(rangeStart, rangeEnd, occurrences){
+    var today = todayStr();
+    var days = [];
+    for(var i=0;i<7;i++) days.push(dateAdd(rangeStart,i));
+
+    var byPersonDate = {};
+    occurrences.forEach(function(o){
+      var att = o.attendees || ['all'];
+      if(att.indexOf('all') !== -1){
+        byPersonDate.everyone = byPersonDate.everyone || {};
+        (byPersonDate.everyone[o.occurrenceDate] = byPersonDate.everyone[o.occurrenceDate]||[]).push(o);
+      } else {
+        att.forEach(function(pid){
+          byPersonDate[pid] = byPersonDate[pid] || {};
+          (byPersonDate[pid][o.occurrenceDate] = byPersonDate[pid][o.occurrenceDate]||[]).push(o);
+        });
+      }
+    });
+
+    var head = '<div></div>' + days.map(function(d){
+      var dow = new Date(d+'T00:00:00').toLocaleDateString(undefined,{weekday:'short'});
+      return '<div class="week-head'+(d===today?' today':'')+'">'+dow+' '+parseInt(d.slice(8,10),10)+'</div>';
+    }).join('');
+
+    var rows = '<div class="week-lane-label"><span class="adot" style="background:var(--primary-btn)"></span>Everyone</div>'
+      + days.map(function(d){
+          var list = (byPersonDate.everyone && byPersonDate.everyone[d]) || [];
+          return '<div class="week-cell'+(d===today?' today':'')+'" data-date="'+d+'">'+list.map(eventChipHtml).join('')+'</div>';
+        }).join('');
+
+    state.family.forEach(function(m){
+      if(state.calFilter !== 'all' && state.calFilter !== m.id) return;
+      rows += '<div class="week-lane-label"><span class="adot" style="background:'+m.color+'"></span>'+escapeHtml(m.name)+'</div>'
+        + days.map(function(d){
+            var list = (byPersonDate[m.id] && byPersonDate[m.id][d]) || [];
+            return '<div class="week-cell'+(d===today?' today':'')+'" data-date="'+d+'">'+list.map(eventChipHtml).join('')+'</div>';
+          }).join('');
+    });
+
+    return '<div class="week-wrap"><div class="week-grid">'+head+rows+'</div></div>';
+  }
+
+  function renderAgendaRail(rangeStart, rangeEnd, occurrences){
+    var today = todayStr();
+    var byDate = {};
+    occurrences.forEach(function(o){ (byDate[o.occurrenceDate] = byDate[o.occurrenceDate]||[]).push(o); });
+    var dates = Object.keys(byDate).sort();
+    if(!dates.length){
+      return '<div class="agenda-rail"><div class="agenda-empty">Nothing coming up in this window.</div></div>';
+    }
+    var days = dates.map(function(d){
+      var isToday = d === today;
+      var isTomorrow = d === dateAdd(today,1);
+      var list = byDate[d].slice().sort(function(a,b){ return (a.time||'').localeCompare(b.time||''); });
+      var cards = list.map(function(o){
+        var cat = categoryOf(o);
+        var timeLabel = o.allDay ? 'All day' : (o.time||'');
+        var loc = o.location ? ' · '+escapeHtml(o.location) : '';
+        return '<div class="agenda-card" style="border-left-color:'+cat.color+'" data-occ="'+o.occurrenceId+'">'
+          + '<span class="ac-icon">'+cat.icon+'</span>'
+          + '<div class="ac-body"><div class="ac-title">'+escapeHtml(o.title)+'</div><div class="ac-meta">'+timeLabel+loc+'</div></div>'
+          + '<span class="ac-avatars">'+attendeeAvatarsHtml(o)+'</span>'
+          + '</div>';
+      }).join('');
+      return '<div class="agenda-day">'
+        + '<div class="agenda-day-label">'+fmtLong(d)+(isToday?'<span class="today-badge">Today</span>':(isTomorrow?'<span class="today-badge" style="background:var(--ink-muted)">Tomorrow</span>':''))+'</div>'
+        + '<div class="agenda-cards">'+cards+'</div>'
+        + '</div>';
+    }).join('');
+    return '<div class="agenda-rail">'+days+'</div>';
+  }
+
+  function renderCalToolbar(){
+    document.querySelectorAll('#cal-subview-tabs button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.subview === state.calSubView);
+    });
+    var famHtml = '<button data-fam="all" class="'+(state.calFilter==='all'?'active':'')+'">All</button>'
+      + state.family.map(function(m){
+          return '<button data-fam="'+m.id+'" class="'+(state.calFilter===m.id?'active':'')+'">'+escapeHtml(m.name)+'</button>';
+        }).join('');
+    var famTabs = document.getElementById('cal-family-tabs');
+    famTabs.innerHTML = famHtml;
+    famTabs.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click', function(){ state.calFilter = b.dataset.fam; render(); });
+    });
+  }
+
+  function updateCalPeriodLabel(rangeStart, rangeEnd){
+    var el = document.getElementById('cal-period-label');
+    if(!el) return;
+    if(state.calSubView === 'month') el.textContent = fmtMonthYear(state.calAnchor);
+    else if(state.calSubView === 'week') el.textContent = fmtDate(rangeStart)+' – '+fmtDate(rangeEnd);
+    else el.textContent = 'Next 3 weeks';
+  }
+
+  function calNavStep(dir){
+    if(state.calSubView === 'month') state.calAnchor = addMonths(state.calAnchor, dir);
+    else state.calAnchor = dateAdd(state.calAnchor, dir*7);
+    render();
+  }
+
+  function renderCalendar(){
+    renderCalToolbar();
+
+    var today = todayStr();
+    var rangeStart, rangeEnd;
+    if(state.calSubView === 'month'){
+      rangeStart = startOfWeek(startOfMonth(state.calAnchor));
+      rangeEnd = dateAdd(rangeStart, 41);
+    } else if(state.calSubView === 'week'){
+      rangeStart = startOfWeek(state.calAnchor);
+      rangeEnd = dateAdd(rangeStart, 6);
+    } else {
+      rangeStart = state.calAnchor;
+      rangeEnd = dateAdd(rangeStart, 20);
+    }
+
+    var occurrences = expandOccurrences(rangeStart, rangeEnd).filter(eventMatchesFilter);
+
+    var html = '<div class="cal-wrap">' + renderCountdownStrip();
+    if(state.calSubView === 'month') html += renderMonthGrid(rangeStart, rangeEnd, occurrences);
+    else if(state.calSubView === 'week') html += renderWeekLanes(rangeStart, rangeEnd, occurrences);
+    else html += renderAgendaRail(rangeStart, rangeEnd, occurrences);
+    html += '</div>';
+
+    document.getElementById('view-root').innerHTML = html;
+
+    document.getElementById('view-root').querySelectorAll('[data-occ]').forEach(function(el){
+      el.addEventListener('click', function(e){
+        e.stopPropagation();
+        var occ = occFromOccurrenceId(el.dataset.occ);
+        if(occ) openEventModal(occ);
+      });
+    });
+    document.getElementById('view-root').querySelectorAll('.month-more').forEach(function(el){
+      el.addEventListener('click', function(e){
+        e.stopPropagation();
+        state.calAnchor = el.dataset.jump;
+        state.calSubView = 'agenda';
+        render();
+      });
+    });
+    document.getElementById('view-root').querySelectorAll('.month-cell,.week-cell').forEach(function(cell){
+      cell.addEventListener('click', function(e){
+        if(e.target.closest('[data-occ]') || e.target.closest('.month-more')) return;
+        openAddEventModal(cell.dataset.date);
+      });
+    });
+
+    updateCalPeriodLabel(rangeStart, rangeEnd);
+  }
+
+  function toggleToolbars(){
+    var isCal = state.view === 'calendar';
+    document.getElementById('task-toolbar').classList.toggle('hidden', isCal);
+    document.getElementById('calendar-toolbar').classList.toggle('hidden', !isCal);
+    document.getElementById('stats-row').classList.toggle('hidden', isCal);
+    document.body.classList.toggle('kid-mode', isCal && isKidMode());
+  }
+
   function render(){
+    toggleToolbars();
+    if(state.view === 'calendar'){
+      renderCalendar();
+      return;
+    }
     renderStats();
     if(state.view === 'matrix') renderMatrix();
     else if(state.view === 'list') renderList();
@@ -1064,21 +1587,428 @@
     });
   }
 
+  /* ================= CALENDAR: DATE HELPERS ================= */
+  function dateAdd(dateStr, days){
+    var d = new Date(dateStr+'T00:00:00');
+    d.setDate(d.getDate()+days);
+    return toLocalDateStr(d);
+  }
+  function dateDiffDays(a,b){
+    return Math.round((new Date(b+'T00:00:00') - new Date(a+'T00:00:00')) / 86400000);
+  }
+  function addMonths(dateStr, n){
+    var d = new Date(dateStr+'T00:00:00');
+    var day = d.getDate();
+    d.setDate(1);
+    d.setMonth(d.getMonth()+n);
+    var lastDay = new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+    d.setDate(Math.min(day, lastDay));
+    return toLocalDateStr(d);
+  }
+  function addYears(dateStr, n){
+    var d = new Date(dateStr+'T00:00:00');
+    d.setFullYear(d.getFullYear()+n);
+    return toLocalDateStr(d);
+  }
+  function startOfWeek(dateStr){ // Sunday-start week
+    var d = new Date(dateStr+'T00:00:00');
+    d.setDate(d.getDate()-d.getDay());
+    return toLocalDateStr(d);
+  }
+  function startOfMonth(dateStr){
+    return dateStr.slice(0,7)+'-01';
+  }
+  function fmtLong(dateStr){
+    var d = new Date(dateStr+'T00:00:00');
+    return d.toLocaleDateString(undefined, {weekday:'long', month:'long', day:'numeric'});
+  }
+  function fmtMonthYear(dateStr){
+    var d = new Date(dateStr+'T00:00:00');
+    return d.toLocaleDateString(undefined, {month:'long', year:'numeric'});
+  }
+  var WEEKDAY_LABELS = ['S','M','T','W','T','F','S'];
+
+  /* ================= CALENDAR: RECURRENCE ENGINE ================= */
+  var MAX_RECUR_ITERATIONS = 400;
+
+  function eventSpanDays(ev){
+    if(!ev.endDate) return 0;
+    return Math.max(0, dateDiffDays(ev.date, ev.endDate));
+  }
+  function occurrenceInRange(startDate, spanDays, rangeStart, rangeEnd){
+    var endDate = spanDays ? dateAdd(startDate, spanDays) : startDate;
+    return !(endDate < rangeStart || startDate > rangeEnd);
+  }
+  function findEventById(id){
+    return state.events.find(function(e){ return e.id === id; });
+  }
+  // Expands all events into concrete occurrences intersecting [rangeStart, rangeEnd] (inclusive, 'YYYY-MM-DD').
+  function expandOccurrences(rangeStart, rangeEnd){
+    var out = [];
+    var safetyLimit = dateAdd(rangeEnd, 3);
+
+    state.events.forEach(function(ev){
+      var span = eventSpanDays(ev);
+
+      if(ev.recurrenceId || !ev.recurrence){
+        // one-off event, or a standalone override tied to a series
+        if(occurrenceInRange(ev.date, span, rangeStart, rangeEnd)){
+          out.push(Object.assign({}, ev, { occurrenceId: ev.id, occurrenceDate: ev.date, isOverride: !!ev.recurrenceId, isVirtual:false }));
+        }
+        return;
+      }
+
+      // recurring master
+      var rule = ev.recurrence;
+      var cursor = ev.date;
+      var weekdayMode = rule.freq === 'weekly' && rule.byWeekday && rule.byWeekday.length;
+      var iterations = 0, matched = 0;
+
+      while(iterations < MAX_RECUR_ITERATIONS){
+        iterations++;
+        if(rule.until && cursor > rule.until) break;
+        if(cursor > safetyLimit) break;
+
+        var include = true;
+        if(weekdayMode){
+          var dow = new Date(cursor+'T00:00:00').getDay();
+          include = rule.byWeekday.indexOf(dow) !== -1;
+        }
+        if(include){
+          matched++;
+          if(rule.count && matched > rule.count) break;
+          if((ev.exceptionDates||[]).indexOf(cursor) === -1 && occurrenceInRange(cursor, span, rangeStart, rangeEnd)){
+            out.push(Object.assign({}, ev, {
+              occurrenceId: ev.id+'::'+cursor, occurrenceDate: cursor, date: cursor,
+              endDate: span ? dateAdd(cursor, span) : ev.endDate,
+              isOverride:false, isVirtual:true, masterId: ev.id
+            }));
+          }
+        }
+
+        if(weekdayMode) cursor = dateAdd(cursor, 1);
+        else if(rule.freq === 'daily') cursor = dateAdd(cursor, rule.interval||1);
+        else if(rule.freq === 'weekly') cursor = dateAdd(cursor, 7*(rule.interval||1));
+        else if(rule.freq === 'monthly') cursor = addMonths(cursor, rule.interval||1);
+        else if(rule.freq === 'yearly') cursor = addYears(cursor, rule.interval||1);
+        else break;
+      }
+    });
+
+    out.sort(function(a,b){ return (a.occurrenceDate+(a.time||'')).localeCompare(b.occurrenceDate+(b.time||'')); });
+    return out;
+  }
+
+  // scope: 'this' | 'following' | 'all'. occ must be a virtual occurrence (occ.isVirtual === true).
+  function applyEditScope(occ, scope, fields){
+    var master = findEventById(occ.masterId);
+    if(!master) return;
+    if(scope === 'all'){
+      var f = Object.assign({}, fields);
+      delete f.date; // series start date doesn't move on an "all" edit
+      Object.assign(master, f);
+    } else if(scope === 'this'){
+      master.exceptionDates = master.exceptionDates || [];
+      if(master.exceptionDates.indexOf(occ.occurrenceDate) === -1) master.exceptionDates.push(occ.occurrenceDate);
+      state.events.push(Object.assign({}, master, fields, {
+        id: uid(), recurrence: null, exceptionDates: [],
+        recurrenceId: master.id, overrideDate: occ.occurrenceDate,
+        date: fields.date || occ.occurrenceDate
+      }));
+    } else if(scope === 'following'){
+      var cutoff = dateAdd(occ.occurrenceDate, -1);
+      var oldUntil = master.recurrence.until;
+      master.recurrence = Object.assign({}, master.recurrence, { until: cutoff });
+      var newRule = Object.assign({}, master.recurrence, { until: oldUntil });
+      if(fields.recurrence) newRule = Object.assign(newRule, fields.recurrence);
+      state.events.push(Object.assign({}, master, fields, {
+        id: uid(), date: occ.occurrenceDate, exceptionDates: [],
+        recurrence: newRule, recurrenceId: null, overrideDate: null
+      }));
+    }
+  }
+
+  function deleteOccurrence(occ, scope){
+    if(occ.isOverride || !occ.isVirtual){
+      state.events = state.events.filter(function(e){ return e.id !== occ.occurrenceId; });
+      return;
+    }
+    var master = findEventById(occ.masterId);
+    if(!master) return;
+    if(scope === 'this'){
+      master.exceptionDates = master.exceptionDates || [];
+      master.exceptionDates.push(occ.occurrenceDate);
+    } else if(scope === 'following'){
+      master.recurrence.until = dateAdd(occ.occurrenceDate, -1);
+    } else if(scope === 'all'){
+      state.events = state.events.filter(function(e){ return e.id !== master.id && e.recurrenceId !== master.id; });
+    }
+  }
+
+  function promptScope(title, cb){
+    var wrap = document.createElement('div');
+    wrap.innerHTML = '<div class="scrim" id="scope-scrim"><div class="modal" style="max-width:380px;">'
+      + '<div class="field-label" style="margin-top:0;">'+escapeHtml(title)+'</div>'
+      + '<div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">'
+      + '<button class="btn-sm" data-scope="this" style="text-align:left;padding:11px 14px;">This event only</button>'
+      + '<button class="btn-sm" data-scope="following" style="text-align:left;padding:11px 14px;">This and following events</button>'
+      + '<button class="btn-sm" data-scope="all" style="text-align:left;padding:11px 14px;">All events in the series</button>'
+      + '<button class="btn-sm" data-scope="cancel" style="text-align:left;padding:11px 14px;color:var(--ink-muted);">Cancel</button>'
+      + '</div></div></div>';
+    document.body.appendChild(wrap);
+    wrap.querySelector('#scope-scrim').addEventListener('click', function(e){
+      if(e.target.id === 'scope-scrim') document.body.removeChild(wrap);
+    });
+    wrap.querySelectorAll('button[data-scope]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        document.body.removeChild(wrap);
+        if(btn.dataset.scope !== 'cancel') cb(btn.dataset.scope);
+      });
+    });
+  }
+
+  /* ================= CALENDAR: EVENT MODAL ================= */
+  function openAddEventModal(defaultDate){
+    var base = {
+      id: uid(), title:'', category:'other', attendees:['all'],
+      date: defaultDate || state.calAnchor || todayStr(), endDate:null, allDay:true, time:null,
+      location:'', notes:'', recurrence:null, exceptionDates:[], recurrenceId:null, overrideDate:null,
+      createdBy: state.currentFamilyMember ? state.currentFamilyMember.id : null, createdAt: nowISO()
+    };
+    openEventModal({ occurrenceId:null, occurrenceDate: base.date, isVirtual:false, isOverride:false, isNew:true, draftBase: base });
+  }
+
+  function openEventModal(occ){
+    var isNew = !!occ.isNew;
+    var sourceEvent = isNew ? occ.draftBase : (occ.isVirtual ? findEventById(occ.masterId) : findEventById(occ.occurrenceId));
+    if(!sourceEvent) return;
+    var needsScope = !isNew && !!occ.isVirtual;
+
+    var draft = Object.assign({}, sourceEvent);
+    draft.attendees = (sourceEvent.attendees || ['all']).slice();
+    draft.recurrence = sourceEvent.recurrence ? Object.assign({}, sourceEvent.recurrence, { byWeekday: (sourceEvent.recurrence.byWeekday||[]).slice() }) : null;
+    if(occ.isVirtual){
+      draft.date = occ.occurrenceDate;
+      draft.endDate = sourceEvent.endDate ? dateAdd(occ.occurrenceDate, eventSpanDays(sourceEvent)) : null;
+      if(needsScope) draft.recurrence = null; // editing a single occurrence starts as a non-repeating override unless they pick "all"/"following"
+    }
+
+    function renderEventModal(){
+      var catButtons = Object.keys(EVENT_CATEGORIES).map(function(key){
+        var c = EVENT_CATEGORIES[key];
+        return '<button type="button" class="cat-btn'+(draft.category===key?' selected':'')+'" data-cat="'+key+'">'+c.icon+' '+c.label+'</button>';
+      }).join('');
+
+      var attendeeChips = '<span class="tag-chip attendee-chip'+(draft.attendees.indexOf('all')!==-1?' active':'')+'" data-id="all">Everyone</span>'
+        + state.family.map(function(m){
+            var on = draft.attendees.indexOf('all')===-1 && draft.attendees.indexOf(m.id)!==-1;
+            return '<span class="tag-chip attendee-chip'+(on?' active':'')+'" data-id="'+m.id+'"><span class="adot" style="background:'+m.color+'"></span>'+escapeHtml(m.name)+'</span>';
+          }).join('');
+
+      var freq = draft.recurrence ? draft.recurrence.freq : '';
+      var weekdayPicker = '';
+      if(freq === 'weekly'){
+        var byWeekday = (draft.recurrence.byWeekday && draft.recurrence.byWeekday.length) ? draft.recurrence.byWeekday : [new Date(draft.date+'T00:00:00').getDay()];
+        weekdayPicker = '<div class="weekday-picker" id="ev-weekdays">'
+          + WEEKDAY_LABELS.map(function(lbl,i){
+              return '<button type="button" data-dow="'+i+'" class="'+(byWeekday.indexOf(i)!==-1?'selected':'')+'">'+lbl+'</button>';
+            }).join('')
+          + '</div>';
+      }
+      var endsMode = !draft.recurrence ? 'never' : (draft.recurrence.until ? 'until' : (draft.recurrence.count ? 'count' : 'never'));
+      var repeatDetail = '';
+      if(freq){
+        repeatDetail = ''
+          + '<div class="row-2" style="margin-top:10px;">'
+          + '<div><div class="field-label" style="margin-top:0;">Every</div><input type="number" min="1" class="text-input" id="ev-interval" value="'+(draft.recurrence.interval||1)+'"></div>'
+          + '<div><div class="field-label" style="margin-top:0;">&nbsp;</div><div style="padding:9px 0;font-size:12.5px;color:var(--ink-muted);">'+({daily:'day(s)',weekly:'week(s)',monthly:'month(s)',yearly:'year(s)'}[freq])+'</div></div>'
+          + '</div>'
+          + weekdayPicker
+          + '<div class="field-label">Ends</div>'
+          + '<div class="ends-row">'
+          + '<label class="ends-option"><input type="radio" name="ev-ends" value="never" '+(endsMode==='never'?'checked':'')+'> Never</label>'
+          + '<label class="ends-option"><input type="radio" name="ev-ends" value="until" '+(endsMode==='until'?'checked':'')+'> On date <input type="date" id="ev-until" value="'+(draft.recurrence.until||'')+'" '+(endsMode!=='until'?'disabled':'')+'></label>'
+          + '<label class="ends-option"><input type="radio" name="ev-ends" value="count" '+(endsMode==='count'?'checked':'')+'> After <input type="number" min="1" id="ev-count" value="'+(draft.recurrence.count||5)+'" '+(endsMode!=='count'?'disabled':'')+'> occurrences</label>'
+          + '</div>';
+      }
+
+      var scopeNote = needsScope ? '<div class="settings-help" style="margin-top:0;margin-bottom:14px;">Editing '+fmtLong(occ.occurrenceDate)+'. You\'ll be asked whether changes apply to just this event or the whole series when you tap Done.</div>' : '';
+
+      var html = ''
+        + '<div class="scrim" id="scrim">'
+        + '<div class="modal">'
+        + scopeNote
+        + '<input class="modal-title-input" id="ev-title" placeholder="Event title" value="'+escapeHtml(draft.title)+'">'
+        + '<div class="field-label">Category</div><div class="category-grid">'+catButtons+'</div>'
+        + '<div class="field-label">Who</div><div class="tag-list" id="ev-attendees">'+attendeeChips+'</div>'
+        + '<div class="row-2" style="margin-top:18px;">'
+        + '<div><div class="field-label" style="margin-top:0;">Date</div><input type="date" id="ev-date" value="'+(draft.date||'')+'"></div>'
+        + '<div><div class="field-label" style="margin-top:0;">End date (optional)</div><input type="date" id="ev-end-date" value="'+(draft.endDate||'')+'"></div>'
+        + '</div>'
+        + '<div class="row-2">'
+        + '<div><label class="check-inline"><input type="checkbox" id="ev-allday" '+(draft.allDay?'checked':'')+'> All day</label></div>'
+        + '<div id="ev-time-wrap" style="'+(draft.allDay?'display:none;':'')+'"><div class="field-label" style="margin-top:0;">Time</div><input type="time" id="ev-time" value="'+(draft.time||'')+'"></div>'
+        + '</div>'
+        + '<div class="field-label">Location</div><input class="text-input" id="ev-location" placeholder="Optional" value="'+escapeHtml(draft.location||'')+'">'
+        + '<div class="field-label">Repeat</div>'
+        + '<select class="text-input" id="ev-repeat-freq">'
+        + '<option value=""'+(freq===''?' selected':'')+'>Does not repeat</option>'
+        + '<option value="daily"'+(freq==='daily'?' selected':'')+'>Daily</option>'
+        + '<option value="weekly"'+(freq==='weekly'?' selected':'')+'>Weekly</option>'
+        + '<option value="monthly"'+(freq==='monthly'?' selected':'')+'>Monthly</option>'
+        + '<option value="yearly"'+(freq==='yearly'?' selected':'')+'>Yearly</option>'
+        + '</select>'
+        + '<div id="ev-repeat-detail">'+repeatDetail+'</div>'
+        + '<div class="field-label">Notes</div><textarea class="notes" id="ev-notes">'+escapeHtml(draft.notes||'')+'</textarea>'
+        + '<div class="modal-footer">'
+        + (isNew ? '' : '<button class="btn-delete" id="ev-delete">Delete event</button>')
+        + '<button class="btn-close" id="ev-close">Done</button>'
+        + '</div>'
+        + '</div></div>';
+
+      document.getElementById('modal-root').innerHTML = html;
+      wireEventModal();
+      if(isNew) document.getElementById('ev-title').focus();
+    }
+
+    function wireEventModal(){
+      function closeDom(){ document.getElementById('modal-root').innerHTML = ''; }
+
+      document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id==='scrim') closeDom(); });
+      document.getElementById('ev-title').addEventListener('input', function(e){ draft.title = e.target.value; });
+      document.getElementById('ev-location').addEventListener('input', function(e){ draft.location = e.target.value; });
+      document.getElementById('ev-notes').addEventListener('input', function(e){ draft.notes = e.target.value; });
+      document.getElementById('ev-date').addEventListener('change', function(e){ draft.date = e.target.value; });
+      document.getElementById('ev-end-date').addEventListener('change', function(e){ draft.endDate = e.target.value || null; });
+      document.getElementById('ev-time').addEventListener('change', function(e){ draft.time = e.target.value || null; });
+
+      document.getElementById('ev-allday').addEventListener('change', function(e){
+        draft.allDay = e.target.checked;
+        if(draft.allDay) draft.time = null;
+        renderEventModal();
+      });
+
+      document.querySelectorAll('.cat-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){ draft.category = btn.dataset.cat; renderEventModal(); });
+      });
+
+      document.querySelectorAll('.attendee-chip').forEach(function(chip){
+        chip.addEventListener('click', function(){
+          var id = chip.dataset.id;
+          if(id === 'all'){ draft.attendees = ['all']; }
+          else{
+            draft.attendees = draft.attendees.filter(function(a){ return a!=='all'; });
+            var i = draft.attendees.indexOf(id);
+            if(i===-1) draft.attendees.push(id); else draft.attendees.splice(i,1);
+            if(!draft.attendees.length) draft.attendees = ['all'];
+          }
+          renderEventModal();
+        });
+      });
+
+      document.getElementById('ev-repeat-freq').addEventListener('change', function(e){
+        var freq = e.target.value;
+        if(!freq){ draft.recurrence = null; }
+        else{
+          draft.recurrence = { freq: freq, interval:1, byWeekday: freq==='weekly' ? [new Date(draft.date+'T00:00:00').getDay()] : null, until:null, count:null };
+        }
+        renderEventModal();
+      });
+
+      var intervalEl = document.getElementById('ev-interval');
+      if(intervalEl) intervalEl.addEventListener('input', function(e){ draft.recurrence.interval = Math.max(1, parseInt(e.target.value,10)||1); });
+
+      document.querySelectorAll('#ev-weekdays button').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var dow = parseInt(btn.dataset.dow,10);
+          var list = draft.recurrence.byWeekday || [];
+          var i = list.indexOf(dow);
+          if(i===-1) list.push(dow); else if(list.length>1) list.splice(i,1);
+          draft.recurrence.byWeekday = list;
+          renderEventModal();
+        });
+      });
+
+      document.querySelectorAll('input[name="ev-ends"]').forEach(function(radio){
+        radio.addEventListener('change', function(){
+          if(radio.value==='never'){ draft.recurrence.until=null; draft.recurrence.count=null; }
+          else if(radio.value==='until'){ draft.recurrence.until = draft.recurrence.until || dateAdd(draft.date, 30); draft.recurrence.count=null; }
+          else if(radio.value==='count'){ draft.recurrence.count = draft.recurrence.count || 5; draft.recurrence.until=null; }
+          renderEventModal();
+        });
+      });
+      var untilEl = document.getElementById('ev-until');
+      if(untilEl) untilEl.addEventListener('change', function(e){ draft.recurrence.until = e.target.value || null; });
+      var countEl = document.getElementById('ev-count');
+      if(countEl) countEl.addEventListener('input', function(e){ draft.recurrence.count = Math.max(1, parseInt(e.target.value,10)||1); });
+
+      function buildFields(){
+        return {
+          title: (draft.title||'').trim() || 'Untitled event',
+          category: draft.category, attendees: draft.attendees.slice(),
+          date: draft.date, endDate: draft.endDate || null,
+          allDay: draft.allDay, time: draft.allDay ? null : draft.time,
+          location: draft.location||'', notes: draft.notes||'',
+          recurrence: draft.recurrence ? Object.assign({}, draft.recurrence) : null
+        };
+      }
+
+      function commit(scope){
+        var fields = buildFields();
+        if(isNew){
+          if(!draft.title || !draft.title.trim()){ closeDom(); render(); return; }
+          state.events.push(Object.assign({}, sourceEvent, fields, { exceptionDates:[], recurrenceId:null, overrideDate:null }));
+        } else if(occ.isOverride || !occ.isVirtual){
+          Object.assign(findEventById(occ.occurrenceId), fields);
+        } else {
+          applyEditScope(occ, scope, fields);
+        }
+        persistCalendar();
+        closeDom();
+        render();
+      }
+
+      document.getElementById('ev-close').addEventListener('click', function(){
+        if(needsScope){ promptScope('Apply changes to…', function(scope){ commit(scope); }); }
+        else{ commit(null); }
+      });
+
+      var delBtn = document.getElementById('ev-delete');
+      if(delBtn){
+        delBtn.addEventListener('click', function(){
+          closeDom();
+          if(occ.isOverride || !occ.isVirtual){
+            state.events = state.events.filter(function(e){ return e.id !== occ.occurrenceId; });
+            persistCalendar(); render();
+          } else {
+            promptScope('Delete…', function(scope){
+              deleteOccurrence(occ, scope);
+              persistCalendar(); render();
+            });
+          }
+        });
+      }
+    }
+
+    renderEventModal();
+  }
+
   /* ================= SETTINGS MODAL ================= */
   function openSettingsModal(){
-    var cfg = getConfig() || {owner:'',repo:'',path:'tasks.json',branch:'main',token:''};
+    var cfg = getConfig() || {owner:'',repo:'',path:'tasks.json',calendarPath:'family-calendar.json',branch:'main',token:''};
     var html = ''
       + '<div class="scrim" id="scrim">'
       + '<div class="modal">'
       + '<div class="field-label" style="margin-top:0;">GitHub Sync Settings</div>'
       + '<div class="settings-field"><label>Repo owner</label><input class="text-input" id="s-owner" value="'+escapeHtml(cfg.owner)+'" placeholder="e.g. your-github-username"></div>'
       + '<div class="settings-field"><label>Repo name</label><input class="text-input" id="s-repo" value="'+escapeHtml(cfg.repo)+'" placeholder="e.g. task-manager"></div>'
-      + '<div class="row-2">'
       + '<div class="settings-field"><label>Branch</label><input class="text-input" id="s-branch" value="'+escapeHtml(cfg.branch||'main')+'"></div>'
-      + '<div class="settings-field"><label>File path</label><input class="text-input" id="s-path" value="'+escapeHtml(cfg.path||'tasks.json')+'"></div>'
+      + '<div class="row-2">'
+      + '<div class="settings-field"><label>Tasks file path</label><input class="text-input" id="s-path" value="'+escapeHtml(cfg.path||'tasks.json')+'"></div>'
+      + '<div class="settings-field"><label>Calendar file path</label><input class="text-input" id="s-cal-path" value="'+escapeHtml(cfg.calendarPath||'family-calendar.json')+'"></div>'
       + '</div>'
       + '<div class="settings-field"><label>Personal access token</label><input class="text-input" type="password" id="s-token" value="'+escapeHtml(cfg.token)+'" placeholder="fine-grained PAT, Contents: read & write"></div>'
-      + '<div class="settings-help">Create a fine-grained token at github.com → Settings → Developer settings → Personal access tokens, scoped to just this repo with <strong>Contents: Read and write</strong> permission. It is stored only in this browser, never committed to the repo. Both you and Monisha need to enter your own token here on your own device.</div>'
+      + '<div class="settings-help">Create a fine-grained token at github.com → Settings → Developer settings → Personal access tokens, scoped to just this repo with <strong>Contents: Read and write</strong> permission. It is stored only in this browser, never committed to the repo. Everyone in the family needs to enter their own token here on their own device.</div>'
       + '<div class="settings-actions">'
       + '<button class="btn-primary" id="s-save">Save & Connect</button>'
       + '<button class="btn-sm" id="s-disconnect">Disconnect</button>'
@@ -1103,6 +2033,7 @@
         repo: document.getElementById('s-repo').value.trim(),
         branch: document.getElementById('s-branch').value.trim() || 'main',
         path: document.getElementById('s-path').value.trim() || 'tasks.json',
+        calendarPath: document.getElementById('s-cal-path').value.trim() || 'family-calendar.json',
         token: document.getElementById('s-token').value.trim()
       };
       if(!newCfg.owner || !newCfg.repo || !newCfg.token){
@@ -1112,6 +2043,97 @@
       setConfig(newCfg);
       close();
       loadFromGitHub();
+      loadCalendarFromGitHub();
+    });
+  }
+
+  /* ================= FAMILY SETTINGS MODAL ================= */
+  function openFamilySettingsModal(){
+    var draft = state.family.map(function(m){ return Object.assign({}, m); });
+
+    function nextColor(){
+      var used = draft.map(function(m){ return m.color; });
+      for(var i=0;i<FAMILY_COLOR_PALETTE.length;i++){
+        if(used.indexOf(FAMILY_COLOR_PALETTE[i]) === -1) return FAMILY_COLOR_PALETTE[i];
+      }
+      return FAMILY_COLOR_PALETTE[draft.length % FAMILY_COLOR_PALETTE.length];
+    }
+
+    var html = ''
+      + '<div class="scrim" id="scrim">'
+      + '<div class="modal">'
+      + '<div class="field-label" style="margin-top:0;">Family Members</div>'
+      + '<div id="family-list"></div>'
+      + '<button class="btn-sm" id="fam-add">+ Add family member</button>'
+      + '<div class="settings-help">Each person\'s email should match what they log into Cloudflare Access with, so the app knows who\'s using it (for defaults and a simplified kid view). Leave email blank for a family member who won\'t log in themselves — they\'ll still show up as a taggable attendee.</div>'
+      + '<div class="settings-actions">'
+      + '<button class="btn-primary" id="fam-save">Save</button>'
+      + '<button class="btn-sm" id="fam-cancel">Cancel</button>'
+      + '</div>'
+      + '<div id="fam-error" style="color:var(--overdue);font-size:12px;margin-top:10px;"></div>'
+      + '</div></div>';
+    document.getElementById('modal-root').innerHTML = html;
+
+    function renderFamilyList(){
+      var rows = draft.map(function(m, i){
+        return '<div class="family-row" data-idx="'+i+'">'
+          + '<button type="button" class="color-swatch" data-idx="'+i+'" style="background:'+m.color+'" title="Click to change color"></button>'
+          + '<input class="text-input fam-name" data-idx="'+i+'" placeholder="Name" value="'+escapeHtml(m.name||'')+'">'
+          + '<input class="text-input fam-email" data-idx="'+i+'" placeholder="email@example.com" value="'+escapeHtml(m.email||'')+'">'
+          + '<div class="seg3 fam-role" data-idx="'+i+'">'
+          + '<button type="button" data-role="adult" class="'+(m.role!=='kid'?'active':'')+'">Adult</button>'
+          + '<button type="button" data-role="kid" class="'+(m.role==='kid'?'active':'')+'">Kid</button>'
+          + '</div>'
+          + '<button type="button" class="rm fam-remove" data-idx="'+i+'" title="Remove">✕</button>'
+          + '</div>';
+      }).join('');
+      document.getElementById('family-list').innerHTML = rows || '<div class="list-empty">No family members yet — add one below.</div>';
+
+      document.querySelectorAll('.color-swatch').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var i = parseInt(btn.dataset.idx,10);
+          var idx = FAMILY_COLOR_PALETTE.indexOf(draft[i].color);
+          draft[i].color = FAMILY_COLOR_PALETTE[(idx+1+FAMILY_COLOR_PALETTE.length) % FAMILY_COLOR_PALETTE.length];
+          renderFamilyList();
+        });
+      });
+      document.querySelectorAll('.fam-name').forEach(function(inp){
+        inp.addEventListener('input', function(){ draft[parseInt(inp.dataset.idx,10)].name = inp.value; });
+      });
+      document.querySelectorAll('.fam-email').forEach(function(inp){
+        inp.addEventListener('input', function(){ draft[parseInt(inp.dataset.idx,10)].email = inp.value.trim().toLowerCase(); });
+      });
+      document.querySelectorAll('.fam-role button').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var i = parseInt(btn.closest('.fam-role').dataset.idx,10);
+          draft[i].role = btn.dataset.role;
+          renderFamilyList();
+        });
+      });
+      document.querySelectorAll('.fam-remove').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          draft.splice(parseInt(btn.dataset.idx,10),1);
+          renderFamilyList();
+        });
+      });
+    }
+    renderFamilyList();
+
+    function close(){ document.getElementById('modal-root').innerHTML = ''; }
+    document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id==='scrim') close(); });
+    document.getElementById('fam-cancel').addEventListener('click', close);
+    document.getElementById('fam-add').addEventListener('click', function(){
+      draft.push({ id: uid(), name:'', color: nextColor(), email:'', role:'adult' });
+      renderFamilyList();
+    });
+    document.getElementById('fam-save').addEventListener('click', function(){
+      var cleaned = draft.filter(function(m){ return m.name && m.name.trim(); })
+        .map(function(m){ return { id:m.id, name:m.name.trim(), color:m.color, email:(m.email||'').trim().toLowerCase(), role: m.role==='kid'?'kid':'adult' }; });
+      state.family = cleaned;
+      resolveCurrentFamilyMember();
+      persistCalendar();
+      close();
+      render();
     });
   }
 
@@ -1152,6 +2174,23 @@
     document.getElementById('setup-banner').classList.add('hidden');
   });
 
+  /* Calendar toolbar (static controls) */
+  document.getElementById('cal-subview-tabs').addEventListener('click', function(e){
+    var btn = e.target.closest('button[data-subview]');
+    if(!btn) return;
+    state.calSubView = btn.dataset.subview;
+    render();
+  });
+  document.getElementById('cal-prev').addEventListener('click', function(){ calNavStep(-1); });
+  document.getElementById('cal-next').addEventListener('click', function(){ calNavStep(1); });
+  document.getElementById('cal-today').addEventListener('click', function(){ state.calAnchor = todayStr(); render(); });
+  document.getElementById('cal-search-input').addEventListener('input', function(e){
+    state.calSearch = e.target.value;
+    render();
+  });
+  document.getElementById('add-event-btn').addEventListener('click', function(){ openAddEventModal(state.calAnchor); });
+  document.getElementById('open-family-settings').addEventListener('click', openFamilySettingsModal);
+
   /* app title/subtitle persistence (local only, cosmetic) */
   function loadMeta(){
     try{
@@ -1173,8 +2212,12 @@
 
   /* ================= INIT ================= */
   loadMeta();
-  loadIdentity();
+  loadIdentity().then(function(){
+    resolveCurrentFamilyMember();
+    if(state.view === 'calendar') render();
+  });
   loadFromGitHub();
+  loadCalendarFromGitHub();
 
 })();
 </script>
