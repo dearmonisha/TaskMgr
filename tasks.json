@@ -117,7 +117,7 @@
       "title": "Call Terry",
       "notes": "",
       "importance": true,
-      "urgency": true,
+      "urgency": false,
       "assignee": "monisha",
       "due": "2026-07-09",
       "tags": [],
@@ -130,7 +130,7 @@
       ],
       "completed": false,
       "completedAt": null,
-      "quadrantEnteredAt": "2026-07-09T04:24:15.179Z",
+      "quadrantEnteredAt": "2026-07-09T04:58:36.576Z",
       "activity": []
     }
   ]
