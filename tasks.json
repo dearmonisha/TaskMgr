@@ -15,27 +15,6 @@
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-08T23:43:59.472Z",
       "activity": []
-    },
-    {
-      "id": "07369e86-5749-4a11-80a4-bb43dad2e8bf",
-      "title": "Call appa",
-      "notes": "",
-      "importance": true,
-      "urgency": true,
-      "assignee": "shared",
-      "due": null,
-      "tags": [],
-      "subtasks": [],
-      "completed": false,
-      "completedAt": null,
-      "quadrantEnteredAt": "2026-07-08T23:44:54.784Z",
-      "activity": [
-        {
-          "id": "a845ba0e-c28c-4eac-a43b-ca6a4e94da3f",
-          "text": "Reassigned to Shared",
-          "ts": "2026-07-08T23:47:54.174Z"
-        }
-      ]
     }
   ]
 }
