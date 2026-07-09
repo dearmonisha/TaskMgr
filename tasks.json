@@ -113,29 +113,39 @@
       ]
     },
     {
-      "id": "ec49a5c2-dddf-4995-8434-6a8cd2efa131",
-      "title": "Execute Will and Trust",
+      "id": "9829805d-c063-4ab0-a87e-65aef0db6c85",
+      "title": "Call Terry",
+      "notes": "",
+      "importance": true,
+      "urgency": false,
+      "assignee": "monisha",
+      "due": "2026-07-09",
+      "tags": [],
+      "subtasks": [
+        {
+          "id": "64295d1e-6cce-4638-8c04-85b70d9c9a14",
+          "text": "Complete Report",
+          "done": false
+        }
+      ],
+      "completed": false,
+      "completedAt": null,
+      "quadrantEnteredAt": "2026-07-09T04:58:36.576Z",
+      "activity": []
+    },
+    {
+      "id": "731f55bc-7aab-4207-b68d-92d5f17eb86e",
+      "title": "Schedule multi client testing by COO",
       "notes": "",
       "importance": true,
       "urgency": false,
       "assignee": "me",
       "due": null,
       "tags": [],
-      "subtasks": [
-        {
-          "id": "2e7c7d49-85c5-4ed2-bdb0-2e9b784f089b",
-          "text": "Inform Mortgage before executing",
-          "done": false
-        },
-        {
-          "id": "db011b78-a6e2-46d1-9b1e-3ce986db7903",
-          "text": "Identify 2 witnesses",
-          "done": false
-        }
-      ],
+      "subtasks": [],
       "completed": false,
       "completedAt": null,
-      "quadrantEnteredAt": "2026-07-09T13:33:51.675Z",
+      "quadrantEnteredAt": "2026-07-09T17:02:16.250Z",
       "activity": []
     }
   ]
