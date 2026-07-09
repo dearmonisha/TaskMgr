@@ -16,5 +16,26 @@
       "role": "kid"
     }
   ],
-  "events": []
+  "events": [
+    {
+      "id": "6f9bc131-b6e5-4036-b5c2-0f2248f57abd",
+      "title": "Royal Caribbean Cruise",
+      "category": "trip",
+      "attendees": [
+        "all"
+      ],
+      "date": "2026-07-11",
+      "endDate": "2026-07-18",
+      "allDay": true,
+      "time": null,
+      "location": "Miami, FL",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "createdBy": null,
+      "createdAt": "2026-07-09T04:56:44.218Z"
+    }
+  ]
 }
