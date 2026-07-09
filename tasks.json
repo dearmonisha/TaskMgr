@@ -1,20 +1,4 @@
 {
   "version": 1,
-  "tasks": [
-    {
-      "id": "81abf32b-2d8f-48d8-8c5c-516ffce5b413",
-      "title": "Test Entry",
-      "notes": "",
-      "importance": true,
-      "urgency": false,
-      "assignee": "monisha",
-      "due": null,
-      "tags": [],
-      "subtasks": [],
-      "completed": false,
-      "completedAt": null,
-      "quadrantEnteredAt": "2026-07-08T23:43:59.472Z",
-      "activity": []
-    }
-  ]
+  "tasks": []
 }
