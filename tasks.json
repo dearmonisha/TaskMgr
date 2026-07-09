@@ -118,10 +118,16 @@
       "notes": "",
       "importance": true,
       "urgency": true,
-      "assignee": "me",
-      "due": null,
+      "assignee": "monisha",
+      "due": "2026-07-09",
       "tags": [],
-      "subtasks": [],
+      "subtasks": [
+        {
+          "id": "64295d1e-6cce-4638-8c04-85b70d9c9a14",
+          "text": "Complete Report",
+          "done": false
+        }
+      ],
       "completed": false,
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-09T04:24:15.179Z",
