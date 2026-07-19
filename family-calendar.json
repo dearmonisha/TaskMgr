@@ -1,6 +1,49 @@
 {
   "version": 1,
-  "family": [],
+  "family": [
+    {
+      "id": "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6",
+      "name": "Shiva",
+      "color": "#13808a",
+      "email": "dearshiva@gmail.com",
+      "role": "adult"
+    },
+    {
+      "id": "6d5c9f8b-bd79-45b8-aafa-52ebb3cf0e46",
+      "name": "Monisha",
+      "color": "#955c82",
+      "email": "dearmonisha@gmail.com",
+      "role": "adult"
+    },
+    {
+      "id": "4e763cb0-2259-4631-9c0f-727b31f8b086",
+      "name": "Tamanna",
+      "color": "#bc5460",
+      "email": "deartamannarajan@gmail.com",
+      "role": "kid"
+    },
+    {
+      "id": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "name": "Aadi",
+      "color": "#008fa0",
+      "email": "dearaadirajan@gmail.com",
+      "role": "kid"
+    },
+    {
+      "id": "ebbf1674-7863-4d0f-b34d-f2017b9dc367",
+      "name": "Tanvi",
+      "color": "#8765be",
+      "email": "tanviverma2023@gmail.com",
+      "role": "kid"
+    },
+    {
+      "id": "49cc0cbb-f288-474a-9797-81e6a3714ac0",
+      "name": "Kashish",
+      "color": "#3e8f44",
+      "email": "kashishverma1801@gmail.com",
+      "role": "kid"
+    }
+  ],
   "events": [],
   "calendarSubscriptions": []
 }
