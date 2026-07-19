@@ -94,33 +94,39 @@
       "createdAt": "2026-07-19T22:08:25.326Z"
     },
     {
-      "id": "b1edafbf-1a4a-416b-875a-e1c76dd3ead2",
-      "title": "Saxophone Class",
+      "id": "d0bdb25e-7a0b-4c61-bc95-b94d8185eaa1",
+      "title": "Comp Band Camp",
       "category": "band",
       "attendees": [
-        "all"
+        "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6",
+        "6d5c9f8b-bd79-45b8-aafa-52ebb3cf0e46",
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
       ],
-      "date": "2026-07-22",
+      "date": "2026-07-28",
       "endDate": null,
       "allDay": true,
       "time": null,
       "location": "",
       "notes": "",
-      "recurrence": {
-        "freq": "weekly",
-        "interval": 1,
-        "byWeekday": [
-          3
-        ],
-        "until": null,
-        "count": null
-      },
+      "recurrence": null,
       "exceptionDates": [],
       "recurrenceId": null,
       "overrideDate": null,
-      "createdBy": "4e763cb0-2259-4631-9c0f-727b31f8b086",
-      "createdAt": "2026-07-19T22:35:42.094Z"
+      "createdBy": "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6",
+      "createdAt": "2026-07-19T22:34:16.419Z"
     }
   ],
-  "calendarSubscriptions": []
+  "calendarSubscriptions": [
+    {
+      "id": "cba06539-fd7c-4bb4-9fd7-6df00a968415",
+      "ownerFamilyMemberId": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "name": "Band",
+      "url": "https://calendar.google.com/calendar/u/0/r?cid=1m5pjqaes2pd3g5b68l9hhpuig@group.calendar.google.com&cid=84jp7ctks4behcmpes3ocdb1n4@group.calendar.google.com&cid=irvsemcermlup06e3279ghhk60@group.calendar.google.com&cid=nulalpfh5qm4fjm4nq8bhe5df0@group.calendar.google.com&cid=en.usa%23holiday@group.v.calendar.google.com&cid=oo4e9m6gb33m54anefjelgbof0@group.calendar.google.com&cid=bo3akif7q42ldllo13odf2psgk@group.calendar.google.com&cid=0duc6jk3v4c4rq5ppb31k040qk@group.calendar.google.com&cid=ju5qsi0bf6n1fulahn3gq7cekg@group.calendar.google.com&cid=4oeitn6ont57h99bd5rpe3r3ds@group.calendar.google.com&pli=1",
+      "category": "band",
+      "enabled": true,
+      "lastSyncedAt": null,
+      "lastError": "That URL did not return a valid iCalendar (.ics) file.",
+      "syncStatus": "err"
+    }
+  ]
 }
