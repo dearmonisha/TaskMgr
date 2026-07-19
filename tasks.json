@@ -132,10 +132,15 @@
       "due": "2026-07-22",
       "tags": [],
       "subtasks": [],
-      "completed": false,
-      "completedAt": null,
+      "completed": true,
+      "completedAt": "2026-07-19T22:33:42.227Z",
       "quadrantEnteredAt": "2026-07-19T22:32:05.105Z",
       "activity": [
+        {
+          "id": "30db028e-a735-4e32-8793-1ab74f412903",
+          "text": "Marked complete",
+          "ts": "2026-07-19T22:33:42.227Z"
+        },
         {
           "id": "3e90467c-8264-41a0-9b4e-6c8f8ae8adee",
           "text": "Marked complete",
