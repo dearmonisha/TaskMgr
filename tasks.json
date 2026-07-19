@@ -7,14 +7,16 @@
       "notes": "",
       "importance": true,
       "urgency": false,
-      "assignee": "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6",
-      "due": null,
+      "due": "2026-07-20",
       "tags": [],
       "subtasks": [],
       "completed": false,
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-09T02:46:20.429Z",
-      "activity": []
+      "activity": [],
+      "assignees": [
+        "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6"
+      ]
     },
     {
       "id": "2c1a325d-25b5-48a6-9c8f-78b4738c83bb",
@@ -22,14 +24,14 @@
       "notes": "",
       "importance": true,
       "urgency": false,
-      "assignee": "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6",
       "due": null,
       "tags": [],
       "subtasks": [],
       "completed": false,
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-09T02:52:19.950Z",
-      "activity": []
+      "activity": [],
+      "assignees": []
     },
     {
       "id": "f40fe495-928c-45e3-b981-6ff9ee0898ec",
@@ -37,14 +39,14 @@
       "notes": "",
       "importance": true,
       "urgency": false,
-      "assignee": "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6",
       "due": null,
       "tags": [],
       "subtasks": [],
       "completed": false,
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-19T22:12:49.997Z",
-      "activity": []
+      "activity": [],
+      "assignees": []
     },
     {
       "id": "731f55bc-7aab-4207-b68d-92d5f17eb86e",
@@ -52,14 +54,14 @@
       "notes": "",
       "importance": true,
       "urgency": false,
-      "assignee": "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6",
       "due": null,
       "tags": [],
       "subtasks": [],
       "completed": false,
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-09T17:02:16.250Z",
-      "activity": []
+      "activity": [],
+      "assignees": []
     },
     {
       "id": "5afa3433-73ef-4102-ad88-513c8f2307eb",
@@ -67,14 +69,14 @@
       "notes": "",
       "importance": true,
       "urgency": true,
-      "assignee": "6d5c9f8b-bd79-45b8-aafa-52ebb3cf0e46",
       "due": "2026-07-20",
       "tags": [],
       "subtasks": [],
       "completed": false,
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-19T21:52:33.454Z",
-      "activity": []
+      "activity": [],
+      "assignees": []
     },
     {
       "id": "a56d57e3-6e12-4d58-ae29-027227106762",
@@ -82,7 +84,6 @@
       "notes": "",
       "importance": true,
       "urgency": true,
-      "assignee": "6d5c9f8b-bd79-45b8-aafa-52ebb3cf0e46",
       "due": "2026-07-20",
       "tags": [],
       "subtasks": [],
@@ -105,7 +106,8 @@
           "text": "Reassigned to Shared",
           "ts": "2026-07-19T21:54:08.743Z"
         }
-      ]
+      ],
+      "assignees": []
     }
   ]
 }
