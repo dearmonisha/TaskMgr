@@ -104,8 +104,8 @@
       ],
       "date": "2026-07-22",
       "endDate": null,
-      "allDay": true,
-      "time": null,
+      "allDay": false,
+      "time": "13:50",
       "location": "",
       "notes": "",
       "recurrence": {
