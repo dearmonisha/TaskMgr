@@ -92,6 +92,32 @@
       "activity": []
     },
     {
+      "id": "cd6a0825-6a11-42d6-99e8-15b6d4cad1e8",
+      "title": "Print Luggage Tags for Cruise",
+      "notes": "",
+      "importance": true,
+      "urgency": true,
+      "assignee": "shared",
+      "due": "2026-07-09",
+      "tags": [],
+      "subtasks": [],
+      "completed": true,
+      "completedAt": "2026-07-19T21:48:08.151Z",
+      "quadrantEnteredAt": "2026-07-09T03:13:20.529Z",
+      "activity": [
+        {
+          "id": "930e71a0-a427-4ebd-84ec-7480eda95a28",
+          "text": "Marked complete",
+          "ts": "2026-07-19T21:48:08.153Z"
+        },
+        {
+          "id": "9e3c59ca-756e-4ddb-a86e-285a68717ec3",
+          "text": "Reassigned to Shared",
+          "ts": "2026-07-09T03:13:36.151Z"
+        }
+      ]
+    },
+    {
       "id": "731f55bc-7aab-4207-b68d-92d5f17eb86e",
       "title": "Schedule multi client testing by COO",
       "notes": "",
@@ -105,6 +131,52 @@
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-09T17:02:16.250Z",
       "activity": []
+    },
+    {
+      "id": "5afa3433-73ef-4102-ad88-513c8f2307eb",
+      "title": "Move Aadi’s dental appointment from 22nd Jul",
+      "notes": "",
+      "importance": true,
+      "urgency": true,
+      "assignee": "6d5c9f8b-bd79-45b8-aafa-52ebb3cf0e46",
+      "due": "2026-07-20",
+      "tags": [],
+      "subtasks": [],
+      "completed": false,
+      "completedAt": null,
+      "quadrantEnteredAt": "2026-07-19T21:52:33.454Z",
+      "activity": []
+    },
+    {
+      "id": "a56d57e3-6e12-4d58-ae29-027227106762",
+      "title": "Pick Maximus from daycare",
+      "notes": "",
+      "importance": true,
+      "urgency": true,
+      "assignee": "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6",
+      "due": "2026-07-20",
+      "tags": [],
+      "subtasks": [],
+      "completed": false,
+      "completedAt": null,
+      "quadrantEnteredAt": "2026-07-19T21:55:22.089Z",
+      "activity": [
+        {
+          "id": "815b67ac-fc67-49f6-aa78-133e516207f0",
+          "text": "Reassigned to Shiva",
+          "ts": "2026-07-19T21:57:45.573Z"
+        },
+        {
+          "id": "aeb7e83b-be1f-492b-9708-8b2bce94e8f4",
+          "text": "Reassigned to Do First",
+          "ts": "2026-07-19T21:55:22.089Z"
+        },
+        {
+          "id": "5b22363c-30f0-49a2-8491-0cae0ee78f76",
+          "text": "Reassigned to Shared",
+          "ts": "2026-07-19T21:54:08.743Z"
+        }
+      ]
     }
   ]
 }
