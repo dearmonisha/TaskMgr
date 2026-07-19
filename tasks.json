@@ -81,14 +81,14 @@
       "title": "F/w Santosh on AI workshop Virtual and CLT",
       "notes": "",
       "importance": false,
-      "urgency": true,
+      "urgency": false,
       "assignee": "me",
       "due": null,
       "tags": [],
       "subtasks": [],
       "completed": false,
       "completedAt": null,
-      "quadrantEnteredAt": "2026-07-19T21:14:01.776Z",
+      "quadrantEnteredAt": "2026-07-19T21:14:08.410Z",
       "activity": []
     },
     {
