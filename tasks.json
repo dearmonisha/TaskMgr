@@ -41,14 +41,16 @@
       "notes": "",
       "importance": true,
       "urgency": false,
-      "due": null,
+      "due": "2026-07-22",
       "tags": [],
       "subtasks": [],
       "completed": false,
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-19T22:12:49.997Z",
       "activity": [],
-      "assignees": []
+      "assignees": [
+        "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6"
+      ]
     },
     {
       "id": "731f55bc-7aab-4207-b68d-92d5f17eb86e",
