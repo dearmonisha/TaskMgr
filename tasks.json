@@ -101,10 +101,15 @@
       "due": "2026-07-09",
       "tags": [],
       "subtasks": [],
-      "completed": false,
-      "completedAt": null,
+      "completed": true,
+      "completedAt": "2026-07-19T21:54:57.783Z",
       "quadrantEnteredAt": "2026-07-09T03:13:20.529Z",
       "activity": [
+        {
+          "id": "cc5f8339-5246-4ac7-8976-8c8b20b5c64b",
+          "text": "Marked complete",
+          "ts": "2026-07-19T21:54:57.783Z"
+        },
         {
           "id": "930e71a0-a427-4ebd-84ec-7480eda95a28",
           "text": "Marked complete",
