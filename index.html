@@ -303,6 +303,57 @@
     .dream-cards{grid-template-columns:1fr;}
   }
 
+  /* ---------- Compass (Vision / Mission / Goals / Priorities) ---------- */
+  .compass-wrap{margin-top:22px;}
+  .compass-section{margin-bottom:30px;}
+  .compass-hint{font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-muted);}
+  .compass-reflection-banner{display:flex;align-items:center;justify-content:space-between;gap:14px;background:var(--due-today-bg);border:1px solid #e0c58e;color:var(--due-today);padding:12px 16px;border-radius:10px;margin-bottom:22px;font-size:13px;}
+  .compass-reflection-banner button{flex:none;}
+
+  .priority-grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
+  .priority-card{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius-panel);padding:16px;display:flex;flex-direction:column;gap:8px;box-shadow:0 2px 6px rgba(50,35,24,0.1);min-height:96px;}
+  .priority-num{font-family:var(--font-serif);font-weight:700;font-size:22px;color:var(--schedule);}
+  .priority-text{font-size:14px;font-weight:600;outline:none;line-height:1.35;}
+  .priority-text:empty:before{content:'Click to edit…';color:var(--ink-muted);font-style:italic;font-weight:400;}
+  .priority-card .rm{align-self:flex-end;border:none;background:transparent;color:var(--ink-muted);font-size:13px;padding:0;margin-top:auto;}
+  .priority-add{align-items:center;justify-content:center;cursor:pointer;border:1.5px dashed var(--hairline);background:transparent;box-shadow:none;font-family:inherit;}
+  .priority-add-label{color:var(--ink-muted);font-size:13px;font-weight:600;}
+
+  .compass-vision-text{font-family:var(--font-serif);font-style:italic;font-weight:600;font-size:19px;line-height:1.4;outline:none;padding:8px 10px;border-radius:8px;margin:0 -10px;}
+  .compass-vision-text:hover,.compass-vision-text:focus{background:rgba(0,0,0,0.03);}
+  .compass-vision-text:empty:before{content:attr(data-placeholder);color:var(--ink-muted);font-style:italic;font-weight:400;}
+
+  .mission-row{display:flex;align-items:baseline;gap:8px;padding:8px 0;border-bottom:1px solid var(--hairline);}
+  .mission-row:last-child{border-bottom:none;}
+  .mission-bullet{font-weight:700;color:var(--schedule);flex:none;font-size:13px;}
+  .mission-text{flex:1;outline:none;font-size:13.5px;padding:2px 4px;border-radius:4px;}
+  .mission-text:hover,.mission-text:focus{background:rgba(0,0,0,0.03);}
+  .mission-text:empty:before{content:'e.g. protect my study time before entertainment';color:var(--ink-muted);font-style:italic;}
+
+  .goal-junior-stars{font-size:16px;letter-spacing:2px;margin-top:6px;}
+  .goal-target-date{font-size:11px;color:var(--ink-muted);margin-top:4px;font-weight:600;}
+
+  /* Senior: clean, data-forward. Junior: bigger, badge/achievement-flavored. */
+  .compass-senior .priority-card{padding:14px;}
+  .compass-senior .dream-card{border-radius:8px;}
+  .compass-junior .compass-vision-text{font-size:22px;}
+  .compass-junior .priority-num{font-size:28px;}
+  .compass-junior .priority-card{background:var(--surface);border-width:2px;border-radius:14px;}
+  .compass-junior .dream-card{border-width:2px;border-radius:14px;}
+  .compass-junior .dream-check{width:40px;height:40px;font-size:19px;}
+  .compass-junior .dream-group-header{font-size:18px;}
+
+  .priority-reflect-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .priority-reflect-row .priority-num{flex:none;width:28px;}
+
+  body.kid-mode .compass-vision-text{font-size:22px;}
+  body.kid-mode .priority-num{font-size:26px;}
+  body.kid-mode #compass-toolbar button{font-size:14px;padding:10px 16px;}
+
+  @media (max-width:640px){
+    .priority-grid3{grid-template-columns:1fr;}
+  }
+
   /* ---------- Modal ---------- */
   .scrim{position:fixed;inset:0;background:rgba(50,35,24,0.35);display:flex;align-items:flex-start;justify-content:center;padding:5vh 16px;overflow-y:auto;z-index:100;}
   .modal{background:var(--surface);border-radius:14px;max-width:560px;width:100%;box-shadow:0 20px 60px rgba(50,35,24,0.3);padding:26px;margin:auto;}
@@ -342,6 +393,12 @@
   .attendee-chip .adot{width:8px;height:8px;border-radius:50%;display:inline-block;}
   .check-inline{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink);padding-top:10px;cursor:pointer;}
   .check-inline input{width:16px;height:16px;flex:none;}
+  .time-picker-row{display:flex;align-items:center;gap:6px;}
+  .time-select{border:1.5px solid var(--hairline);border-radius:8px;padding:9px 6px;font-size:13px;outline:none;background:var(--surface);color:var(--ink);}
+  .time-select:focus{border-color:var(--schedule);}
+  #ev-time-hour,#ev-time-minute{width:60px;}
+  #ev-time-ampm{width:66px;}
+  .time-colon{font-weight:700;color:var(--ink-muted);}
   .weekday-picker{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap;}
   .weekday-picker button{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--hairline);background:var(--surface);font-size:12px;font-weight:700;color:var(--ink-muted);flex:none;}
   .weekday-picker button.selected{background:var(--primary-btn);color:#fff;border-color:var(--primary-btn);}
@@ -378,15 +435,16 @@
   .banner button{margin-left:auto;border:none;background:var(--primary-btn);color:#fff;padding:6px 14px;border-radius:var(--radius-pill);font-size:11.5px;font-weight:600;flex:none;}
   .banner .dismiss{background:transparent;color:var(--due-today);border:1px solid currentColor;}
 
-  .family-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
-  .family-row .fam-name{flex:1.2;min-width:0;}
-  .family-row .fam-email{flex:1.6;min-width:0;}
+  .family-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px;}
+  .family-row .fam-name{flex:1.2;min-width:110px;}
+  .family-row .fam-email{flex:1.6;min-width:150px;}
   .family-row .fam-role{flex:none;width:120px;}
+  .family-row .fam-timezone{flex:1.4;min-width:170px;}
   .color-swatch{width:28px;height:28px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1.5px var(--hairline);flex:none;padding:0;}
   .family-row .rm{border:none;background:transparent;color:var(--ink-muted);font-size:14px;flex:none;padding:4px;}
   @media (max-width:480px){
     .family-row{flex-wrap:wrap;}
-    .family-row .fam-name,.family-row .fam-email{flex:1 1 100%;}
+    .family-row .fam-name,.family-row .fam-email,.family-row .fam-timezone{flex:1 1 100%;}
     .family-row .fam-role{flex:1;width:auto;}
   }
 
@@ -419,6 +477,7 @@
           <button data-view="matrix" class="active">Matrix</button>
           <button data-view="calendar">Calendar</button>
           <button data-view="dreams">Dreams</button>
+          <button data-view="compass">Compass</button>
           <button data-view="list">List</button>
           <button data-view="archive">Archive</button>
         </div>
@@ -473,6 +532,19 @@
       </div>
     </div>
 
+    <div class="header-row2 hidden" id="compass-toolbar">
+      <div class="filters-search">
+        <div class="pill-tabs" id="compass-family-tabs"></div>
+        <div class="seg3" id="compass-mode-toggle" style="width:150px;" title="Visual style for this page">
+          <button type="button" data-mode="senior">Senior</button>
+          <button type="button" data-mode="junior">Junior</button>
+        </div>
+      </div>
+      <div class="quick-add" style="justify-content:flex-end;">
+        <button id="add-goal-btn">+ Add Goal…</button>
+      </div>
+    </div>
+
     <div class="stats-row" id="stats-row"></div>
   </header>
 
@@ -499,6 +571,7 @@
   var LS_TASKS = 'eisenhower_tasks_local_v1';
   var LS_CALENDAR = 'eisenhower_calendar_local_v1';
   var LS_DREAMS = 'eisenhower_dreams_local_v1';
+  var LS_COMPASS = 'eisenhower_compass_local_v1';
   var LS_CONFIG = 'eisenhower_gh_config_v1';
   var LS_META = 'eisenhower_meta_v1'; // title/subtitle
 
@@ -527,6 +600,57 @@
     if(h < 24) return h+'h ago';
     var d = Math.floor(h/24);
     return d+'d ago';
+  }
+  function pad2(n){ return (n<10?'0':'')+n; }
+  // 24h 'HH:MM' -> '6:00 PM'. All time-of-day display in the app goes through this -- never
+  // military/24h time, per family preference.
+  function formatTime12(timeStr){
+    if(!timeStr) return '';
+    var parts = timeStr.split(':');
+    var h = parseInt(parts[0],10), m = parts[1] || '00';
+    if(isNaN(h)) return timeStr;
+    var ampm = h >= 12 ? 'PM' : 'AM';
+    var h12 = h % 12; if(h12 === 0) h12 = 12;
+    return h12 + ':' + m + ' ' + ampm;
+  }
+  // Common US timezones a family is likely to be spread across. Kept as a curated list (rather
+  // than the full IANA database) so the Family Settings picker stays simple.
+  var TIMEZONE_OPTIONS = [
+    { value:'America/New_York',    label:'Eastern (New York)' },
+    { value:'America/Chicago',     label:'Central (Chicago)' },
+    { value:'America/Denver',      label:'Mountain (Denver)' },
+    { value:'America/Phoenix',     label:'Mountain, no DST (Phoenix)' },
+    { value:'America/Los_Angeles', label:'Pacific (Los Angeles)' },
+    { value:'America/Anchorage',   label:'Alaska' },
+    { value:'Pacific/Honolulu',    label:'Hawaii' }
+  ];
+  var DEFAULT_TIMEZONE = 'America/Chicago';
+  // How far `timeZone` is ahead of UTC (in minutes) at the moment `instant` represents. Uses the
+  // browser's built-in Intl timezone database, so DST is handled automatically -- no external
+  // timezone library needed.
+  function getTZOffsetMinutes(instant, timeZone){
+    var dtf = new Intl.DateTimeFormat('en-US', {
+      timeZone: timeZone, hourCycle:'h23',
+      year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit'
+    });
+    var parts = dtf.formatToParts(instant).reduce(function(acc,p){ if(p.type!=='literal') acc[p.type]=p.value; return acc; }, {});
+    var asUTC = Date.UTC(+parts.year, +parts.month-1, +parts.day, +parts.hour, +parts.minute, +parts.second);
+    return (asUTC - instant.getTime()) / 60000;
+  }
+  // Converts a naive wall-clock date+time (as typed into the Event modal, meaning "6:00 PM in
+  // whatever the family's home timezone is") into the equivalent wall-clock date+time in a
+  // different viewer's timezone. Pure display conversion -- the stored event is never rewritten.
+  function convertWallClockZone(dateStr, timeStr, fromZone, toZone){
+    if(!dateStr || !timeStr || fromZone === toZone) return { date: dateStr, time: timeStr };
+    var naive = new Date(dateStr+'T'+timeStr+':00Z');
+    var fromOffset = getTZOffsetMinutes(naive, fromZone);
+    var instant = new Date(naive.getTime() - fromOffset*60000);
+    var toOffset = getTZOffsetMinutes(instant, toZone);
+    var zoned = new Date(instant.getTime() + toOffset*60000);
+    return {
+      date: zoned.getUTCFullYear()+'-'+pad2(zoned.getUTCMonth()+1)+'-'+pad2(zoned.getUTCDate()),
+      time: pad2(zoned.getUTCHours())+':'+pad2(zoned.getUTCMinutes())
+    };
   }
   function quadrantOf(task){
     if(task.importance && task.urgency) return 'doFirst';
@@ -575,9 +699,15 @@
     currentUserEmail: null, // filled in from Cloudflare Access identity, if available
 
     // ---- Calendar module ----
-    family: [],           // [{id,name,color,email,role:'adult'|'kid'}]
+    family: [],           // [{id,name,color,email,role:'adult'|'kid',timezone}]
     events: [],           // see EVENT SCHEMA below
     calendarSubscriptions: [], // [{id,ownerFamilyMemberId,name,url,category,enabled,lastSyncedAt,lastError,syncStatus}]
+    // Event times are entered/stored as a naive wall-clock anchored to this zone (e.g. "6:00 PM"
+    // means 6pm here). Each family member can have their own timezone (see family[].timezone) --
+    // when displaying a time to someone in a different zone, it's converted from homeTimezone to
+    // their zone. Editing an event always shows/edits in homeTimezone, so there's never ambiguity
+    // about "whose clock" a typed time means.
+    homeTimezone: DEFAULT_TIMEZONE,
     calSha: null,
     calSubView: 'agenda', // 'agenda' | 'month' | 'week'
     calAnchor: todayStr(),// reference date for month/week/agenda navigation
@@ -588,7 +718,14 @@
     // ---- Vision board module ----
     dreams: [],          // see DREAM SCHEMA below
     dreamSha: null,
-    dreamFilter: null    // which kid's board is showing; resolved to a real kid id on first render
+    dreamFilter: null,   // which kid's board is showing; resolved to a real kid id on first render
+
+    // ---- Compass module (Vision / Mission / Goals / Priorities) ----
+    compassProfiles: [],  // one per kid: {ownerId, mode:'senior'|'junior', vision, mission:[], lastReflectionAt, updatedAt}
+    compassGoals: [],     // see GOAL SCHEMA below
+    compassPriorities: [],// see PRIORITY SCHEMA below
+    compassSha: null,
+    compassFilter: null   // which kid's page is showing; resolved to a real kid id on first render
   };
 
   var pendingNewTaskId = null; // set while the Add Task modal is open for a not-yet-confirmed task
@@ -642,6 +779,33 @@
     other:      { label:'Other',      icon:'⭐', color:'#6d6059' }
   };
   var DREAM_CATEGORY_ORDER = ['adventure','learning','kindness','creativity','sports','other'];
+
+  /*
+    COMPASS SCHEMA (Vision / Mission / Goals / Priorities -- one page per kid, private to them;
+    adults can view any kid's page, same visibility model as the vision board):
+
+    profile: {
+      ownerId: familyMemberId, mode: 'senior'|'junior',
+      vision: '',            // one-sentence "north star"
+      mission: [''],         // 3-4 "I will..." statements
+      lastReflectionAt: null|iso, updatedAt: iso
+    }
+    goal: {
+      id, ownerId, title, category: 'academics'|'personal'|'health'|'relationships'|'other',
+      targetDate: null|'YYYY-MM-DD', steps: [{id,text,done}],
+      achieved: false, achievedAt: null|iso, createdAt: iso
+    }
+    priority: { id, ownerId, text, order: 0|1|2, createdAt: iso }  // capped at 3 active per kid
+  */
+  var GOAL_CATEGORIES = {
+    academics:     { label:'Academics',       icon:'📘', color:'#3b6ea5' },
+    personal:      { label:'Personal Growth', icon:'🌱', color:'#3e8f44' },
+    health:        { label:'Health & Sports', icon:'🏅', color:'#c9922f' },
+    relationships: { label:'Relationships',   icon:'🤝', color:'#b0507e' },
+    other:         { label:'Other',           icon:'⭐', color:'#6d6059' }
+  };
+  var GOAL_CATEGORY_ORDER = ['academics','personal','health','relationships','other'];
+  var REFLECTION_INTERVAL_DAYS = 30;
 
   /* ================= IDENTITY (Cloudflare Access) ================= */
   // Everyone -- including whoever set this app up -- is just an entry in state.family,
@@ -833,7 +997,7 @@
         if(r.notFound){
           state.calSha = null;
           var localCal = loadCalendarLocalOnly();
-          state.family = localCal.family; state.events = localCal.events; state.calendarSubscriptions = localCal.calendarSubscriptions;
+          state.family = localCal.family; state.events = localCal.events; state.calendarSubscriptions = localCal.calendarSubscriptions; state.homeTimezone = localCal.homeTimezone;
           resolveCurrentFamilyMember();
           render();
           saveCalendarToGitHub();
@@ -842,10 +1006,11 @@
         }
         state.calSha = r.data.sha;
         var parsed;
-        try{ parsed = JSON.parse(b64DecodeUnicode(r.data.content)); }catch(e){ parsed = {family:[], events:[], calendarSubscriptions:[]}; }
+        try{ parsed = JSON.parse(b64DecodeUnicode(r.data.content)); }catch(e){ parsed = {family:[], events:[], calendarSubscriptions:[], homeTimezone: DEFAULT_TIMEZONE}; }
         state.family = parsed.family || [];
         state.events = parsed.events || [];
         state.calendarSubscriptions = parsed.calendarSubscriptions || [];
+        state.homeTimezone = parsed.homeTimezone || DEFAULT_TIMEZONE;
         cacheCalendarLocal();
         resolveCurrentFamilyMember();
         render();
@@ -867,7 +1032,7 @@
     }
     var path = cfg.calendarPath || 'family-calendar.json';
     updateSyncStatus('busy');
-    saveGithubFile(cfg, path, state.calSha, {version:1, family: state.family, events: state.events, calendarSubscriptions: state.calendarSubscriptions}, 'Update family-calendar.json via Task Manager app')
+    saveGithubFile(cfg, path, state.calSha, {version:1, family: state.family, events: state.events, calendarSubscriptions: state.calendarSubscriptions, homeTimezone: state.homeTimezone}, 'Update family-calendar.json via Task Manager app')
       .then(function(sha){
         state.calSha = sha;
         cacheCalendarLocal();
@@ -882,15 +1047,15 @@
   function loadCalendarLocalOnly(){
     try{
       var raw = JSON.parse(localStorage.getItem(LS_CALENDAR) || 'null');
-      return { family: (raw && raw.family) || [], events: (raw && raw.events) || [], calendarSubscriptions: (raw && raw.calendarSubscriptions) || [] };
-    }catch(e){ return { family: [], events: [], calendarSubscriptions: [] }; }
+      return { family: (raw && raw.family) || [], events: (raw && raw.events) || [], calendarSubscriptions: (raw && raw.calendarSubscriptions) || [], homeTimezone: (raw && raw.homeTimezone) || DEFAULT_TIMEZONE };
+    }catch(e){ return { family: [], events: [], calendarSubscriptions: [], homeTimezone: DEFAULT_TIMEZONE }; }
   }
   function loadCalendarLocal(){
     var c = loadCalendarLocalOnly();
-    state.family = c.family; state.events = c.events; state.calendarSubscriptions = c.calendarSubscriptions;
+    state.family = c.family; state.events = c.events; state.calendarSubscriptions = c.calendarSubscriptions; state.homeTimezone = c.homeTimezone;
   }
   function cacheCalendarLocal(){
-    localStorage.setItem(LS_CALENDAR, JSON.stringify({family: state.family, events: state.events, calendarSubscriptions: state.calendarSubscriptions}));
+    localStorage.setItem(LS_CALENDAR, JSON.stringify({family: state.family, events: state.events, calendarSubscriptions: state.calendarSubscriptions, homeTimezone: state.homeTimezone}));
   }
   function persistCalendar(){
     saveCalendarToGitHub();
@@ -960,6 +1125,78 @@
   }
   function persistDreams(){
     saveDreamsToGitHub();
+  }
+
+  /* ---- Compass file ---- */
+  function loadCompassFromGitHub(){
+    var cfg = getConfig();
+    if(!cfg || !cfg.owner || !cfg.repo || !cfg.token){
+      loadCompassLocal();
+      render();
+      return;
+    }
+    var path = cfg.compassPath || 'compass.json';
+    loadGithubFile(cfg, path)
+      .then(function(r){
+        if(r.notFound){
+          state.compassSha = null;
+          var local = loadCompassLocalOnly();
+          state.compassProfiles = local.profiles; state.compassGoals = local.goals; state.compassPriorities = local.priorities;
+          render();
+          saveCompassToGitHub();
+          return;
+        }
+        state.compassSha = r.data.sha;
+        var parsed;
+        try{ parsed = JSON.parse(b64DecodeUnicode(r.data.content)); }catch(e){ parsed = {profiles:[], goals:[], priorities:[]}; }
+        state.compassProfiles = parsed.profiles || [];
+        state.compassGoals = parsed.goals || [];
+        state.compassPriorities = parsed.priorities || [];
+        cacheCompassLocal();
+        render();
+      })
+      .catch(function(err){
+        console.error(err);
+        loadCompassLocal();
+        render();
+      });
+  }
+
+  var saveCompassToGitHub = debounce(function(){
+    var cfg = getConfig();
+    if(!cfg || !cfg.owner || !cfg.repo || !cfg.token){
+      cacheCompassLocal();
+      return;
+    }
+    var path = cfg.compassPath || 'compass.json';
+    updateSyncStatus('busy');
+    saveGithubFile(cfg, path, state.compassSha, {version:1, profiles: state.compassProfiles, goals: state.compassGoals, priorities: state.compassPriorities}, 'Update compass.json via Task Manager app')
+      .then(function(sha){
+        state.compassSha = sha;
+        cacheCompassLocal();
+        updateSyncStatus('ok');
+      }).catch(function(err){
+        console.error(err);
+        cacheCompassLocal();
+        updateSyncStatus('err');
+      });
+  }, 1200);
+
+  function loadCompassLocalOnly(){
+    try{
+      var raw = JSON.parse(localStorage.getItem(LS_COMPASS) || 'null');
+      return { profiles: (raw && raw.profiles) || [], goals: (raw && raw.goals) || [], priorities: (raw && raw.priorities) || [] };
+    }catch(e){ return { profiles: [], goals: [], priorities: [] }; }
+  }
+  function loadCompassLocal(){
+    var c = loadCompassLocalOnly();
+    state.compassProfiles = c.profiles; state.compassGoals = c.goals; state.compassPriorities = c.priorities;
+  }
+  function cacheCompassLocal(){
+    localStorage.setItem(LS_COMPASS, JSON.stringify({profiles: state.compassProfiles, goals: state.compassGoals, priorities: state.compassPriorities}));
+  }
+  function persistCompass(){
+    saveCompassToGitHub();
   }
 
   function updateSyncStatus(s){
@@ -1224,6 +1461,20 @@
     return true;
   }
 
+  // Formats an occurrence's time-of-day for display, converted from the family's home timezone
+  // into the CURRENT VIEWER's own timezone (if they've set a different one in Family Settings).
+  // Imported (ICS) events are formatted but not zone-converted -- we don't reliably know what zone
+  // they were parsed in, so we show their time-of-day as-is rather than guess and get it wrong.
+  function displayEventTime(occ){
+    if(occ.allDay || !occ.time) return 'All day';
+    if(occ.source === 'ics') return formatTime12(occ.time);
+    var home = state.homeTimezone || DEFAULT_TIMEZONE;
+    var viewerZone = (state.currentFamilyMember && state.currentFamilyMember.timezone) || home;
+    if(viewerZone === home) return formatTime12(occ.time);
+    var converted = convertWallClockZone(occ.occurrenceDate, occ.time, home, viewerZone);
+    return formatTime12(converted.time);
+  }
+
   function attendeeAvatarsHtml(occ){
     var att = occ.attendees || ['all'];
     var members = (att.indexOf('all') !== -1) ? state.family.slice(0,4) : att.map(familyMember).filter(Boolean);
@@ -1284,7 +1535,7 @@
         + '</div>';
     }
     var cat = categoryOf(occ);
-    var timeLabel = occ.allDay ? 'All day' : (occ.time||'');
+    var timeLabel = displayEventTime(occ);
     var loc = occ.location ? ' · '+escapeHtml(occ.location) : '';
     var importedMark = occ.source === 'ics' ? '📥 ' : '';
     return '<div class="agenda-card" style="border-left-color:'+cat.color+'" data-occ="'+occ.occurrenceId+'">'
@@ -1507,10 +1758,12 @@
   function toggleToolbars(){
     var isCal = state.view === 'calendar';
     var isDreams = state.view === 'dreams';
-    var isTaskView = !isCal && !isDreams;
+    var isCompass = state.view === 'compass';
+    var isTaskView = !isCal && !isDreams && !isCompass;
     document.getElementById('task-toolbar').classList.toggle('hidden', !isTaskView);
     document.getElementById('calendar-toolbar').classList.toggle('hidden', !isCal);
     document.getElementById('dream-toolbar').classList.toggle('hidden', !isDreams);
+    document.getElementById('compass-toolbar').classList.toggle('hidden', !isCompass);
     document.getElementById('stats-row').classList.toggle('hidden', !isTaskView);
     document.body.classList.toggle('kid-mode', isKidMode()); // applies app-wide, not just on the calendar tab
     document.getElementById('open-family-settings').classList.toggle('hidden', isKidMode()); // roster management is adults-only
@@ -1524,6 +1777,10 @@
     }
     if(state.view === 'dreams'){
       renderDreams();
+      return;
+    }
+    if(state.view === 'compass'){
+      renderCompass();
       return;
     }
     renderStats();
@@ -2095,7 +2352,7 @@
     var cat = categoryOf(sourceEvent);
     var sub = findSubscription(sourceEvent.subscriptionId);
     var owner = familyMember(sourceEvent.createdBy);
-    var whenLabel = sourceEvent.allDay ? fmtLong(occ.occurrenceDate) : (fmtLong(occ.occurrenceDate) + ' at ' + (sourceEvent.time||''));
+    var whenLabel = sourceEvent.allDay ? fmtLong(occ.occurrenceDate) : (fmtLong(occ.occurrenceDate) + ' at ' + formatTime12(sourceEvent.time));
     var syncedLabel = sub && sub.lastSyncedAt ? ('Synced '+fmtRelative(sub.lastSyncedAt)) : 'Not synced yet';
     var canManage = sub && state.currentFamilyMember && state.currentFamilyMember.id === sub.ownerFamilyMemberId;
 
@@ -2186,6 +2443,31 @@
 
       var scopeNote = needsScope ? '<div class="settings-help" style="margin-top:0;margin-bottom:14px;">Editing '+fmtLong(occ.occurrenceDate)+'. You\'ll be asked whether changes apply to just this event or the whole series when you tap Save.</div>' : '';
 
+      // Custom 12-hour picker instead of a native <input type="time"> -- native time inputs render
+      // in whatever format the OS/browser locale prefers, which can silently show 24h (military)
+      // time on some setups. This guarantees AM/PM everywhere, regardless of device.
+      var timeForPicker = draft.time || '09:00';
+      var tParts = timeForPicker.split(':');
+      var tH24 = parseInt(tParts[0],10); if(isNaN(tH24)) tH24 = 9;
+      var tM = tParts[1] || '00';
+      var tH12 = tH24 % 12; if(tH12 === 0) tH12 = 12;
+      var tAmPm = tH24 >= 12 ? 'PM' : 'AM';
+      var hourOptionsHtml = [12,1,2,3,4,5,6,7,8,9,10,11].map(function(h){
+        return '<option value="'+h+'"'+(h===tH12?' selected':'')+'>'+h+'</option>';
+      }).join('');
+      var minuteOptionsHtml = '';
+      for(var mi=0; mi<60; mi++){
+        var mstr = pad2(mi);
+        minuteOptionsHtml += '<option value="'+mstr+'"'+(mstr===tM?' selected':'')+'>'+mstr+'</option>';
+      }
+      var ampmOptionsHtml = ['AM','PM'].map(function(a){ return '<option value="'+a+'"'+(a===tAmPm?' selected':'')+'>'+a+'</option>'; }).join('');
+      var timePickerHtml = '<div class="time-picker-row">'
+        + '<select class="time-select" id="ev-time-hour">'+hourOptionsHtml+'</select>'
+        + '<span class="time-colon">:</span>'
+        + '<select class="time-select" id="ev-time-minute">'+minuteOptionsHtml+'</select>'
+        + '<select class="time-select" id="ev-time-ampm">'+ampmOptionsHtml+'</select>'
+        + '</div>';
+
       var html = ''
         + '<div class="scrim" id="scrim">'
         + '<div class="modal">'
@@ -2199,7 +2481,7 @@
         + '</div>'
         + '<div class="row-2">'
         + '<div><label class="check-inline"><input type="checkbox" id="ev-allday" '+(draft.allDay?'checked':'')+'> All day</label></div>'
-        + '<div id="ev-time-wrap" style="'+(draft.allDay?'display:none;':'')+'"><div class="field-label" style="margin-top:0;">Time</div><input type="time" id="ev-time" value="'+(draft.time||'')+'"></div>'
+        + '<div id="ev-time-wrap" style="'+(draft.allDay?'display:none;':'')+'"><div class="field-label" style="margin-top:0;">Time</div>'+timePickerHtml+'</div>'
         + '</div>'
         + '<div class="field-label">Location</div><input class="text-input" id="ev-location" placeholder="Optional" value="'+escapeHtml(draft.location||'')+'">'
         + '<div class="field-label">Repeat</div>'
@@ -2235,11 +2517,22 @@
       document.getElementById('ev-notes').addEventListener('input', function(e){ draft.notes = e.target.value; });
       document.getElementById('ev-date').addEventListener('change', function(e){ draft.date = e.target.value; });
       document.getElementById('ev-end-date').addEventListener('change', function(e){ draft.endDate = e.target.value || null; });
-      document.getElementById('ev-time').addEventListener('change', function(e){ draft.time = e.target.value || null; });
+
+      function commitTimePicker(){
+        var h12 = parseInt(document.getElementById('ev-time-hour').value,10);
+        var m = document.getElementById('ev-time-minute').value;
+        var ampm = document.getElementById('ev-time-ampm').value;
+        var h24 = h12 % 12; if(ampm === 'PM') h24 += 12;
+        draft.time = pad2(h24) + ':' + m;
+      }
+      document.getElementById('ev-time-hour').addEventListener('change', commitTimePicker);
+      document.getElementById('ev-time-minute').addEventListener('change', commitTimePicker);
+      document.getElementById('ev-time-ampm').addEventListener('change', commitTimePicker);
 
       document.getElementById('ev-allday').addEventListener('change', function(e){
         draft.allDay = e.target.checked;
         if(draft.allDay) draft.time = null;
+        else if(!draft.time) draft.time = '09:00'; // keep draft.time in sync with what the picker will show
         renderEventModal();
       });
 
@@ -2587,6 +2880,481 @@
     renderDreamForm();
   }
 
+  /* ================= COMPASS (Vision / Mission / Goals / Priorities) ================= */
+  // Same per-kid privacy model as the vision board: one page per kid, adults can browse any kid's
+  // page via the toolbar tabs, kids are locked to their own. Vision/Mission/Priorities save inline
+  // as you type/blur (like the app title); Goals get a full Save/Cancel modal since they carry more
+  // fields (category, target date, a steps checklist).
+
+  function compassProfileFor(ownerId){
+    return state.compassProfiles.find(function(p){ return p.ownerId === ownerId; });
+  }
+  function ensureCompassProfile(ownerId){
+    var p = compassProfileFor(ownerId);
+    if(!p){
+      p = { ownerId: ownerId, mode:'junior', vision:'', mission:[], lastReflectionAt:null, updatedAt: nowISO() };
+      state.compassProfiles.push(p);
+    }
+    return p;
+  }
+  function compassGoalsFor(ownerId){
+    return state.compassGoals.filter(function(g){ return g.ownerId === ownerId; });
+  }
+  function compassPrioritiesFor(ownerId){
+    return state.compassPriorities.filter(function(p){ return p.ownerId === ownerId; })
+      .sort(function(a,b){ return a.order - b.order; });
+  }
+  function goalStepsProgress(g){
+    var steps = g.steps || [];
+    var done = steps.filter(function(s){ return s.done; }).length;
+    return { done: done, total: steps.length };
+  }
+  function needsReflection(profile){
+    if(!profile) return false;
+    if(!profile.lastReflectionAt) return true;
+    var diffDays = (Date.now() - new Date(profile.lastReflectionAt).getTime()) / 86400000;
+    return diffDays >= REFLECTION_INTERVAL_DAYS;
+  }
+  function reflowPriorityOrder(ownerId){
+    compassPrioritiesFor(ownerId).forEach(function(p,i){ p.order = i; });
+  }
+  function toggleGoalAchieved(id){
+    var g = state.compassGoals.find(function(x){ return x.id === id; });
+    if(!g) return;
+    g.achieved = !g.achieved;
+    g.achievedAt = g.achieved ? nowISO() : null;
+    persistCompass();
+    render();
+  }
+
+  function goalCardHtml(g, mode){
+    var cat = GOAL_CATEGORIES[g.category] || GOAL_CATEGORIES.other;
+    var prog = goalStepsProgress(g);
+    var achieved = !!g.achieved;
+    var progressHtml;
+    if(mode === 'junior'){
+      var starCount = 5;
+      var filled = prog.total ? Math.round((prog.done/prog.total)*starCount) : 0;
+      var stars = '';
+      for(var i=0;i<starCount;i++) stars += (i<filled ? '⭐' : '☆');
+      progressHtml = prog.total ? '<div class="goal-junior-stars">'+stars+'</div>' : '';
+    } else {
+      var pct = prog.total ? Math.round(100*prog.done/prog.total) : 0;
+      progressHtml = (prog.total ? '<div class="dream-progress"><div class="dream-progress-bar"><div class="dream-progress-fill" style="width:'+pct+'%;background:'+cat.color+'"></div></div><span class="dream-progress-label">'+prog.done+'/'+prog.total+'</span></div>' : '')
+        + (g.targetDate ? '<div class="goal-target-date">Due '+fmtDate(g.targetDate)+'</div>' : '');
+    }
+    var icon = achieved ? (mode==='junior' ? '🏆' : '✅') : cat.icon;
+    return '<div class="dream-card goal-card'+(achieved?' achieved':'')+'" style="border-left-color:'+cat.color+'" data-id="'+g.id+'">'
+      + '<button type="button" class="dream-check" data-action="goal-toggle-achieved" data-id="'+g.id+'" title="'+(achieved?'Mark not achieved yet':'Mark achieved!')+'">'+icon+'</button>'
+      + '<div class="dream-body">'
+      + '<div class="dream-title'+(achieved?' done':'')+'">'+escapeHtml(g.title)+'</div>'
+      + progressHtml
+      + '</div>'
+      + '</div>';
+  }
+
+  function renderPrioritiesSpotlight(ownerId, priorities){
+    var slots = [0,1,2].map(function(i){
+      var p = priorities[i];
+      if(p){
+        return '<div class="priority-card" data-id="'+p.id+'">'
+          + '<div class="priority-num">'+(i+1)+'</div>'
+          + '<div class="priority-text" contenteditable="true" data-id="'+p.id+'">'+escapeHtml(p.text)+'</div>'
+          + '<button type="button" class="rm" data-action="rm-priority" data-id="'+p.id+'" title="Remove">✕ Remove</button>'
+          + '</div>';
+      }
+      return '<button type="button" class="priority-card priority-add" data-action="add-priority">'
+        + '<div class="priority-num">'+(i+1)+'</div>'
+        + '<div class="priority-add-label">+ Add a priority</div>'
+        + '</button>';
+    }).join('');
+    return '<div class="compass-section priority-spotlight">'
+      + '<div class="field-label" style="margin-top:0;">Top 3 Priorities Right Now</div>'
+      + '<div class="priority-grid3">'+slots+'</div>'
+      + '</div>';
+  }
+
+  function renderVisionSection(profile){
+    var placeholder = 'Click to set your vision — who do you want to be?';
+    return '<div class="compass-section">'
+      + '<div class="field-label" style="margin-top:0;">Vision <span class="compass-hint">— your north star</span></div>'
+      + '<div class="compass-vision-text" id="compass-vision" contenteditable="true" data-placeholder="'+escapeHtml(placeholder)+'">'+escapeHtml((profile&&profile.vision)||'')+'</div>'
+      + '</div>';
+  }
+
+  function renderMissionSection(profile){
+    var mission = (profile && profile.mission) || [];
+    var rows = mission.map(function(text, i){
+      return '<div class="mission-row" data-idx="'+i+'">'
+        + '<span class="mission-bullet">I will</span>'
+        + '<span class="mission-text" contenteditable="true" data-idx="'+i+'">'+escapeHtml(text)+'</span>'
+        + '<button type="button" class="rm" data-action="rm-mission" data-idx="'+i+'" title="Remove">✕</button>'
+        + '</div>';
+    }).join('');
+    return '<div class="compass-section">'
+      + '<div class="field-label">Mission <span class="compass-hint">— how you show up every day</span></div>'
+      + '<div id="compass-mission-list">'+rows+(mission.length ? '' : '<div class="dream-empty-state" style="padding:16px;">No mission statements yet.</div>')+'</div>'
+      + (mission.length < 6 ? '<button type="button" class="btn-sm" id="compass-add-mission">+ Add a mission statement</button>' : '')
+      + '</div>';
+  }
+
+  function renderGoalsSection(goals, mode){
+    var byCat = {};
+    goals.forEach(function(g){ (byCat[g.category] = byCat[g.category]||[]).push(g); });
+    var groups = GOAL_CATEGORY_ORDER.map(function(key){
+      var list = byCat[key] || [];
+      if(!list.length) return '';
+      var cat = GOAL_CATEGORIES[key];
+      return '<div class="dream-group">'
+        + '<div class="dream-group-header" style="border-color:'+cat.color+'"><span>'+cat.icon+'</span><span>'+escapeHtml(cat.label)+'</span></div>'
+        + '<div class="dream-cards">'+list.map(function(g){ return goalCardHtml(g, mode); }).join('')+'</div>'
+        + '</div>';
+    }).join('');
+    return '<div class="compass-section">'
+      + '<div class="field-label">Goals This Season</div>'
+      + (goals.length ? groups : '<div class="dream-empty-state">No goals yet — tap “+ Add Goal…” to set the first one!</div>')
+      + '</div>';
+  }
+
+  function renderCompassToolbar(){
+    var tabs = document.getElementById('compass-family-tabs');
+    var kids = state.family.filter(function(m){ return m.role === 'kid'; });
+    var locked = lockedPersonId();
+    if(locked){
+      state.compassFilter = locked;
+    } else if(!state.compassFilter || !kids.some(function(k){ return k.id === state.compassFilter; })){
+      state.compassFilter = kids.length ? kids[0].id : null;
+    }
+
+    if(locked || !kids.length){
+      tabs.innerHTML = '';
+      tabs.classList.add('hidden');
+    } else {
+      tabs.classList.remove('hidden');
+      tabs.innerHTML = kids.map(function(m){
+        return '<button data-fam="'+m.id+'" class="'+(state.compassFilter===m.id?'active':'')+'">'+escapeHtml(m.name)+'</button>';
+      }).join('');
+      tabs.querySelectorAll('button').forEach(function(b){
+        b.addEventListener('click', function(){ state.compassFilter = b.dataset.fam; render(); });
+      });
+    }
+
+    var modeToggle = document.getElementById('compass-mode-toggle');
+    if(!state.compassFilter){
+      modeToggle.classList.add('hidden');
+      return;
+    }
+    modeToggle.classList.remove('hidden');
+    var profile = compassProfileFor(state.compassFilter);
+    var mode = (profile && profile.mode) || 'junior';
+    modeToggle.querySelectorAll('button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.mode === mode);
+    });
+  }
+
+  function renderCompass(){
+    renderCompassToolbar();
+    var kids = state.family.filter(function(m){ return m.role === 'kid'; });
+
+    if(!kids.length){
+      document.getElementById('view-root').innerHTML = '<div class="compass-wrap"><div class="dream-empty-state">No kids set up yet. Add one in <a href="#" id="compass-goto-family">Family Settings</a> to start their Compass page.</div></div>';
+      var gotoBtn = document.getElementById('compass-goto-family');
+      if(gotoBtn) gotoBtn.addEventListener('click', function(e){ e.preventDefault(); openFamilySettingsModal(); });
+      return;
+    }
+
+    var ownerId = state.compassFilter;
+    var owner = familyMember(ownerId);
+    var profile = compassProfileFor(ownerId) || { ownerId: ownerId, mode:'junior', vision:'', mission:[], lastReflectionAt:null };
+    var mode = profile.mode || 'junior';
+    var priorities = compassPrioritiesFor(ownerId);
+    var goals = compassGoalsFor(ownerId);
+
+    var html = '<div class="compass-wrap compass-'+mode+'">'
+      + '<div class="dream-board-title">'+(owner?escapeHtml(owner.name)+'’s Compass':'Compass')+'</div>'
+      + (needsReflection(profile)
+          ? '<div class="compass-reflection-banner"><div><strong>Time for a check-in?</strong> It\'s been a while since '+(owner?escapeHtml(owner.name):'this page')+' updated the Top 3 priorities.</div><button type="button" class="btn-sm" id="compass-start-reflection">Start Reflection</button></div>'
+          : '')
+      + renderPrioritiesSpotlight(ownerId, priorities)
+      + renderVisionSection(profile)
+      + renderMissionSection(profile)
+      + renderGoalsSection(goals, mode)
+      + '</div>';
+
+    document.getElementById('view-root').innerHTML = html;
+    wireCompassPage(ownerId);
+  }
+
+  function wireCompassPage(ownerId){
+    var root = document.getElementById('view-root');
+
+    var reflectBtn = document.getElementById('compass-start-reflection');
+    if(reflectBtn) reflectBtn.addEventListener('click', function(){ openReflectionModal(ownerId); });
+
+    root.querySelectorAll('.priority-text').forEach(function(el){
+      el.addEventListener('blur', function(){
+        var p = state.compassPriorities.find(function(x){ return x.id === el.dataset.id; });
+        if(p){ p.text = el.textContent.trim(); persistCompass(); }
+      });
+    });
+    root.querySelectorAll('[data-action="rm-priority"]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        state.compassPriorities = state.compassPriorities.filter(function(p){ return p.id !== btn.dataset.id; });
+        reflowPriorityOrder(ownerId);
+        persistCompass();
+        render();
+      });
+    });
+    var addPriorityBtn = root.querySelector('[data-action="add-priority"]');
+    if(addPriorityBtn) addPriorityBtn.addEventListener('click', function(){
+      var mine = compassPrioritiesFor(ownerId);
+      if(mine.length >= 3) return;
+      state.compassPriorities.push({ id: uid(), ownerId: ownerId, text:'', order: mine.length, createdAt: nowISO() });
+      persistCompass();
+      render();
+      var el = root ? null : null; // no-op placeholder; focusing after full re-render is handled below
+      setTimeout(function(){
+        var last = document.querySelectorAll('.priority-text');
+        if(last.length) last[last.length-1].focus();
+      }, 0);
+    });
+
+    var visionEl = document.getElementById('compass-vision');
+    if(visionEl) visionEl.addEventListener('blur', function(){
+      var p = ensureCompassProfile(ownerId);
+      p.vision = visionEl.textContent.trim();
+      p.updatedAt = nowISO();
+      persistCompass();
+    });
+
+    root.querySelectorAll('.mission-text').forEach(function(el){
+      el.addEventListener('blur', function(){
+        var p = ensureCompassProfile(ownerId);
+        var i = parseInt(el.dataset.idx,10);
+        if(p.mission[i] !== undefined){ p.mission[i] = el.textContent.trim(); p.updatedAt = nowISO(); persistCompass(); }
+      });
+    });
+    root.querySelectorAll('[data-action="rm-mission"]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var p = ensureCompassProfile(ownerId);
+        p.mission.splice(parseInt(btn.dataset.idx,10),1);
+        p.updatedAt = nowISO();
+        persistCompass();
+        render();
+      });
+    });
+    var addMissionBtn = document.getElementById('compass-add-mission');
+    if(addMissionBtn) addMissionBtn.addEventListener('click', function(){
+      var p = ensureCompassProfile(ownerId);
+      p.mission = p.mission || [];
+      p.mission.push('');
+      p.updatedAt = nowISO();
+      persistCompass();
+      render();
+      setTimeout(function(){
+        var rows = document.querySelectorAll('.mission-text');
+        if(rows.length) rows[rows.length-1].focus();
+      }, 0);
+    });
+
+    root.querySelectorAll('.goal-card').forEach(function(card){
+      card.addEventListener('click', function(e){
+        if(e.target.closest('[data-action]')) return;
+        openGoalModal(card.dataset.id);
+      });
+    });
+    root.querySelectorAll('[data-action="goal-toggle-achieved"]').forEach(function(btn){
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        toggleGoalAchieved(btn.dataset.id);
+      });
+    });
+  }
+
+  function openAddGoalModal(){
+    var kids = state.family.filter(function(m){ return m.role === 'kid'; });
+    if(!kids.length){ openFamilySettingsModal(); return; }
+    var ownerId = state.compassFilter && kids.some(function(k){ return k.id === state.compassFilter; }) ? state.compassFilter : kids[0].id;
+    var base = {
+      id: uid(), ownerId: ownerId, title:'', category:'academics',
+      targetDate: null, steps: [], achieved:false, achievedAt:null, createdAt: nowISO()
+    };
+    openGoalModal({ isNew:true, draftBase: base });
+  }
+
+  function openGoalModal(refOrId){
+    var isNew = typeof refOrId === 'object' && refOrId && refOrId.isNew;
+    var sourceGoal = isNew ? refOrId.draftBase : state.compassGoals.find(function(g){ return g.id === refOrId; });
+    if(!sourceGoal) return;
+
+    var draft = Object.assign({}, sourceGoal);
+    draft.steps = (sourceGoal.steps || []).map(function(s){ return Object.assign({}, s); });
+
+    function renderGoalForm(){
+      var catButtons = GOAL_CATEGORY_ORDER.map(function(key){
+        var c = GOAL_CATEGORIES[key];
+        return '<button type="button" class="cat-btn'+(draft.category===key?' selected':'')+'" data-cat="'+key+'">'+c.icon+' '+c.label+'</button>';
+      }).join('');
+
+      var stepsHtml = (draft.steps||[]).map(function(s){
+        return '<div class="subtask-row" data-id="'+s.id+'">'
+          + '<input type="checkbox" '+(s.done?'checked':'')+' data-action="st-toggle">'
+          + '<span class="st-text'+(s.done?' done':'')+'">'+escapeHtml(s.text)+'</span>'
+          + '<button class="rm" data-action="st-remove">✕</button></div>';
+      }).join('');
+
+      var html = ''
+        + '<div class="scrim" id="scrim">'
+        + '<div class="modal">'
+        + '<input class="modal-title-input" id="gl-title" placeholder="What\'s the goal?" value="'+escapeHtml(draft.title)+'">'
+        + '<div class="field-label" style="margin-top:0;">Category</div><div class="category-grid">'+catButtons+'</div>'
+        + '<div class="field-label">Target date (optional)</div><input type="date" id="gl-target" value="'+(draft.targetDate||'')+'">'
+        + '<div class="field-label">Steps to get there (optional)</div><div id="gl-steps">'+stepsHtml+'</div>'
+        + '<input class="dashed-input" id="gl-step-input" placeholder="Add a step, press Enter">'
+        + '<div class="field-label">Status</div><button type="button" class="status-toggle'+(draft.achieved?' complete':'')+'" id="gl-achieved">'+(draft.achieved?'🎉 Achieved!':'☐ Not yet achieved')+'</button>'
+        + '<div class="modal-footer">'
+        + (isNew ? '<span></span>' : '<button class="btn-delete" id="gl-delete">Delete goal</button>')
+        + '<div style="display:flex;gap:10px;">'
+        + '<button class="btn-sm" id="gl-cancel">Cancel</button>'
+        + '<button class="btn-close" id="gl-save">Save</button>'
+        + '</div>'
+        + '</div>'
+        + '</div></div>';
+
+      document.getElementById('modal-root').innerHTML = html;
+      if(isNew) document.getElementById('gl-title').focus();
+
+      document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id==='scrim') doCancel(); });
+      document.getElementById('gl-cancel').addEventListener('click', doCancel);
+      document.getElementById('gl-save').addEventListener('click', commit);
+
+      document.getElementById('gl-title').addEventListener('input', function(e){ draft.title = e.target.value; });
+      document.getElementById('gl-target').addEventListener('change', function(e){ draft.targetDate = e.target.value || null; });
+
+      document.querySelectorAll('.cat-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){ draft.category = btn.dataset.cat; renderGoalForm(); });
+      });
+
+      document.getElementById('gl-achieved').addEventListener('click', function(){
+        draft.achieved = !draft.achieved;
+        draft.achievedAt = draft.achieved ? nowISO() : null;
+        renderGoalForm();
+      });
+
+      document.querySelectorAll('#gl-steps [data-action="st-toggle"]').forEach(function(cb){
+        cb.addEventListener('change', function(){
+          var row = cb.closest('.subtask-row');
+          var s = draft.steps.find(function(x){ return x.id === row.dataset.id; });
+          if(s) s.done = cb.checked;
+          renderGoalForm();
+        });
+      });
+      document.querySelectorAll('#gl-steps [data-action="st-remove"]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var row = btn.closest('.subtask-row');
+          draft.steps = draft.steps.filter(function(x){ return x.id !== row.dataset.id; });
+          renderGoalForm();
+        });
+      });
+      document.getElementById('gl-step-input').addEventListener('keydown', function(e){
+        if(e.key === 'Enter' && e.target.value.trim()){
+          draft.steps.push({ id: uid(), text: e.target.value.trim(), done:false });
+          renderGoalForm();
+        }
+      });
+
+      var delBtn = document.getElementById('gl-delete');
+      if(delBtn) delBtn.addEventListener('click', function(){
+        closeDom();
+        state.compassGoals = state.compassGoals.filter(function(g){ return g.id !== sourceGoal.id; });
+        persistCompass();
+        render();
+      });
+    }
+
+    function closeDom(){ document.getElementById('modal-root').innerHTML = ''; }
+    function doCancel(){ closeDom(); render(); }
+
+    function commit(){
+      var titleTrim = (draft.title||'').trim();
+      if(isNew && !titleTrim){ closeDom(); render(); return; }
+      var fields = {
+        title: titleTrim || sourceGoal.title,
+        category: draft.category,
+        targetDate: draft.targetDate || null,
+        steps: (draft.steps||[]).map(function(s){ return Object.assign({}, s); }),
+        achieved: draft.achieved, achievedAt: draft.achievedAt
+      };
+      if(isNew){
+        state.compassGoals.push(Object.assign({}, sourceGoal, fields));
+      } else {
+        Object.assign(sourceGoal, fields);
+      }
+      persistCompass();
+      closeDom();
+      render();
+    }
+
+    renderGoalForm();
+  }
+
+  function openReflectionModal(ownerId){
+    var mine = compassPrioritiesFor(ownerId);
+    var draft = mine.map(function(p){ return Object.assign({}, p); });
+    while(draft.length < 3) draft.push(null);
+
+    function renderReflectionForm(){
+      var rows = draft.map(function(p, i){
+        var val = p ? escapeHtml(p.text) : '';
+        return '<div class="priority-reflect-row">'
+          + '<div class="priority-num">'+(i+1)+'</div>'
+          + '<input class="text-input" data-idx="'+i+'" value="'+val+'" placeholder="A priority for the next few weeks">'
+          + '</div>';
+      }).join('');
+
+      var html = ''
+        + '<div class="scrim" id="scrim">'
+        + '<div class="modal">'
+        + '<div class="field-label" style="margin-top:0;">Monthly Check-in</div>'
+        + '<div class="settings-help" style="margin-top:0;">Reset your Top 3 priorities — keep what still matters, swap out what\'s done or changed. Vision and Mission stay untouched; this is just about right now.</div>'
+        + '<div id="reflect-rows">'+rows+'</div>'
+        + '<div class="modal-footer">'
+        + '<span></span>'
+        + '<div style="display:flex;gap:10px;">'
+        + '<button class="btn-sm" id="reflect-cancel">Cancel</button>'
+        + '<button class="btn-close" id="reflect-save">Save & Done</button>'
+        + '</div>'
+        + '</div>'
+        + '</div></div>';
+
+      document.getElementById('modal-root').innerHTML = html;
+
+      document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id==='scrim') closeDom(); });
+      document.getElementById('reflect-cancel').addEventListener('click', closeDom);
+      document.querySelectorAll('#reflect-rows input').forEach(function(inp){
+        inp.addEventListener('input', function(){
+          var i = parseInt(inp.dataset.idx,10);
+          if(!draft[i]) draft[i] = { id: uid(), ownerId: ownerId, order: i, createdAt: nowISO() };
+          draft[i].text = inp.value;
+        });
+      });
+      document.getElementById('reflect-save').addEventListener('click', function(){
+        var kept = draft.filter(function(p){ return p && p.text && p.text.trim(); }).map(function(p,i){
+          p.text = p.text.trim(); p.order = i; return p;
+        });
+        state.compassPriorities = state.compassPriorities.filter(function(p){ return p.ownerId !== ownerId; }).concat(kept);
+        var profile = ensureCompassProfile(ownerId);
+        profile.lastReflectionAt = nowISO();
+        persistCompass();
+        closeDom();
+        render();
+      });
+    }
+
+    function closeDom(){ document.getElementById('modal-root').innerHTML = ''; }
+    renderReflectionForm();
+  }
+
   /* ================= CALENDAR: ICS IMPORT ================= */
   var ICS_DOW = {SU:0,MO:1,TU:2,WE:3,TH:4,FR:5,SA:6};
 
@@ -2839,7 +3607,7 @@
 
   /* ================= SETTINGS MODAL ================= */
   function openSettingsModal(){
-    var cfg = getConfig() || {owner:'',repo:'',path:'tasks.json',calendarPath:'family-calendar.json',dreamsPath:'vision-board.json',branch:'main',token:''};
+    var cfg = getConfig() || {owner:'',repo:'',path:'tasks.json',calendarPath:'family-calendar.json',dreamsPath:'vision-board.json',compassPath:'compass.json',branch:'main',token:''};
     var html = ''
       + '<div class="scrim" id="scrim">'
       + '<div class="modal">'
@@ -2852,6 +3620,7 @@
       + '<div class="settings-field"><label>Calendar file path</label><input class="text-input" id="s-cal-path" value="'+escapeHtml(cfg.calendarPath||'family-calendar.json')+'"></div>'
       + '</div>'
       + '<div class="settings-field"><label>Vision board file path</label><input class="text-input" id="s-dreams-path" value="'+escapeHtml(cfg.dreamsPath||'vision-board.json')+'"></div>'
+      + '<div class="settings-field"><label>Compass file path</label><input class="text-input" id="s-compass-path" value="'+escapeHtml(cfg.compassPath||'compass.json')+'"></div>'
       + '<div class="settings-field"><label>Personal access token</label><input class="text-input" type="password" id="s-token" value="'+escapeHtml(cfg.token)+'" placeholder="fine-grained PAT, Contents: read & write"></div>'
       + '<div class="settings-help">Create a fine-grained token at github.com → Settings → Developer settings → Personal access tokens, scoped to just this repo with <strong>Contents: Read and write</strong> permission. It is stored only in this browser, never committed to the repo. Everyone in the family needs to enter their own token here on their own device.</div>'
       + '<div class="settings-actions">'
@@ -2880,6 +3649,7 @@
         path: document.getElementById('s-path').value.trim() || 'tasks.json',
         calendarPath: document.getElementById('s-cal-path').value.trim() || 'family-calendar.json',
         dreamsPath: document.getElementById('s-dreams-path').value.trim() || 'vision-board.json',
+        compassPath: document.getElementById('s-compass-path').value.trim() || 'compass.json',
         token: document.getElementById('s-token').value.trim()
       };
       if(!newCfg.owner || !newCfg.repo || !newCfg.token){
@@ -2891,12 +3661,14 @@
       loadFromGitHub();
       loadCalendarFromGitHub();
       loadDreamsFromGitHub();
+      loadCompassFromGitHub();
     });
   }
 
   /* ================= FAMILY SETTINGS MODAL ================= */
   function openFamilySettingsModal(){
     var draft = state.family.map(function(m){ return Object.assign({}, m); });
+    var homeTzDraft = state.homeTimezone || DEFAULT_TIMEZONE;
 
     function nextColor(){
       var used = draft.map(function(m){ return m.color; });
@@ -2905,11 +3677,19 @@
       }
       return FAMILY_COLOR_PALETTE[draft.length % FAMILY_COLOR_PALETTE.length];
     }
+    function tzOptionsHtml(selected){
+      return TIMEZONE_OPTIONS.map(function(tz){
+        return '<option value="'+tz.value+'"'+(tz.value===selected?' selected':'')+'>'+escapeHtml(tz.label)+'</option>';
+      }).join('');
+    }
 
     var html = ''
       + '<div class="scrim" id="scrim">'
       + '<div class="modal">'
-      + '<div class="field-label" style="margin-top:0;">Family Members</div>'
+      + '<div class="field-label" style="margin-top:0;">Family calendar timezone</div>'
+      + '<select class="text-input" id="fam-home-tz">'+tzOptionsHtml(homeTzDraft)+'</select>'
+      + '<div class="settings-help" style="margin-top:6px;">Event times (like "6:00 PM band practice") are entered and stored in this zone — think of it as where things actually happen. Each person below can have their own timezone if they view the calendar from somewhere else; times are converted for them automatically.</div>'
+      + '<div class="field-label">Family Members</div>'
       + '<div id="family-list"></div>'
       + '<button class="btn-sm" id="fam-add">+ Add family member</button>'
       + '<div class="settings-help">Each person\'s email should match what they log into Cloudflare Access with, so the app knows who\'s using it (for defaults and a simplified kid view). Leave email blank for a family member who won\'t log in themselves — they\'ll still show up as a taggable attendee.</div>'
@@ -2920,6 +3700,7 @@
       + '<div id="fam-error" style="color:var(--overdue);font-size:12px;margin-top:10px;"></div>'
       + '</div></div>';
     document.getElementById('modal-root').innerHTML = html;
+    document.getElementById('fam-home-tz').addEventListener('change', function(e){ homeTzDraft = e.target.value; });
 
     function renderFamilyList(){
       var rows = draft.map(function(m, i){
@@ -2931,6 +3712,7 @@
           + '<button type="button" data-role="adult" class="'+(m.role!=='kid'?'active':'')+'">Adult</button>'
           + '<button type="button" data-role="kid" class="'+(m.role==='kid'?'active':'')+'">Kid</button>'
           + '</div>'
+          + '<select class="text-input fam-timezone" data-idx="'+i+'" title="Their timezone">'+tzOptionsHtml(m.timezone || homeTzDraft)+'</select>'
           + '<button type="button" class="rm fam-remove" data-idx="'+i+'" title="Remove">✕</button>'
           + '</div>';
       }).join('');
@@ -2957,6 +3739,9 @@
           renderFamilyList();
         });
       });
+      document.querySelectorAll('.fam-timezone').forEach(function(sel){
+        sel.addEventListener('change', function(){ draft[parseInt(sel.dataset.idx,10)].timezone = sel.value; });
+      });
       document.querySelectorAll('.fam-remove').forEach(function(btn){
         btn.addEventListener('click', function(){
           draft.splice(parseInt(btn.dataset.idx,10),1);
@@ -2970,13 +3755,14 @@
     document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id==='scrim') close(); });
     document.getElementById('fam-cancel').addEventListener('click', close);
     document.getElementById('fam-add').addEventListener('click', function(){
-      draft.push({ id: uid(), name:'', color: nextColor(), email:'', role:'adult' });
+      draft.push({ id: uid(), name:'', color: nextColor(), email:'', role:'adult', timezone: homeTzDraft });
       renderFamilyList();
     });
     document.getElementById('fam-save').addEventListener('click', function(){
       var cleaned = draft.filter(function(m){ return m.name && m.name.trim(); })
-        .map(function(m){ return { id:m.id, name:m.name.trim(), color:m.color, email:(m.email||'').trim().toLowerCase(), role: m.role==='kid'?'kid':'adult' }; });
+        .map(function(m){ return { id:m.id, name:m.name.trim(), color:m.color, email:(m.email||'').trim().toLowerCase(), role: m.role==='kid'?'kid':'adult', timezone: m.timezone || homeTzDraft }; });
       state.family = cleaned;
+      state.homeTimezone = homeTzDraft;
       resolveCurrentFamilyMember();
       persistCalendar();
       close();
@@ -3032,6 +3818,16 @@
   document.getElementById('open-my-calendars').addEventListener('click', openMyCalendarsModal);
   document.getElementById('open-family-settings').addEventListener('click', openFamilySettingsModal);
   document.getElementById('add-dream-btn').addEventListener('click', openAddDreamModal);
+  document.getElementById('add-goal-btn').addEventListener('click', openAddGoalModal);
+  document.getElementById('compass-mode-toggle').addEventListener('click', function(e){
+    var btn = e.target.closest('button[data-mode]');
+    if(!btn || !state.compassFilter) return;
+    var p = ensureCompassProfile(state.compassFilter);
+    p.mode = btn.dataset.mode;
+    p.updatedAt = nowISO();
+    persistCompass();
+    render();
+  });
 
   /* app title/subtitle persistence (local only, cosmetic) */
   function loadMeta(){
@@ -3061,6 +3857,7 @@
   loadFromGitHub();
   loadCalendarFromGitHub();
   loadDreamsFromGitHub();
+  loadCompassFromGitHub();
 
 })();
 </script>
