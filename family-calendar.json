@@ -44,6 +44,33 @@
       "role": "kid"
     }
   ],
-  "events": [],
+  "events": [
+    {
+      "id": "4ea8583b-dfdc-4fbd-9c2d-e1785f895491",
+      "title": "School Starting 😭😭",
+      "category": "other",
+      "attendees": [
+        "4e763cb0-2259-4631-9c0f-727b31f8b086"
+      ],
+      "date": "2026-08-12",
+      "endDate": null,
+      "allDay": true,
+      "time": null,
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "yearly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": null,
+        "count": 5
+      },
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "createdBy": "4e763cb0-2259-4631-9c0f-727b31f8b086",
+      "createdAt": "2026-07-19T22:08:25.326Z"
+    }
+  ],
   "calendarSubscriptions": []
 }
