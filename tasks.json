@@ -32,21 +32,6 @@
       "activity": []
     },
     {
-      "id": "0c42dd71-9145-4bce-a99a-5f3d08083a40",
-      "title": "Update CRM one pager for Tom",
-      "notes": "",
-      "importance": true,
-      "urgency": true,
-      "assignee": "me",
-      "due": null,
-      "tags": [],
-      "subtasks": [],
-      "completed": false,
-      "completedAt": null,
-      "quadrantEnteredAt": "2026-07-09T02:46:22.812Z",
-      "activity": []
-    },
-    {
       "id": "8caf4d6b-288f-4638-a993-d5f4d1fd8804",
       "title": "Kickoff Deck for User Advisory Group",
       "notes": "",
