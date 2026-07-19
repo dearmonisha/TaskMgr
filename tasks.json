@@ -35,7 +35,7 @@
       "id": "f40fe495-928c-45e3-b981-6ff9ee0898ec",
       "title": "F/w Santosh on AI workshop Virtual and CLT",
       "notes": "",
-      "importance": false,
+      "importance": true,
       "urgency": false,
       "assignee": "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6",
       "due": null,
@@ -43,7 +43,7 @@
       "subtasks": [],
       "completed": false,
       "completedAt": null,
-      "quadrantEnteredAt": "2026-07-19T21:14:08.410Z",
+      "quadrantEnteredAt": "2026-07-19T22:12:49.997Z",
       "activity": []
     },
     {
