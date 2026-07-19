@@ -58,13 +58,7 @@
       "time": null,
       "location": "",
       "notes": "",
-      "recurrence": {
-        "freq": "daily",
-        "interval": 2,
-        "byWeekday": null,
-        "until": null,
-        "count": 5
-      },
+      "recurrence": null,
       "exceptionDates": [],
       "recurrenceId": null,
       "overrideDate": null,
