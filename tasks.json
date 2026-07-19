@@ -92,37 +92,6 @@
       "activity": []
     },
     {
-      "id": "cd6a0825-6a11-42d6-99e8-15b6d4cad1e8",
-      "title": "Print Luggage Tags for Cruise",
-      "notes": "",
-      "importance": true,
-      "urgency": true,
-      "assignee": "shared",
-      "due": "2026-07-09",
-      "tags": [],
-      "subtasks": [],
-      "completed": false,
-      "completedAt": null,
-      "quadrantEnteredAt": "2026-07-09T03:13:20.529Z",
-      "activity": [
-        {
-          "id": "cc5f8339-5246-4ac7-8976-8c8b20b5c64b",
-          "text": "Marked complete",
-          "ts": "2026-07-19T21:54:57.783Z"
-        },
-        {
-          "id": "930e71a0-a427-4ebd-84ec-7480eda95a28",
-          "text": "Marked complete",
-          "ts": "2026-07-19T21:48:08.153Z"
-        },
-        {
-          "id": "9e3c59ca-756e-4ddb-a86e-285a68717ec3",
-          "text": "Reassigned to Shared",
-          "ts": "2026-07-09T03:13:36.151Z"
-        }
-      ]
-    },
-    {
       "id": "731f55bc-7aab-4207-b68d-92d5f17eb86e",
       "title": "Schedule multi client testing by COO",
       "notes": "",
