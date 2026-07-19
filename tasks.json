@@ -2,64 +2,21 @@
   "version": 1,
   "tasks": [
     {
-      "id": "33dd9815-f0ab-46c7-9a1e-ceb789ad6ce3",
-      "title": "Plan for Meetings during PTO",
-      "notes": "",
-      "importance": true,
-      "urgency": true,
-      "assignee": "me",
-      "due": null,
-      "tags": [],
-      "subtasks": [],
-      "completed": false,
-      "completedAt": null,
-      "quadrantEnteredAt": "2026-07-09T02:45:47.557Z",
-      "activity": []
-    },
-    {
-      "id": "43a0199e-5db6-4fab-8dee-58fda25a5e30",
-      "title": "Prepare for Mid-Year Conversation",
-      "notes": "",
-      "importance": true,
-      "urgency": true,
-      "assignee": "me",
-      "due": null,
-      "tags": [],
-      "subtasks": [],
-      "completed": false,
-      "completedAt": null,
-      "quadrantEnteredAt": "2026-07-09T02:45:59.482Z",
-      "activity": []
-    },
-    {
-      "id": "0c42dd71-9145-4bce-a99a-5f3d08083a40",
-      "title": "Update CRM one pager for Tom",
-      "notes": "",
-      "importance": true,
-      "urgency": true,
-      "assignee": "me",
-      "due": null,
-      "tags": [],
-      "subtasks": [],
-      "completed": false,
-      "completedAt": null,
-      "quadrantEnteredAt": "2026-07-09T02:46:22.812Z",
-      "activity": []
-    },
-    {
       "id": "8caf4d6b-288f-4638-a993-d5f4d1fd8804",
       "title": "Kickoff Deck for User Advisory Group",
       "notes": "",
       "importance": true,
       "urgency": false,
-      "assignee": "me",
-      "due": null,
+      "due": "2026-07-20",
       "tags": [],
       "subtasks": [],
       "completed": false,
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-09T02:46:20.429Z",
-      "activity": []
+      "activity": [],
+      "assignees": [
+        "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6"
+      ]
     },
     {
       "id": "2c1a325d-25b5-48a6-9c8f-78b4738c83bb",
@@ -67,29 +24,33 @@
       "notes": "",
       "importance": true,
       "urgency": false,
-      "assignee": "me",
-      "due": null,
+      "due": "2026-07-21",
       "tags": [],
       "subtasks": [],
       "completed": false,
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-09T02:52:19.950Z",
-      "activity": []
+      "activity": [],
+      "assignees": [
+        "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6"
+      ]
     },
     {
       "id": "f40fe495-928c-45e3-b981-6ff9ee0898ec",
       "title": "F/w Santosh on AI workshop Virtual and CLT",
       "notes": "",
-      "importance": false,
+      "importance": true,
       "urgency": false,
-      "assignee": "me",
-      "due": null,
+      "due": "2026-07-22",
       "tags": [],
       "subtasks": [],
       "completed": false,
       "completedAt": null,
-      "quadrantEnteredAt": "2026-07-19T21:14:08.410Z",
-      "activity": []
+      "quadrantEnteredAt": "2026-07-19T22:12:49.997Z",
+      "activity": [],
+      "assignees": [
+        "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6"
+      ]
     },
     {
       "id": "731f55bc-7aab-4207-b68d-92d5f17eb86e",
@@ -97,28 +58,82 @@
       "notes": "",
       "importance": true,
       "urgency": false,
-      "assignee": "me",
-      "due": null,
+      "due": "2026-07-22",
       "tags": [],
       "subtasks": [],
       "completed": false,
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-09T17:02:16.250Z",
-      "activity": []
+      "activity": [],
+      "assignees": [
+        "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6"
+      ]
     },
     {
-      "id": "6770dba8-1f6f-4022-824c-7e1348431c62",
-      "title": "Walk !!!!!",
-      "notes": "Get this done by 6 pm",
+      "id": "5afa3433-73ef-4102-ad88-513c8f2307eb",
+      "title": "Move Aadi’s dental appointment from 22nd Jul",
+      "notes": "",
       "importance": true,
-      "urgency": false,
-      "assignee": "4e763cb0-2259-4631-9c0f-727b31f8b086",
+      "urgency": true,
       "due": "2026-07-20",
       "tags": [],
       "subtasks": [],
       "completed": false,
       "completedAt": null,
-      "quadrantEnteredAt": "2026-07-19T22:24:54.128Z",
+      "quadrantEnteredAt": "2026-07-19T21:52:33.454Z",
+      "activity": [],
+      "assignees": [
+        "6d5c9f8b-bd79-45b8-aafa-52ebb3cf0e46"
+      ]
+    },
+    {
+      "id": "a56d57e3-6e12-4d58-ae29-027227106762",
+      "title": "Pick Maximus from daycare",
+      "notes": "",
+      "importance": true,
+      "urgency": true,
+      "due": "2026-07-20",
+      "tags": [],
+      "subtasks": [],
+      "completed": false,
+      "completedAt": null,
+      "quadrantEnteredAt": "2026-07-19T21:55:22.089Z",
+      "activity": [
+        {
+          "id": "815b67ac-fc67-49f6-aa78-133e516207f0",
+          "text": "Reassigned to Shiva",
+          "ts": "2026-07-19T21:57:45.573Z"
+        },
+        {
+          "id": "aeb7e83b-be1f-492b-9708-8b2bce94e8f4",
+          "text": "Reassigned to Do First",
+          "ts": "2026-07-19T21:55:22.089Z"
+        },
+        {
+          "id": "5b22363c-30f0-49a2-8491-0cae0ee78f76",
+          "text": "Reassigned to Shared",
+          "ts": "2026-07-19T21:54:08.743Z"
+        }
+      ],
+      "assignees": [
+        "6d5c9f8b-bd79-45b8-aafa-52ebb3cf0e46"
+      ]
+    },
+    {
+      "id": "356453a5-bfa5-4a3e-bac1-8b63062652ae",
+      "title": "Test for Aadi",
+      "notes": "",
+      "importance": true,
+      "urgency": false,
+      "assignees": [
+        "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6"
+      ],
+      "due": null,
+      "tags": [],
+      "subtasks": [],
+      "completed": false,
+      "completedAt": null,
+      "quadrantEnteredAt": "2026-07-19T22:32:05.105Z",
       "activity": []
     }
   ]
