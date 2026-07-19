@@ -17,21 +17,6 @@
       "activity": []
     },
     {
-      "id": "43a0199e-5db6-4fab-8dee-58fda25a5e30",
-      "title": "Prepare for Mid-Year Conversation",
-      "notes": "",
-      "importance": true,
-      "urgency": true,
-      "assignee": "me",
-      "due": null,
-      "tags": [],
-      "subtasks": [],
-      "completed": false,
-      "completedAt": null,
-      "quadrantEnteredAt": "2026-07-09T02:45:59.482Z",
-      "activity": []
-    },
-    {
       "id": "8caf4d6b-288f-4638-a993-d5f4d1fd8804",
       "title": "Kickoff Deck for User Advisory Group",
       "notes": "",
