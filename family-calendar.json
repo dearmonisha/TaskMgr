@@ -44,6 +44,33 @@
       "role": "kid"
     }
   ],
-  "events": [],
+  "events": [
+    {
+      "id": "ea1662cd-b9d4-4663-ac79-3895bb7c7b1e",
+      "title": "Test",
+      "category": "concert",
+      "attendees": [
+        "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6"
+      ],
+      "date": "2026-07-01",
+      "endDate": null,
+      "allDay": true,
+      "time": null,
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "daily",
+        "interval": 2,
+        "byWeekday": null,
+        "until": null,
+        "count": 5
+      },
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "createdBy": "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6",
+      "createdAt": "2026-07-19T22:03:26.420Z"
+    }
+  ],
   "calendarSubscriptions": []
 }
