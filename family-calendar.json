@@ -114,6 +114,27 @@
       "overrideDate": null,
       "createdBy": "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6",
       "createdAt": "2026-07-19T22:34:16.419Z"
+    },
+    {
+      "id": "16d0a622-0026-4f86-ac92-ada70cc33919",
+      "title": "Old Event",
+      "category": "other",
+      "attendees": [
+        "6d5c9f8b-bd79-45b8-aafa-52ebb3cf0e46",
+        "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6"
+      ],
+      "date": "2026-07-01",
+      "endDate": null,
+      "allDay": true,
+      "time": null,
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "createdBy": "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6",
+      "createdAt": "2026-07-19T22:36:15.633Z"
     }
   ],
   "calendarSubscriptions": []
