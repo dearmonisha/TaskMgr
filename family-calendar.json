@@ -92,6 +92,28 @@
       "overrideDate": "2026-08-12",
       "createdBy": "4e763cb0-2259-4631-9c0f-727b31f8b086",
       "createdAt": "2026-07-19T22:08:25.326Z"
+    },
+    {
+      "id": "d0bdb25e-7a0b-4c61-bc95-b94d8185eaa1",
+      "title": "Comp Band Camp",
+      "category": "band",
+      "attendees": [
+        "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6",
+        "6d5c9f8b-bd79-45b8-aafa-52ebb3cf0e46",
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-07-28",
+      "endDate": null,
+      "allDay": true,
+      "time": null,
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "createdBy": "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6",
+      "createdAt": "2026-07-19T22:34:16.419Z"
     }
   ],
   "calendarSubscriptions": []
