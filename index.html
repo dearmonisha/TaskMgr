@@ -1994,7 +1994,11 @@
     if(occ.isVirtual){
       draft.date = occ.occurrenceDate;
       draft.endDate = sourceEvent.endDate ? dateAdd(occ.occurrenceDate, eventSpanDays(sourceEvent)) : null;
-      if(needsScope) draft.recurrence = null; // editing a single occurrence starts as a non-repeating override unless they pick "all"/"following"
+      // draft.recurrence stays as a copy of the series' real recurrence (set above) so the Repeat
+      // field shows the actual pattern. Scope is decided at Save time: "this event only" always
+      // forces the resulting override to be non-repeating (applyEditScope handles that), while
+      // "following"/"all" carry this recurrence forward -- nulling it here used to wipe the whole
+      // series' recurrence the moment any single occurrence was edited with scope "all".
     }
 
     function renderEventModal(){
@@ -2036,7 +2040,7 @@
           + '</div>';
       }
 
-      var scopeNote = needsScope ? '<div class="settings-help" style="margin-top:0;margin-bottom:14px;">Editing '+fmtLong(occ.occurrenceDate)+'. You\'ll be asked whether changes apply to just this event or the whole series when you tap Done.</div>' : '';
+      var scopeNote = needsScope ? '<div class="settings-help" style="margin-top:0;margin-bottom:14px;">Editing '+fmtLong(occ.occurrenceDate)+'. You\'ll be asked whether changes apply to just this event or the whole series when you tap Save.</div>' : '';
 
       var html = ''
         + '<div class="scrim" id="scrim">'
@@ -2065,8 +2069,11 @@
         + '<div id="ev-repeat-detail">'+repeatDetail+'</div>'
         + '<div class="field-label">Notes</div><textarea class="notes" id="ev-notes">'+escapeHtml(draft.notes||'')+'</textarea>'
         + '<div class="modal-footer">'
-        + (isNew ? '' : '<button class="btn-delete" id="ev-delete">Delete event</button>')
-        + '<button class="btn-close" id="ev-close">Done</button>'
+        + (isNew ? '<span></span>' : '<button class="btn-delete" id="ev-delete">Delete event</button>')
+        + '<div style="display:flex;gap:10px;">'
+        + '<button class="btn-sm" id="ev-cancel">Cancel</button>'
+        + '<button class="btn-close" id="ev-save">Save</button>'
+        + '</div>'
         + '</div>'
         + '</div></div>';
 
@@ -2172,10 +2179,11 @@
         render();
       }
 
-      document.getElementById('ev-close').addEventListener('click', function(){
+      document.getElementById('ev-save').addEventListener('click', function(){
         if(needsScope){ promptScope('Apply changes to…', function(scope){ commit(scope); }); }
         else{ commit(null); }
       });
+      document.getElementById('ev-cancel').addEventListener('click', function(){ closeDom(); render(); });
 
       var delBtn = document.getElementById('ev-delete');
       if(delBtn){
