@@ -131,36 +131,6 @@
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-09T17:02:16.250Z",
       "activity": []
-    },
-    {
-      "id": "5afa3433-73ef-4102-ad88-513c8f2307eb",
-      "title": "Move Aadi’s dental appointment from 22nd Jul",
-      "notes": "",
-      "importance": true,
-      "urgency": true,
-      "assignee": "6d5c9f8b-bd79-45b8-aafa-52ebb3cf0e46",
-      "due": "2026-07-20",
-      "tags": [],
-      "subtasks": [],
-      "completed": false,
-      "completedAt": null,
-      "quadrantEnteredAt": "2026-07-19T21:52:33.454Z",
-      "activity": []
-    },
-    {
-      "id": "a56d57e3-6e12-4d58-ae29-027227106762",
-      "title": "Pick Maximus from daycare",
-      "notes": "",
-      "importance": true,
-      "urgency": false,
-      "assignee": "6d5c9f8b-bd79-45b8-aafa-52ebb3cf0e46",
-      "due": null,
-      "tags": [],
-      "subtasks": [],
-      "completed": false,
-      "completedAt": null,
-      "quadrantEnteredAt": "2026-07-19T21:53:37.991Z",
-      "activity": []
     }
   ]
 }
