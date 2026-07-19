@@ -1,55 +1,6 @@
 {
   "version": 1,
-  "family": [
-    {
-      "id": "0830eb44-81fc-4b2a-847d-da8bdf2782cc",
-      "name": "Monisha",
-      "color": "#13808a",
-      "email": "dearmonisha@gmail.com",
-      "role": "adult"
-    },
-    {
-      "id": "e5e49f02-3223-4434-8158-3ed41b9858f0",
-      "name": "Tanvi",
-      "color": "#955c82",
-      "email": "tanviverma2023@gmail.com",
-      "role": "kid"
-    },
-    {
-      "id": "29cf05fd-ef1d-4d77-816d-a1aceaa4daa2",
-      "name": "Tamanna",
-      "color": "#bc5460",
-      "email": "deartamannarajan@gmail.com",
-      "role": "kid"
-    },
-    {
-      "id": "a1174824-4285-40a3-9dac-2c1327839aa5",
-      "name": "Aadi",
-      "color": "#008fa0",
-      "email": "dearaadirajan@gmail.com",
-      "role": "kid"
-    }
-  ],
-  "events": [
-    {
-      "id": "6f9bc131-b6e5-4036-b5c2-0f2248f57abd",
-      "title": "Royal Caribbean Cruise",
-      "category": "trip",
-      "attendees": [
-        "0830eb44-81fc-4b2a-847d-da8bdf2782cc"
-      ],
-      "date": "2026-07-11",
-      "endDate": "2026-07-18",
-      "allDay": true,
-      "time": null,
-      "location": "Miami, FL",
-      "notes": "7 day cruise",
-      "recurrence": null,
-      "exceptionDates": [],
-      "recurrenceId": null,
-      "overrideDate": null,
-      "createdBy": null,
-      "createdAt": "2026-07-09T04:56:44.218Z"
-    }
-  ]
+  "family": [],
+  "events": [],
+  "calendarSubscriptions": []
 }

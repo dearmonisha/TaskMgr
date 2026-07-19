@@ -379,18 +379,14 @@
           <button data-view="archive">Archive</button>
           <button data-view="calendar">Calendar</button>
         </div>
+        <button class="settings-gear" id="open-family-settings" title="Manage family members">👪</button>
         <button class="settings-gear" id="open-settings" title="GitHub sync settings">⚙</button>
       </div>
     </div>
 
     <div class="header-row2" id="task-toolbar">
       <div class="filters-search">
-        <div class="pill-tabs" id="person-tabs">
-          <button data-person="all" class="active">All</button>
-          <button data-person="me">Shiva</button>
-          <button data-person="monisha">Monisha</button>
-          <button data-person="shared">Shared</button>
-        </div>
+        <div class="pill-tabs" id="person-tabs"></div>
         <div class="search-box">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" id="search-input" placeholder="Search tasks or tags">
@@ -421,7 +417,7 @@
       <div class="quick-add">
         <input type="text" id="cal-search-input" placeholder="Search events">
         <button id="add-event-btn">Add Event…</button>
-        <button id="open-family-settings" class="btn-add-detail" title="Manage family members">Family…</button>
+        <button id="open-my-calendars" class="btn-add-detail" title="Import your own calendars (school, sports, etc.)">My Calendars…</button>
       </div>
     </div>
 
@@ -528,6 +524,7 @@
     // ---- Calendar module ----
     family: [],           // [{id,name,color,email,role:'adult'|'kid'}]
     events: [],           // see EVENT SCHEMA below
+    calendarSubscriptions: [], // [{id,ownerFamilyMemberId,name,url,category,enabled,lastSyncedAt,lastError,syncStatus}]
     calSha: null,
     calSubView: 'agenda', // 'agenda' | 'month' | 'week'
     calAnchor: todayStr(),// reference date for month/week/agenda navigation
@@ -536,13 +533,12 @@
     currentFamilyMember: null // resolved from currentUserEmail against state.family
   };
 
-  var SHIVA_EMAIL = 'dearshiva@gmail.com';
   var pendingNewTaskId = null; // set while the Add Task modal is open for a not-yet-confirmed task
 
   /*
     EVENT SCHEMA:
     {
-      id, title, category: 'school'|'sports'|'birthday'|'appointment'|'trip'|'chore'|'other',
+      id, title, category: 'band'|'homework'|'concert'|'projects'|'test'|'gym'|'birthday'|'appointment'|'trip'|'chore'|'other',
       attendees: ['all'] | [familyMemberId, ...],
       date: 'YYYY-MM-DD', endDate: null|'YYYY-MM-DD' (inclusive, for multi-day events),
       allDay: true|false, time: null|'HH:MM',
@@ -551,12 +547,18 @@
       exceptionDates: [],           // dates skipped from this series (only meaningful when recurrence is set)
       recurrenceId: null|masterId,  // set on a standalone event that overrides one occurrence of a series
       overrideDate: null|'YYYY-MM-DD',
-      createdBy: null|familyMemberId, createdAt: iso
+      createdBy: null|familyMemberId, createdAt: iso,
+      source: undefined|'ics', subscriptionId: undefined|subscriptionId, sourceUid: undefined|string
+      // events with source:'ics' are auto-imported and read-only in the UI -- re-synced wholesale on each subscription sync
     }
   */
   var EVENT_CATEGORIES = {
-    school:      { label:'School',      icon:'🎒', color:'#008fa0' },
-    sports:      { label:'Sports',      icon:'⚽', color:'#3e8f44' },
+    band:        { label:'Band',        icon:'🎺', color:'#3b6ea5' },
+    homework:    { label:'Homework',    icon:'📚', color:'#a56a3b' },
+    concert:     { label:'Concert',     icon:'🎤', color:'#b0507e' },
+    projects:    { label:'Projects',    icon:'🛠️', color:'#5c7a89' },
+    test:        { label:'Test',        icon:'📝', color:'#a8372e' },
+    gym:         { label:'Gym',         icon:'🏋️', color:'#d9822b' },
     birthday:    { label:'Birthday',    icon:'🎂', color:'#bc5460' },
     appointment: { label:'Appointment', icon:'🩺', color:'#8765be' },
     trip:        { label:'Trip',        icon:'✈️', color:'#c9922f' },
@@ -566,9 +568,9 @@
   var FAMILY_COLOR_PALETTE = ['#13808a','#955c82','#bc5460','#008fa0','#8765be','#3e8f44','#c9922f','#a8372e'];
 
   /* ================= IDENTITY (Cloudflare Access) ================= */
-  function defaultAssignee(){
-    return (state.currentUserEmail === SHIVA_EMAIL) ? 'me' : 'monisha';
-  }
+  // Everyone -- including whoever set this app up -- is just an entry in state.family,
+  // matched to "who's using the app right now" purely by the email Cloudflare Access reports.
+  // There is no hardcoded "owner" account.
   function resolveCurrentFamilyMember(){
     state.currentFamilyMember = (state.currentUserEmail
       ? state.family.find(function(m){ return m.email && m.email.toLowerCase() === state.currentUserEmail; })
@@ -576,6 +578,15 @@
   }
   function isKidMode(){
     return !!(state.currentFamilyMember && state.currentFamilyMember.role === 'kid');
+  }
+  // Kids are locked to seeing just their own (+ shared) tasks/events, with no tab to escape it.
+  // An unresolved identity (nobody's matched their login email in Family Settings yet, or an
+  // adult) gets unrestricted access -- restriction only kicks in for a *known* kid account.
+  function lockedPersonId(){
+    return (state.currentFamilyMember && state.currentFamilyMember.role === 'kid') ? state.currentFamilyMember.id : null;
+  }
+  function defaultTaskAssignee(){
+    return state.currentFamilyMember ? state.currentFamilyMember.id : 'shared';
   }
   function loadIdentity(){
     try{
@@ -736,7 +747,7 @@
     if(!cfg || !cfg.owner || !cfg.repo || !cfg.token){
       loadCalendarLocal();
       resolveCurrentFamilyMember();
-      if(state.view === 'calendar') render();
+      render(); // family/identity affects task views too now, not just calendar
       return;
     }
     var path = cfg.calendarPath || 'family-calendar.json';
@@ -745,26 +756,29 @@
         if(r.notFound){
           state.calSha = null;
           var localCal = loadCalendarLocalOnly();
-          state.family = localCal.family; state.events = localCal.events;
+          state.family = localCal.family; state.events = localCal.events; state.calendarSubscriptions = localCal.calendarSubscriptions;
           resolveCurrentFamilyMember();
-          if(state.view === 'calendar') render();
+          render();
           saveCalendarToGitHub();
+          syncAllSubscriptions();
           return;
         }
         state.calSha = r.data.sha;
         var parsed;
-        try{ parsed = JSON.parse(b64DecodeUnicode(r.data.content)); }catch(e){ parsed = {family:[], events:[]}; }
+        try{ parsed = JSON.parse(b64DecodeUnicode(r.data.content)); }catch(e){ parsed = {family:[], events:[], calendarSubscriptions:[]}; }
         state.family = parsed.family || [];
         state.events = parsed.events || [];
+        state.calendarSubscriptions = parsed.calendarSubscriptions || [];
         cacheCalendarLocal();
         resolveCurrentFamilyMember();
-        if(state.view === 'calendar') render();
+        render();
+        syncAllSubscriptions();
       })
       .catch(function(err){
         console.error(err);
         loadCalendarLocal();
         resolveCurrentFamilyMember();
-        if(state.view === 'calendar') render();
+        render();
       });
   }
 
@@ -776,7 +790,7 @@
     }
     var path = cfg.calendarPath || 'family-calendar.json';
     updateSyncStatus('busy');
-    saveGithubFile(cfg, path, state.calSha, {version:1, family: state.family, events: state.events}, 'Update family-calendar.json via Task Manager app')
+    saveGithubFile(cfg, path, state.calSha, {version:1, family: state.family, events: state.events, calendarSubscriptions: state.calendarSubscriptions}, 'Update family-calendar.json via Task Manager app')
       .then(function(sha){
         state.calSha = sha;
         cacheCalendarLocal();
@@ -791,15 +805,15 @@
   function loadCalendarLocalOnly(){
     try{
       var raw = JSON.parse(localStorage.getItem(LS_CALENDAR) || 'null');
-      return { family: (raw && raw.family) || [], events: (raw && raw.events) || [] };
-    }catch(e){ return { family: [], events: [] }; }
+      return { family: (raw && raw.family) || [], events: (raw && raw.events) || [], calendarSubscriptions: (raw && raw.calendarSubscriptions) || [] };
+    }catch(e){ return { family: [], events: [], calendarSubscriptions: [] }; }
   }
   function loadCalendarLocal(){
     var c = loadCalendarLocalOnly();
-    state.family = c.family; state.events = c.events;
+    state.family = c.family; state.events = c.events; state.calendarSubscriptions = c.calendarSubscriptions;
   }
   function cacheCalendarLocal(){
-    localStorage.setItem(LS_CALENDAR, JSON.stringify({family: state.family, events: state.events}));
+    localStorage.setItem(LS_CALENDAR, JSON.stringify({family: state.family, events: state.events, calendarSubscriptions: state.calendarSubscriptions}));
   }
   function persistCalendar(){
     saveCalendarToGitHub();
@@ -821,10 +835,32 @@
   }
 
   /* ================= RENDER: HEADER ================= */
+  function renderPersonTabs(){
+    var container = document.getElementById('person-tabs');
+    var locked = lockedPersonId();
+    if(locked){
+      state.person = locked;
+      container.innerHTML = '';
+      container.classList.add('hidden');
+      return;
+    }
+    container.classList.remove('hidden');
+    var html = '<button data-person="all" class="'+(state.person==='all'?'active':'')+'">All</button>'
+      + state.family.map(function(m){
+          return '<button data-person="'+m.id+'" class="'+(state.person===m.id?'active':'')+'">'+escapeHtml(m.name)+'</button>';
+        }).join('')
+      + '<button data-person="shared" class="'+(state.person==='shared'?'active':'')+'">Shared</button>';
+    container.innerHTML = html;
+    container.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click', function(){ state.person = b.dataset.person; render(); });
+    });
+  }
+
   function renderStats(){
+    renderPersonTabs();
     var counts = {doFirst:0,schedule:0,delegate:0,eliminate:0};
     var doneToday = 0;
-    state.tasks.forEach(function(t){
+    state.tasks.filter(personMatch).forEach(function(t){
       if(!t.completed) counts[quadrantOf(t)]++;
       if(t.completed && t.completedAt && t.completedAt.slice(0,10) === todayStr()) doneToday++;
     });
@@ -846,11 +882,10 @@
 
   /* ================= FILTERING ================= */
   function personMatch(t){
-    if(state.person === 'all') return true;
-    if(state.person === 'me') return t.assignee === 'me' || t.assignee === 'shared';
-    if(state.person === 'monisha') return t.assignee === 'monisha' || t.assignee === 'shared';
-    if(state.person === 'shared') return t.assignee === 'shared';
-    return true;
+    var filter = lockedPersonId() || state.person;
+    if(filter === 'all') return true;
+    if(filter === 'shared') return t.assignee === 'shared';
+    return t.assignee === filter || t.assignee === 'shared';
   }
   function searchMatch(t){
     if(!state.search) return true;
@@ -866,12 +901,15 @@
   /* ================= RENDER: MATRIX / LIST / ARCHIVE ================= */
   function avatarHtml(assignee){
     if(assignee === 'shared'){
-      return '<span class="tc-avatars"><span class="avatar you">S</span><span class="avatar monisha">M</span></span>';
+      var members = state.family.slice(0,4);
+      if(!members.length) return '<span class="tc-avatars"><span class="avatar" style="background:var(--primary-btn)">?</span></span>';
+      return '<span class="tc-avatars">'+members.map(function(m,i){
+        return '<span class="avatar" style="background:'+m.color+';'+(i>0?'margin-left:-8px;':'')+'">'+escapeHtml((m.name||'?')[0])+'</span>';
+      }).join('')+'</span>';
     }
-    if(assignee === 'monisha'){
-      return '<span class="tc-avatars"><span class="avatar monisha" style="margin-left:0">M</span></span>';
-    }
-    return '<span class="tc-avatars"><span class="avatar you">S</span></span>';
+    var m = familyMember(assignee);
+    if(!m) return '<span class="tc-avatars"><span class="avatar" style="background:var(--ink-muted)">?</span></span>';
+    return '<span class="tc-avatars"><span class="avatar" style="background:'+m.color+'">'+escapeHtml((m.name||'?')[0])+'</span></span>';
   }
   function metaPillsHtml(t){
     var pills = '';
@@ -969,7 +1007,7 @@
   }
 
   function renderArchive(){
-    var done = state.tasks.filter(function(t){ return t.completed; })
+    var done = state.tasks.filter(function(t){ return t.completed && personMatch(t); })
       .sort(function(a,b){ return (b.completedAt||'').localeCompare(a.completedAt||''); });
     var html = done.length ? done.map(function(t){
       return '<div class="archive-row" data-id="'+t.id+'">'
@@ -1041,8 +1079,9 @@
 
   function eventChipHtml(occ){
     var cat = categoryOf(occ);
-    return '<div class="event-chip" style="background:'+cat.color+'" data-occ="'+occ.occurrenceId+'" title="'+escapeHtml(occ.title)+'">'
-      + '<span class="ec-icon">'+cat.icon+'</span><span class="ec-title">'+escapeHtml(occ.title)+'</span></div>';
+    var importedMark = occ.source === 'ics' ? '📥 ' : '';
+    return '<div class="event-chip" style="background:'+cat.color+'" data-occ="'+occ.occurrenceId+'" title="'+escapeHtml((occ.source==='ics'?'Imported · ':'')+occ.title)+'">'
+      + '<span class="ec-icon">'+cat.icon+'</span><span class="ec-title">'+importedMark+escapeHtml(occ.title)+'</span></div>';
   }
 
   function renderCountdownStrip(){
@@ -1150,9 +1189,10 @@
         var cat = categoryOf(o);
         var timeLabel = o.allDay ? 'All day' : (o.time||'');
         var loc = o.location ? ' · '+escapeHtml(o.location) : '';
+        var importedMark = o.source === 'ics' ? '📥 ' : '';
         return '<div class="agenda-card" style="border-left-color:'+cat.color+'" data-occ="'+o.occurrenceId+'">'
           + '<span class="ac-icon">'+cat.icon+'</span>'
-          + '<div class="ac-body"><div class="ac-title">'+escapeHtml(o.title)+'</div><div class="ac-meta">'+timeLabel+loc+'</div></div>'
+          + '<div class="ac-body"><div class="ac-title">'+importedMark+escapeHtml(o.title)+'</div><div class="ac-meta">'+timeLabel+loc+'</div></div>'
           + '<span class="ac-avatars">'+attendeeAvatarsHtml(o)+'</span>'
           + '</div>';
       }).join('');
@@ -1168,11 +1208,19 @@
     document.querySelectorAll('#cal-subview-tabs button').forEach(function(b){
       b.classList.toggle('active', b.dataset.subview === state.calSubView);
     });
+    var famTabs = document.getElementById('cal-family-tabs');
+    var locked = lockedPersonId();
+    if(locked){
+      state.calFilter = locked;
+      famTabs.innerHTML = '';
+      famTabs.classList.add('hidden');
+      return;
+    }
+    famTabs.classList.remove('hidden');
     var famHtml = '<button data-fam="all" class="'+(state.calFilter==='all'?'active':'')+'">All</button>'
       + state.family.map(function(m){
           return '<button data-fam="'+m.id+'" class="'+(state.calFilter===m.id?'active':'')+'">'+escapeHtml(m.name)+'</button>';
         }).join('');
-    var famTabs = document.getElementById('cal-family-tabs');
     famTabs.innerHTML = famHtml;
     famTabs.querySelectorAll('button').forEach(function(b){
       b.addEventListener('click', function(){ state.calFilter = b.dataset.fam; render(); });
@@ -1249,7 +1297,8 @@
     document.getElementById('task-toolbar').classList.toggle('hidden', isCal);
     document.getElementById('calendar-toolbar').classList.toggle('hidden', !isCal);
     document.getElementById('stats-row').classList.toggle('hidden', isCal);
-    document.body.classList.toggle('kid-mode', isCal && isKidMode());
+    document.body.classList.toggle('kid-mode', isKidMode()); // applies app-wide, not just on the calendar tab
+    document.getElementById('open-family-settings').classList.toggle('hidden', isKidMode()); // roster management is adults-only
   }
 
   function render(){
@@ -1378,7 +1427,7 @@
     text = text.trim();
     if(!text) return;
     var guess = guessQuadrantFromText(text);
-    var assignee = defaultAssignee();
+    var assignee = defaultTaskAssignee();
     var task = {
       id: uid(), title: text, notes: '',
       importance: guess.importance, urgency: guess.urgency,
@@ -1416,7 +1465,7 @@
     var t = {
       id: uid(), title: '', notes: '',
       importance: true, urgency: false, // default: Schedule quadrant, same "no signal" default as quick-add
-      assignee: defaultAssignee(), due: null, tags: [],
+      assignee: defaultTaskAssignee(), due: null, tags: [],
       subtasks: [], completed: false, completedAt: null,
       quadrantEnteredAt: nowISO(), activity: []
     };
@@ -1436,6 +1485,10 @@
       var sel = (k === qkey) ? ' sel-'+ (k==='doFirst'?'do-first':k) : '';
       return '<button class="priority-btn'+sel+'" data-q="'+k+'">'+q.title+'</button>';
     }).join('');
+
+    var assigneeBtns = state.family.map(function(m){
+      return '<button type="button" class="cat-btn'+(t.assignee===m.id?' selected':'')+'" data-a="'+m.id+'">'+escapeHtml(m.name)+'</button>';
+    }).join('') + '<button type="button" class="cat-btn'+(t.assignee==='shared'?' selected':'')+'" data-a="shared">Shared</button>';
 
     var tagsHtml = (t.tags||[]).map(function(tag,i){
       return '<span class="tag-chip">'+escapeHtml(tag)+'<button data-idx="'+i+'" data-action="rm-tag">✕</button></span>';
@@ -1460,11 +1513,7 @@
       + '<div class="modal">'
       + '<input class="modal-title-input" id="m-title" placeholder="Task title" value="'+escapeHtml(t.title)+'">'
       + '<div class="field-label">Priority</div><div class="priority-grid">'+priorityBtns+'</div>'
-      + '<div class="field-label">Assigned to</div><div class="seg3" id="m-assignee">'
-      + '<button data-a="me" class="'+(t.assignee==='me'?'active':'')+'">Shiva</button>'
-      + '<button data-a="monisha" class="'+(t.assignee==='monisha'?'active':'')+'">Monisha</button>'
-      + '<button data-a="shared" class="'+(t.assignee==='shared'?'active':'')+'">Shared</button>'
-      + '</div>'
+      + '<div class="field-label">Assigned to</div><div class="category-grid" id="m-assignee">'+assigneeBtns+'</div>'
       + '<div class="row-2" style="margin-top:18px;">'
       + '<div><div class="field-label" style="margin-top:0;">Due date</div><input type="date" id="m-due" value="'+(t.due||'')+'"></div>'
       + '<div><div class="field-label" style="margin-top:0;">Status</div><button class="status-toggle'+(t.completed?' complete':'')+'" id="m-status">'+(t.completed?'↺ Mark incomplete':'✓ Mark complete')+'</button></div>'
@@ -1526,7 +1575,8 @@
         var prev = t.assignee;
         t.assignee = btn.dataset.a;
         if(t.assignee !== prev && (t.assignee === 'shared' || prev === 'shared')){
-          logActivity(t, 'Reassigned to '+(t.assignee==='me'?'Shiva':t.assignee==='monisha'?'Monisha':'Shared'));
+          var whoName = t.assignee === 'shared' ? 'Shared' : ((familyMember(t.assignee)||{}).name || 'Unknown');
+          logActivity(t, 'Reassigned to '+whoName);
         }
         openTaskModal(id);
       });
@@ -1778,10 +1828,47 @@
     openEventModal({ occurrenceId:null, occurrenceDate: base.date, isVirtual:false, isOverride:false, isNew:true, draftBase: base });
   }
 
+  // Read-only view for events that came from an imported calendar subscription --
+  // editing them locally would just be overwritten on the next sync, so we don't offer it.
+  function openImportedEventView(occ, sourceEvent){
+    var cat = categoryOf(sourceEvent);
+    var sub = findSubscription(sourceEvent.subscriptionId);
+    var owner = familyMember(sourceEvent.createdBy);
+    var whenLabel = sourceEvent.allDay ? fmtLong(occ.occurrenceDate) : (fmtLong(occ.occurrenceDate) + ' at ' + (sourceEvent.time||''));
+    var syncedLabel = sub && sub.lastSyncedAt ? ('Synced '+fmtRelative(sub.lastSyncedAt)) : 'Not synced yet';
+    var canManage = sub && state.currentFamilyMember && state.currentFamilyMember.id === sub.ownerFamilyMemberId;
+
+    var html = ''
+      + '<div class="scrim" id="scrim">'
+      + '<div class="modal">'
+      + '<div class="settings-help" style="margin-top:0;">📥 Imported from '+escapeHtml(sub ? sub.name : 'a subscribed calendar')+(owner?' · '+escapeHtml(owner.name):'')+' · '+syncedLabel+'</div>'
+      + '<div style="font-family:var(--font-serif);font-size:21px;font-weight:600;margin-bottom:14px;">'+cat.icon+' '+escapeHtml(sourceEvent.title)+'</div>'
+      + '<div class="field-label" style="margin-top:0;">When</div><div style="font-size:13px;">'+whenLabel+(sourceEvent.endDate?' – '+fmtLong(sourceEvent.endDate):'')+'</div>'
+      + (sourceEvent.location ? '<div class="field-label">Location</div><div style="font-size:13px;">'+escapeHtml(sourceEvent.location)+'</div>' : '')
+      + (sourceEvent.notes ? '<div class="field-label">Notes</div><div style="font-size:13px;white-space:pre-wrap;">'+escapeHtml(sourceEvent.notes)+'</div>' : '')
+      + '<div class="settings-help">This event is read-only here — it\'s managed by the source calendar. To change it, edit it there; to stop seeing it, remove the subscription from My Calendars.</div>'
+      + '<div class="modal-footer">'
+      + (canManage ? '<button class="btn-sm" id="ie-manage">Manage subscription</button>' : '<span></span>')
+      + '<button class="btn-close" id="ie-close">Close</button>'
+      + '</div>'
+      + '</div></div>';
+    document.getElementById('modal-root').innerHTML = html;
+    document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id==='scrim') document.getElementById('modal-root').innerHTML=''; });
+    document.getElementById('ie-close').addEventListener('click', function(){ document.getElementById('modal-root').innerHTML=''; });
+    var manageBtn = document.getElementById('ie-manage');
+    if(manageBtn) manageBtn.addEventListener('click', function(){ openMyCalendarsModal(); });
+  }
+
   function openEventModal(occ){
     var isNew = !!occ.isNew;
     var sourceEvent = isNew ? occ.draftBase : (occ.isVirtual ? findEventById(occ.masterId) : findEventById(occ.occurrenceId));
     if(!sourceEvent) return;
+
+    if(sourceEvent.source === 'ics'){
+      openImportedEventView(occ, sourceEvent);
+      return;
+    }
+
     var needsScope = !isNew && !!occ.isVirtual;
 
     var draft = Object.assign({}, sourceEvent);
@@ -1993,6 +2080,256 @@
     renderEventModal();
   }
 
+  /* ================= CALENDAR: ICS IMPORT ================= */
+  var ICS_DOW = {SU:0,MO:1,TU:2,WE:3,TH:4,FR:5,SA:6};
+
+  function unfoldICS(text){
+    return text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').reduce(function(lines,line){
+      if(/^[ \t]/.test(line) && lines.length){
+        lines[lines.length-1] += line.slice(1);
+      } else {
+        lines.push(line);
+      }
+      return lines;
+    }, []);
+  }
+
+  function parseICSLine(line){
+    var idx = line.indexOf(':');
+    if(idx === -1) return null;
+    var left = line.slice(0,idx);
+    var value = line.slice(idx+1);
+    var parts = left.split(';');
+    var name = (parts[0]||'').toUpperCase();
+    var params = {};
+    for(var i=1;i<parts.length;i++){
+      var kv = parts[i].split('=');
+      if(kv.length===2) params[kv[0].toUpperCase()] = kv[1];
+    }
+    return { name: name, params: params, value: value };
+  }
+
+  function unescapeICSText(s){
+    return (s||'').replace(/\\n/gi,'\n').replace(/\\,/g,',').replace(/\\;/g,';').replace(/\\\\/g,'\\');
+  }
+
+  // Returns {date:'YYYY-MM-DD', time:null|'HH:MM', allDay:bool}. TZID-qualified times are treated
+  // as naive local time (no timezone database available client-side) -- close enough for a family
+  // calendar; UTC ('Z') times are converted to the viewer's local time.
+  function parseICSDateValue(value, params){
+    value = (value||'').trim();
+    if((params && params.VALUE === 'DATE') || /^\d{8}$/.test(value)){
+      return { date: value.slice(0,4)+'-'+value.slice(4,6)+'-'+value.slice(6,8), time:null, allDay:true };
+    }
+    var m = value.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(Z)?$/);
+    if(!m) return { date: todayStr(), time:null, allDay:true };
+    if(m[7]){
+      var dt = new Date(Date.UTC(+m[1], +m[2]-1, +m[3], +m[4], +m[5]));
+      return { date: toLocalDateStr(dt), time: ('0'+dt.getHours()).slice(-2)+':'+('0'+dt.getMinutes()).slice(-2), allDay:false };
+    }
+    return { date: m[1]+'-'+m[2]+'-'+m[3], time: m[4]+':'+m[5], allDay:false };
+  }
+
+  function parseICSRRule(str){
+    var rule = { freq:null, interval:1, byWeekday:null, until:null, count:null };
+    (str||'').split(';').forEach(function(p){
+      var kv = p.split('=');
+      if(kv.length<2) return;
+      var k = kv[0].toUpperCase(), v = kv[1];
+      if(k==='FREQ') rule.freq = v.toLowerCase();
+      else if(k==='INTERVAL') rule.interval = parseInt(v,10)||1;
+      else if(k==='BYDAY') rule.byWeekday = v.split(',').map(function(d){ return ICS_DOW[d.trim().slice(-2).toUpperCase()]; }).filter(function(n){ return n!==undefined; });
+      else if(k==='UNTIL') rule.until = parseICSDateValue(v,{}).date;
+      else if(k==='COUNT') rule.count = parseInt(v,10)||null;
+    });
+    if(['daily','weekly','monthly','yearly'].indexOf(rule.freq)===-1) return null;
+    return rule;
+  }
+
+  // Parses raw .ics text into a flat list of {uid,summary,location,description,dtstart,dtend,rrule,exdate[]}
+  function parseICSText(text){
+    var lines = unfoldICS(text||'');
+    var events = [];
+    var cur = null;
+    lines.forEach(function(line){
+      if(line.indexOf('BEGIN:VEVENT')===0){ cur = {}; return; }
+      if(line.indexOf('END:VEVENT')===0){ if(cur) events.push(cur); cur=null; return; }
+      if(!cur) return;
+      var p = parseICSLine(line);
+      if(!p) return;
+      if(p.name==='SUMMARY') cur.summary = unescapeICSText(p.value);
+      else if(p.name==='LOCATION') cur.location = unescapeICSText(p.value);
+      else if(p.name==='DESCRIPTION') cur.description = unescapeICSText(p.value);
+      else if(p.name==='UID') cur.uid = p.value;
+      else if(p.name==='DTSTART') cur.dtstart = parseICSDateValue(p.value, p.params);
+      else if(p.name==='DTEND') cur.dtend = parseICSDateValue(p.value, p.params);
+      else if(p.name==='RRULE') cur.rrule = parseICSRRule(p.value);
+      else if(p.name==='EXDATE'){ cur.exdate = cur.exdate||[]; cur.exdate.push(parseICSDateValue(p.value,p.params).date); }
+    });
+    return events;
+  }
+
+  // Maps parsed ICS VEVENTs into this app's Event schema, tagged to a subscription.
+  function icsEventsToOurs(icsEvents, sub){
+    return icsEvents.filter(function(ev){ return ev.dtstart; }).map(function(ev){
+      var start = ev.dtstart;
+      var endDate = null;
+      if(ev.dtend && ev.dtend.date !== start.date){
+        endDate = start.allDay ? dateAdd(ev.dtend.date, -1) : ev.dtend.date; // ICS all-day DTEND is exclusive
+      }
+      return {
+        id: 'ics-'+sub.id+'-'+(ev.uid || uid()),
+        title: ev.summary || 'Untitled event',
+        category: sub.category || 'other',
+        attendees: [sub.ownerFamilyMemberId],
+        date: start.date, endDate: endDate,
+        allDay: start.allDay, time: start.allDay ? null : start.time,
+        location: ev.location || '', notes: ev.description || '',
+        recurrence: ev.rrule || null,
+        exceptionDates: ev.exdate || [],
+        recurrenceId: null, overrideDate: null,
+        source: 'ics', subscriptionId: sub.id, sourceUid: ev.uid || null,
+        createdBy: sub.ownerFamilyMemberId, createdAt: nowISO()
+      };
+    });
+  }
+
+  function findSubscription(id){
+    return (state.calendarSubscriptions||[]).find(function(s){ return s.id === id; });
+  }
+
+  function syncSubscription(sub){
+    sub.syncStatus = 'busy';
+    renderMyCalendarsPanelIfOpen();
+    var target = (sub.url||'').trim().replace(/^webcal:\/\//i, 'https://');
+    return fetch('/api/ics-proxy?url='+encodeURIComponent(target))
+      .then(function(res){
+        if(!res.ok){
+          return res.json().catch(function(){ return {}; }).then(function(e){
+            throw new Error(e.error || ('HTTP '+res.status));
+          });
+        }
+        return res.text();
+      })
+      .then(function(text){
+        var icsEvents = parseICSText(text);
+        var newOnes = icsEventsToOurs(icsEvents, sub);
+        state.events = state.events.filter(function(e){ return e.subscriptionId !== sub.id; }).concat(newOnes);
+        sub.lastSyncedAt = nowISO();
+        sub.lastError = null;
+        sub.syncStatus = 'ok';
+        persistCalendar();
+        renderMyCalendarsPanelIfOpen();
+        if(state.view === 'calendar') render();
+      })
+      .catch(function(err){
+        sub.lastError = String((err && err.message) || err);
+        sub.syncStatus = 'err';
+        renderMyCalendarsPanelIfOpen();
+      });
+  }
+
+  function syncAllSubscriptions(){
+    (state.calendarSubscriptions||[]).filter(function(s){ return s.enabled !== false; }).forEach(syncSubscription);
+  }
+
+  /* ---- "My Calendars" subscription manager (scoped to the logged-in family member) ---- */
+  function renderMyCalendarsPanelIfOpen(){
+    var root = document.getElementById('my-cal-list');
+    if(root) renderMyCalendarsList();
+  }
+
+  function renderMyCalendarsList(){
+    var me = state.currentFamilyMember;
+    var mine = (state.calendarSubscriptions||[]).filter(function(s){ return s.ownerFamilyMemberId === me.id; });
+    var html = mine.length ? mine.map(function(s){
+      var status = s.syncStatus==='busy' ? 'Syncing…' : s.syncStatus==='err' ? ('Error: '+escapeHtml(s.lastError||'')) : (s.lastSyncedAt ? 'Synced '+fmtRelative(s.lastSyncedAt) : 'Not synced yet');
+      return '<div class="family-row" data-sub="'+s.id+'" style="align-items:flex-start;">'
+        + '<div style="flex:1;min-width:0;">'
+        + '<div style="font-weight:700;font-size:13px;">'+escapeHtml(s.name||'Untitled calendar')+'</div>'
+        + '<div style="font-size:11px;color:var(--ink-muted);word-break:break-all;">'+escapeHtml(s.url)+'</div>'
+        + '<div style="font-size:11px;color:'+(s.syncStatus==='err'?'var(--overdue)':'var(--ink-muted)')+';margin-top:2px;">'+status+'</div>'
+        + '</div>'
+        + '<button type="button" class="btn-sm" data-action="sync-sub" data-sub="'+s.id+'">Sync now</button>'
+        + '<button type="button" class="rm" data-action="rm-sub" data-sub="'+s.id+'" title="Remove">✕</button>'
+        + '</div>';
+    }).join('') : '<div class="list-empty">No calendars imported yet.</div>';
+    document.getElementById('my-cal-list').innerHTML = html;
+
+    document.querySelectorAll('[data-action="sync-sub"]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var s = findSubscription(btn.dataset.sub);
+        if(s) syncSubscription(s);
+      });
+    });
+    document.querySelectorAll('[data-action="rm-sub"]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        state.calendarSubscriptions = state.calendarSubscriptions.filter(function(s){ return s.id !== btn.dataset.sub; });
+        state.events = state.events.filter(function(e){ return e.subscriptionId !== btn.dataset.sub; });
+        persistCalendar();
+        renderMyCalendarsList();
+        if(state.view === 'calendar') render();
+      });
+    });
+  }
+
+  function openMyCalendarsModal(){
+    var me = state.currentFamilyMember;
+    if(!me){
+      document.getElementById('modal-root').innerHTML = ''
+        + '<div class="scrim" id="scrim"><div class="modal">'
+        + '<div class="field-label" style="margin-top:0;">My Calendars</div>'
+        + '<div class="settings-help" style="margin-top:0;">We couldn\'t match your login to a family member yet. Ask an adult to add you in Family Settings with the same email you log in with, then come back here to import your own calendars.</div>'
+        + '<div class="settings-actions"><button class="btn-sm" id="mc-close">Close</button></div>'
+        + '</div></div>';
+      document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id==='scrim') document.getElementById('modal-root').innerHTML=''; });
+      document.getElementById('mc-close').addEventListener('click', function(){ document.getElementById('modal-root').innerHTML=''; });
+      return;
+    }
+
+    var html = ''
+      + '<div class="scrim" id="scrim">'
+      + '<div class="modal">'
+      + '<div class="field-label" style="margin-top:0;">My Calendars</div>'
+      + '<div class="settings-help" style="margin-top:0;">Import a school, sports, or other calendar (an .ics or webcal link) and it\'ll show up on the Family Calendar, tagged to '+escapeHtml(me.name)+'. It stays in sync — hit "Sync now" any time to pick up changes, or it refreshes automatically when the calendar loads.</div>'
+      + '<div id="my-cal-list"></div>'
+      + '<div class="field-label">Add a calendar</div>'
+      + '<div class="settings-field"><label>Name</label><input class="text-input" id="mc-name" placeholder="e.g. Lincoln Elementary"></div>'
+      + '<div class="settings-field"><label>Calendar URL (.ics or webcal://)</label><input class="text-input" id="mc-url" placeholder="https://school.example.edu/calendar.ics"></div>'
+      + '<div class="settings-field"><label>Default category</label><select class="text-input" id="mc-category">'
+      + Object.keys(EVENT_CATEGORIES).map(function(k){ return '<option value="'+k+'">'+EVENT_CATEGORIES[k].icon+' '+EVENT_CATEGORIES[k].label+'</option>'; }).join('')
+      + '</select></div>'
+      + '<div class="settings-actions">'
+      + '<button class="btn-primary" id="mc-add">Add & Sync</button>'
+      + '<button class="btn-sm" id="mc-close">Close</button>'
+      + '</div>'
+      + '<div id="mc-error" style="color:var(--overdue);font-size:12px;margin-top:10px;"></div>'
+      + '</div></div>';
+    document.getElementById('modal-root').innerHTML = html;
+    renderMyCalendarsList();
+
+    document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id==='scrim') document.getElementById('modal-root').innerHTML=''; });
+    document.getElementById('mc-close').addEventListener('click', function(){ document.getElementById('modal-root').innerHTML=''; });
+    document.getElementById('mc-add').addEventListener('click', function(){
+      var name = document.getElementById('mc-name').value.trim();
+      var url = document.getElementById('mc-url').value.trim();
+      var category = document.getElementById('mc-category').value;
+      if(!name || !url){
+        document.getElementById('mc-error').textContent = 'Name and URL are both required.';
+        return;
+      }
+      var sub = { id: uid(), ownerFamilyMemberId: me.id, name: name, url: url, category: category, enabled: true, lastSyncedAt: null, lastError: null, syncStatus: 'idle' };
+      state.calendarSubscriptions = state.calendarSubscriptions || [];
+      state.calendarSubscriptions.push(sub);
+      persistCalendar();
+      document.getElementById('mc-name').value = '';
+      document.getElementById('mc-url').value = '';
+      document.getElementById('mc-error').textContent = '';
+      renderMyCalendarsList();
+      syncSubscription(sub);
+    });
+  }
+
   /* ================= SETTINGS MODAL ================= */
   function openSettingsModal(){
     var cfg = getConfig() || {owner:'',repo:'',path:'tasks.json',calendarPath:'family-calendar.json',branch:'main',token:''};
@@ -2145,13 +2482,6 @@
     document.querySelectorAll('#view-switcher button').forEach(function(b){ b.classList.toggle('active', b===btn); });
     render();
   });
-  document.getElementById('person-tabs').addEventListener('click', function(e){
-    var btn = e.target.closest('button[data-person]');
-    if(!btn) return;
-    state.person = btn.dataset.person;
-    document.querySelectorAll('#person-tabs button').forEach(function(b){ b.classList.toggle('active', b===btn); });
-    render();
-  });
   document.getElementById('search-input').addEventListener('input', function(e){
     state.search = e.target.value;
     render();
@@ -2189,6 +2519,7 @@
     render();
   });
   document.getElementById('add-event-btn').addEventListener('click', function(){ openAddEventModal(state.calAnchor); });
+  document.getElementById('open-my-calendars').addEventListener('click', openMyCalendarsModal);
   document.getElementById('open-family-settings').addEventListener('click', openFamilySettingsModal);
 
   /* app title/subtitle persistence (local only, cosmetic) */
@@ -2214,7 +2545,7 @@
   loadMeta();
   loadIdentity().then(function(){
     resolveCurrentFamilyMember();
-    if(state.view === 'calendar') render();
+    render();
   });
   loadFromGitHub();
   loadCalendarFromGitHub();
