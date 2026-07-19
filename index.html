@@ -74,7 +74,12 @@
   .search-box svg{flex:none;opacity:0.5;}
   .search-box input{border:none;outline:none;background:transparent;font-size:13px;width:100%;color:var(--ink);}
 
-  .quick-add{display:flex;gap:8px;align-items:center;flex:1;min-width:260px;max-width:520px;}
+  .quick-add{display:flex;flex-wrap:wrap;gap:8px;align-items:center;flex:1;min-width:260px;max-width:520px;}
+  /* The calendar toolbar's quick-add holds a search box plus two buttons ("Add Event…", "My
+     Calendars…") that never shrink below their text width -- 260px understated that, so with a
+     full family roster the row-wrap math never triggered and the buttons silently overflowed past
+     the page edge instead of dropping to their own line. This states the real minimum. */
+  #calendar-toolbar .quick-add{min-width:380px;}
   .quick-add input{flex:1;border:1.5px dashed var(--hairline);border-radius:var(--radius-pill);padding:9px 16px;background:var(--surface);font-size:13px;outline:none;color:var(--ink);}
   .quick-add input:focus{border-color:var(--schedule);}
   .quick-add button{border:none;background:var(--primary-btn);color:#fff;padding:9px 20px;border-radius:var(--radius-pill);font-size:13px;font-weight:600;white-space:nowrap;}
@@ -266,6 +271,38 @@
     .event-chip{font-size:9.5px;padding:2px 5px;}
   }
 
+  /* ---------- Vision board ---------- */
+  .dream-wrap{margin-top:22px;}
+  .dream-board-title{font-family:var(--font-serif);font-size:22px;font-weight:700;margin-bottom:18px;}
+  .dream-group{margin-bottom:26px;}
+  .dream-group-header{display:flex;align-items:center;gap:8px;font-family:var(--font-serif);font-weight:700;font-size:16px;padding-bottom:6px;border-bottom:2px solid;margin-bottom:12px;}
+  .dream-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+  .dream-card{background:var(--surface);border:1px solid var(--hairline);border-left:4px solid transparent;border-radius:var(--radius-card);padding:12px 14px;box-shadow:0 2px 6px rgba(50,35,24,0.1);cursor:pointer;display:flex;gap:10px;align-items:flex-start;}
+  .dream-card.achieved{background:rgba(62,143,68,0.06);}
+  .dream-check{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--hairline);background:var(--surface);font-size:16px;display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer;}
+  .dream-card.achieved .dream-check{background:var(--eliminate-tint);border-color:var(--eliminate);}
+  .dream-body{flex:1;min-width:0;}
+  .dream-title{font-family:var(--font-serif);font-weight:700;font-size:15px;line-height:1.3;word-break:break-word;}
+  .dream-title.done{text-decoration:line-through;opacity:0.6;}
+  .dream-progress{display:flex;align-items:center;gap:8px;margin-top:8px;}
+  .dream-progress-bar{flex:1;height:6px;background:rgba(50,35,24,0.08);border-radius:999px;overflow:hidden;}
+  .dream-progress-fill{height:100%;border-radius:999px;}
+  .dream-progress-label{font-size:11px;color:var(--ink-muted);font-weight:600;white-space:nowrap;}
+  .dream-empty-state{padding:40px 20px;text-align:center;font-style:italic;color:var(--ink-muted);}
+  .dream-empty-state a{color:var(--schedule);font-style:normal;font-weight:600;}
+
+  /* Kid mode: bigger cards, bigger touch targets */
+  body.kid-mode .dream-board-title{font-size:26px;}
+  body.kid-mode .dream-group-header{font-size:19px;}
+  body.kid-mode .dream-card{padding:16px 18px;}
+  body.kid-mode .dream-title{font-size:18px;}
+  body.kid-mode .dream-check{width:44px;height:44px;font-size:20px;}
+  body.kid-mode #dream-toolbar button{font-size:14px;padding:10px 16px;}
+
+  @media (max-width:640px){
+    .dream-cards{grid-template-columns:1fr;}
+  }
+
   /* ---------- Modal ---------- */
   .scrim{position:fixed;inset:0;background:rgba(50,35,24,0.35);display:flex;align-items:flex-start;justify-content:center;padding:5vh 16px;overflow-y:auto;z-index:100;}
   .modal{background:var(--surface);border-radius:14px;max-width:560px;width:100%;box-shadow:0 20px 60px rgba(50,35,24,0.3);padding:26px;margin:auto;}
@@ -381,6 +418,7 @@
         <div class="view-switcher" id="view-switcher">
           <button data-view="matrix" class="active">Matrix</button>
           <button data-view="calendar">Calendar</button>
+          <button data-view="dreams">Dreams</button>
           <button data-view="list">List</button>
           <button data-view="archive">Archive</button>
         </div>
@@ -426,6 +464,15 @@
       </div>
     </div>
 
+    <div class="header-row2 hidden" id="dream-toolbar">
+      <div class="filters-search">
+        <div class="pill-tabs" id="dream-family-tabs"></div>
+      </div>
+      <div class="quick-add" style="justify-content:flex-end;">
+        <button id="add-dream-btn">+ Add Dream…</button>
+      </div>
+    </div>
+
     <div class="stats-row" id="stats-row"></div>
   </header>
 
@@ -451,6 +498,7 @@
   var NOT_IMPORTANT_WORDS = ['maybe','someday','minor','low priority','junk','declutter'];
   var LS_TASKS = 'eisenhower_tasks_local_v1';
   var LS_CALENDAR = 'eisenhower_calendar_local_v1';
+  var LS_DREAMS = 'eisenhower_dreams_local_v1';
   var LS_CONFIG = 'eisenhower_gh_config_v1';
   var LS_META = 'eisenhower_meta_v1'; // title/subtitle
 
@@ -535,7 +583,12 @@
     calAnchor: todayStr(),// reference date for month/week/agenda navigation
     calFilter: 'all',     // 'all' or a family member id
     calSearch: '',
-    currentFamilyMember: null // resolved from currentUserEmail against state.family
+    currentFamilyMember: null, // resolved from currentUserEmail against state.family
+
+    // ---- Vision board module ----
+    dreams: [],          // see DREAM SCHEMA below
+    dreamSha: null,
+    dreamFilter: null    // which kid's board is showing; resolved to a real kid id on first render
   };
 
   var pendingNewTaskId = null; // set while the Add Task modal is open for a not-yet-confirmed task
@@ -571,6 +624,24 @@
     other:       { label:'Other',       icon:'📌', color:'#462c19' }
   };
   var FAMILY_COLOR_PALETTE = ['#13808a','#955c82','#bc5460','#008fa0','#8765be','#3e8f44','#c9922f','#a8372e'];
+
+  /*
+    DREAM SCHEMA (vision board -- one board per kid, private to them; adults can view any kid's board):
+    {
+      id, ownerId: familyMemberId, title, category: 'adventure'|'learning'|'kindness'|'creativity'|'sports'|'other',
+      notes: '', steps: [{id, text, done}],  // optional checklist of steps toward the dream
+      achieved: false, achievedAt: null|iso, createdAt: iso
+    }
+  */
+  var DREAM_CATEGORIES = {
+    adventure:  { label:'Adventure',  icon:'🏔️', color:'#c9922f' },
+    learning:   { label:'Learning',   icon:'📚', color:'#3b6ea5' },
+    kindness:   { label:'Kindness',   icon:'💛', color:'#bc5460' },
+    creativity: { label:'Creativity', icon:'🎨', color:'#8765be' },
+    sports:     { label:'Sports',     icon:'🏅', color:'#3e8f44' },
+    other:      { label:'Other',      icon:'⭐', color:'#6d6059' }
+  };
+  var DREAM_CATEGORY_ORDER = ['adventure','learning','kindness','creativity','sports','other'];
 
   /* ================= IDENTITY (Cloudflare Access) ================= */
   // Everyone -- including whoever set this app up -- is just an entry in state.family,
@@ -823,6 +894,72 @@
   }
   function persistCalendar(){
     saveCalendarToGitHub();
+  }
+
+  /* ---- Vision board file ---- */
+  function loadDreamsFromGitHub(){
+    var cfg = getConfig();
+    if(!cfg || !cfg.owner || !cfg.repo || !cfg.token){
+      loadDreamsLocal();
+      render();
+      return;
+    }
+    var path = cfg.dreamsPath || 'vision-board.json';
+    loadGithubFile(cfg, path)
+      .then(function(r){
+        if(r.notFound){
+          state.dreamSha = null;
+          state.dreams = loadDreamsLocalOnly();
+          render();
+          saveDreamsToGitHub();
+          return;
+        }
+        state.dreamSha = r.data.sha;
+        var parsed;
+        try{ parsed = JSON.parse(b64DecodeUnicode(r.data.content)); }catch(e){ parsed = {dreams:[]}; }
+        state.dreams = parsed.dreams || [];
+        cacheDreamsLocal();
+        render();
+      })
+      .catch(function(err){
+        console.error(err);
+        loadDreamsLocal();
+        render();
+      });
+  }
+
+  var saveDreamsToGitHub = debounce(function(){
+    var cfg = getConfig();
+    if(!cfg || !cfg.owner || !cfg.repo || !cfg.token){
+      cacheDreamsLocal();
+      return;
+    }
+    var path = cfg.dreamsPath || 'vision-board.json';
+    updateSyncStatus('busy');
+    saveGithubFile(cfg, path, state.dreamSha, {version:1, dreams: state.dreams}, 'Update vision-board.json via Task Manager app')
+      .then(function(sha){
+        state.dreamSha = sha;
+        cacheDreamsLocal();
+        updateSyncStatus('ok');
+      }).catch(function(err){
+        console.error(err);
+        cacheDreamsLocal();
+        updateSyncStatus('err');
+      });
+  }, 1200);
+
+  function loadDreamsLocalOnly(){
+    try{
+      var raw = JSON.parse(localStorage.getItem(LS_DREAMS) || 'null');
+      return (raw && raw.dreams) || [];
+    }catch(e){ return []; }
+  }
+  function loadDreamsLocal(){ state.dreams = loadDreamsLocalOnly(); }
+  function cacheDreamsLocal(){
+    localStorage.setItem(LS_DREAMS, JSON.stringify({dreams: state.dreams}));
+  }
+  function persistDreams(){
+    saveDreamsToGitHub();
   }
 
   function updateSyncStatus(s){
@@ -1159,7 +1296,7 @@
 
   function renderCountdownStrip(){
     var today = todayStr();
-    var occ = expandOccurrences(today, dateAdd(today,60)).filter(function(o){
+    var occ = expandOccurrences(today, dateAdd(today,7)).filter(function(o){
       if(state.calFilter !== 'all'){
         var att = o.attendees || ['all'];
         if(att.indexOf('all') === -1 && att.indexOf(state.calFilter) === -1) return false;
@@ -1369,9 +1506,12 @@
 
   function toggleToolbars(){
     var isCal = state.view === 'calendar';
-    document.getElementById('task-toolbar').classList.toggle('hidden', isCal);
+    var isDreams = state.view === 'dreams';
+    var isTaskView = !isCal && !isDreams;
+    document.getElementById('task-toolbar').classList.toggle('hidden', !isTaskView);
     document.getElementById('calendar-toolbar').classList.toggle('hidden', !isCal);
-    document.getElementById('stats-row').classList.toggle('hidden', isCal);
+    document.getElementById('dream-toolbar').classList.toggle('hidden', !isDreams);
+    document.getElementById('stats-row').classList.toggle('hidden', !isTaskView);
     document.body.classList.toggle('kid-mode', isKidMode()); // applies app-wide, not just on the calendar tab
     document.getElementById('open-family-settings').classList.toggle('hidden', isKidMode()); // roster management is adults-only
   }
@@ -1380,6 +1520,10 @@
     toggleToolbars();
     if(state.view === 'calendar'){
       renderCalendar();
+      return;
+    }
+    if(state.view === 'dreams'){
+      renderDreams();
       return;
     }
     renderStats();
@@ -2205,6 +2349,244 @@
     renderEventModal();
   }
 
+  /* ================= VISION BOARD ================= */
+  // One board per kid, private to them; adults can browse any kid's board via the tabs but don't
+  // get a board of their own -- this is a kids' feature. Dreams are grouped into category lanes
+  // (Adventure, Learning, Kindness, Creativity, Sports, Other) and each can carry an optional
+  // checklist of steps so a dream can track real progress, not just sit there as decoration.
+
+  function dreamsForOwner(ownerId){
+    return state.dreams.filter(function(d){ return d.ownerId === ownerId; });
+  }
+  function dreamStepsProgress(d){
+    var steps = d.steps || [];
+    var done = steps.filter(function(s){ return s.done; }).length;
+    return { done: done, total: steps.length };
+  }
+  function toggleDreamAchieved(id){
+    var d = state.dreams.find(function(x){ return x.id === id; });
+    if(!d) return;
+    d.achieved = !d.achieved;
+    d.achievedAt = d.achieved ? nowISO() : null;
+    persistDreams();
+    render();
+  }
+
+  function dreamCardHtml(d){
+    var cat = DREAM_CATEGORIES[d.category] || DREAM_CATEGORIES.other;
+    var prog = dreamStepsProgress(d);
+    var pct = prog.total ? Math.round(100*prog.done/prog.total) : 0;
+    var achieved = !!d.achieved;
+    return '<div class="dream-card'+(achieved?' achieved':'')+'" style="border-left-color:'+cat.color+'" data-id="'+d.id+'">'
+      + '<button type="button" class="dream-check" data-action="dream-toggle-achieved" data-id="'+d.id+'" title="'+(achieved?'Mark not achieved yet':'Mark achieved!')+'">'+(achieved?'🎉':cat.icon)+'</button>'
+      + '<div class="dream-body">'
+      + '<div class="dream-title'+(achieved?' done':'')+'">'+escapeHtml(d.title)+'</div>'
+      + (prog.total ? ('<div class="dream-progress"><div class="dream-progress-bar"><div class="dream-progress-fill" style="width:'+pct+'%;background:'+cat.color+'"></div></div><span class="dream-progress-label">'+prog.done+'/'+prog.total+'</span></div>') : '')
+      + '</div>'
+      + '</div>';
+  }
+
+  function renderDreamToolbar(){
+    var tabs = document.getElementById('dream-family-tabs');
+    var kids = state.family.filter(function(m){ return m.role === 'kid'; });
+    var locked = lockedPersonId();
+    if(locked){
+      state.dreamFilter = locked;
+      tabs.innerHTML = '';
+      tabs.classList.add('hidden');
+      return;
+    }
+    tabs.classList.remove('hidden');
+    if(!kids.length){
+      tabs.innerHTML = '';
+      return;
+    }
+    if(!state.dreamFilter || !kids.some(function(k){ return k.id === state.dreamFilter; })){
+      state.dreamFilter = kids[0].id; // boards are personal, not shared -- default to the first kid
+    }
+    tabs.innerHTML = kids.map(function(m){
+      return '<button data-fam="'+m.id+'" class="'+(state.dreamFilter===m.id?'active':'')+'">'+escapeHtml(m.name)+'</button>';
+    }).join('');
+    tabs.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click', function(){ state.dreamFilter = b.dataset.fam; render(); });
+    });
+  }
+
+  function renderDreams(){
+    renderDreamToolbar();
+    var kids = state.family.filter(function(m){ return m.role === 'kid'; });
+
+    if(!kids.length){
+      document.getElementById('view-root').innerHTML = '<div class="dream-wrap"><div class="dream-empty-state">No kids set up yet. Add one in <a href="#" id="dream-goto-family">Family Settings</a> to start their vision board.</div></div>';
+      var gotoBtn = document.getElementById('dream-goto-family');
+      if(gotoBtn) gotoBtn.addEventListener('click', function(e){ e.preventDefault(); openFamilySettingsModal(); });
+      return;
+    }
+
+    var owner = familyMember(state.dreamFilter);
+    var mine = dreamsForOwner(state.dreamFilter);
+    var byCat = {};
+    mine.forEach(function(d){ (byCat[d.category] = byCat[d.category]||[]).push(d); });
+
+    var groupsHtml = DREAM_CATEGORY_ORDER.map(function(key){
+      var list = byCat[key] || [];
+      if(!list.length) return '';
+      var cat = DREAM_CATEGORIES[key];
+      return '<div class="dream-group">'
+        + '<div class="dream-group-header" style="border-color:'+cat.color+'"><span>'+cat.icon+'</span><span>'+escapeHtml(cat.label)+'</span></div>'
+        + '<div class="dream-cards">'+list.map(dreamCardHtml).join('')+'</div>'
+        + '</div>';
+    }).join('');
+
+    var html = '<div class="dream-wrap">'
+      + '<div class="dream-board-title">'+(owner?escapeHtml(owner.name)+'’s Vision Board':'Vision Board')+'</div>'
+      + (mine.length ? groupsHtml : '<div class="dream-empty-state">No dreams here yet — tap “+ Add Dream…” to add the first one!</div>')
+      + '</div>';
+
+    document.getElementById('view-root').innerHTML = html;
+
+    document.querySelectorAll('.dream-card').forEach(function(card){
+      card.addEventListener('click', function(e){
+        if(e.target.closest('[data-action]')) return;
+        openDreamModal(card.dataset.id);
+      });
+    });
+    document.querySelectorAll('[data-action="dream-toggle-achieved"]').forEach(function(btn){
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        toggleDreamAchieved(btn.dataset.id);
+      });
+    });
+  }
+
+  function openAddDreamModal(){
+    var kids = state.family.filter(function(m){ return m.role === 'kid'; });
+    if(!kids.length){ openFamilySettingsModal(); return; }
+    var ownerId = state.dreamFilter && kids.some(function(k){ return k.id === state.dreamFilter; }) ? state.dreamFilter : kids[0].id;
+    var base = {
+      id: uid(), ownerId: ownerId, title:'', category:'adventure',
+      notes:'', steps: [], achieved:false, achievedAt:null, createdAt: nowISO()
+    };
+    openDreamModal({ isNew:true, draftBase: base });
+  }
+
+  function openDreamModal(refOrId){
+    var isNew = typeof refOrId === 'object' && refOrId && refOrId.isNew;
+    var sourceDream = isNew ? refOrId.draftBase : state.dreams.find(function(d){ return d.id === refOrId; });
+    if(!sourceDream) return;
+
+    var draft = Object.assign({}, sourceDream);
+    draft.steps = (sourceDream.steps || []).map(function(s){ return Object.assign({}, s); });
+
+    function renderDreamForm(){
+      var catButtons = DREAM_CATEGORY_ORDER.map(function(key){
+        var c = DREAM_CATEGORIES[key];
+        return '<button type="button" class="cat-btn'+(draft.category===key?' selected':'')+'" data-cat="'+key+'">'+c.icon+' '+c.label+'</button>';
+      }).join('');
+
+      var stepsHtml = (draft.steps||[]).map(function(s){
+        return '<div class="subtask-row" data-id="'+s.id+'">'
+          + '<input type="checkbox" '+(s.done?'checked':'')+' data-action="st-toggle">'
+          + '<span class="st-text'+(s.done?' done':'')+'">'+escapeHtml(s.text)+'</span>'
+          + '<button class="rm" data-action="st-remove">✕</button></div>';
+      }).join('');
+
+      var html = ''
+        + '<div class="scrim" id="scrim">'
+        + '<div class="modal">'
+        + '<input class="modal-title-input" id="dr-title" placeholder="What\'s the dream?" value="'+escapeHtml(draft.title)+'">'
+        + '<div class="field-label" style="margin-top:0;">Category</div><div class="category-grid">'+catButtons+'</div>'
+        + '<div class="field-label">Steps to get there (optional)</div><div id="dr-steps">'+stepsHtml+'</div>'
+        + '<input class="dashed-input" id="dr-step-input" placeholder="Add a step, press Enter">'
+        + '<div class="field-label">Notes</div><textarea class="notes" id="dr-notes">'+escapeHtml(draft.notes||'')+'</textarea>'
+        + '<div class="field-label">Status</div><button type="button" class="status-toggle'+(draft.achieved?' complete':'')+'" id="dr-achieved">'+(draft.achieved?'🎉 Achieved!':'☐ Not yet achieved')+'</button>'
+        + '<div class="modal-footer">'
+        + (isNew ? '<span></span>' : '<button class="btn-delete" id="dr-delete">Delete dream</button>')
+        + '<div style="display:flex;gap:10px;">'
+        + '<button class="btn-sm" id="dr-cancel">Cancel</button>'
+        + '<button class="btn-close" id="dr-save">Save</button>'
+        + '</div>'
+        + '</div>'
+        + '</div></div>';
+
+      document.getElementById('modal-root').innerHTML = html;
+      if(isNew) document.getElementById('dr-title').focus();
+
+      document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id==='scrim') doCancel(); });
+      document.getElementById('dr-cancel').addEventListener('click', doCancel);
+      document.getElementById('dr-save').addEventListener('click', commit);
+
+      document.getElementById('dr-title').addEventListener('input', function(e){ draft.title = e.target.value; });
+      document.getElementById('dr-notes').addEventListener('input', function(e){ draft.notes = e.target.value; });
+
+      document.querySelectorAll('.cat-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){ draft.category = btn.dataset.cat; renderDreamForm(); });
+      });
+
+      document.getElementById('dr-achieved').addEventListener('click', function(){
+        draft.achieved = !draft.achieved;
+        draft.achievedAt = draft.achieved ? nowISO() : null;
+        renderDreamForm();
+      });
+
+      document.querySelectorAll('#dr-steps [data-action="st-toggle"]').forEach(function(cb){
+        cb.addEventListener('change', function(){
+          var row = cb.closest('.subtask-row');
+          var s = draft.steps.find(function(x){ return x.id === row.dataset.id; });
+          if(s) s.done = cb.checked;
+          renderDreamForm();
+        });
+      });
+      document.querySelectorAll('#dr-steps [data-action="st-remove"]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var row = btn.closest('.subtask-row');
+          draft.steps = draft.steps.filter(function(x){ return x.id !== row.dataset.id; });
+          renderDreamForm();
+        });
+      });
+      document.getElementById('dr-step-input').addEventListener('keydown', function(e){
+        if(e.key === 'Enter' && e.target.value.trim()){
+          draft.steps.push({ id: uid(), text: e.target.value.trim(), done:false });
+          renderDreamForm();
+        }
+      });
+
+      var delBtn = document.getElementById('dr-delete');
+      if(delBtn) delBtn.addEventListener('click', function(){
+        closeDom();
+        state.dreams = state.dreams.filter(function(d){ return d.id !== sourceDream.id; });
+        persistDreams();
+        render();
+      });
+    }
+
+    function closeDom(){ document.getElementById('modal-root').innerHTML = ''; }
+
+    function doCancel(){ closeDom(); render(); }
+
+    function commit(){
+      var titleTrim = (draft.title||'').trim();
+      if(isNew && !titleTrim){ closeDom(); render(); return; }
+      var fields = {
+        title: titleTrim || sourceDream.title,
+        category: draft.category,
+        notes: draft.notes || '',
+        steps: (draft.steps||[]).map(function(s){ return Object.assign({}, s); }),
+        achieved: draft.achieved, achievedAt: draft.achievedAt
+      };
+      if(isNew){
+        state.dreams.push(Object.assign({}, sourceDream, fields));
+      } else {
+        Object.assign(sourceDream, fields);
+      }
+      persistDreams();
+      closeDom();
+      render();
+    }
+
+    renderDreamForm();
+  }
+
   /* ================= CALENDAR: ICS IMPORT ================= */
   var ICS_DOW = {SU:0,MO:1,TU:2,WE:3,TH:4,FR:5,SA:6};
 
@@ -2457,7 +2839,7 @@
 
   /* ================= SETTINGS MODAL ================= */
   function openSettingsModal(){
-    var cfg = getConfig() || {owner:'',repo:'',path:'tasks.json',calendarPath:'family-calendar.json',branch:'main',token:''};
+    var cfg = getConfig() || {owner:'',repo:'',path:'tasks.json',calendarPath:'family-calendar.json',dreamsPath:'vision-board.json',branch:'main',token:''};
     var html = ''
       + '<div class="scrim" id="scrim">'
       + '<div class="modal">'
@@ -2469,6 +2851,7 @@
       + '<div class="settings-field"><label>Tasks file path</label><input class="text-input" id="s-path" value="'+escapeHtml(cfg.path||'tasks.json')+'"></div>'
       + '<div class="settings-field"><label>Calendar file path</label><input class="text-input" id="s-cal-path" value="'+escapeHtml(cfg.calendarPath||'family-calendar.json')+'"></div>'
       + '</div>'
+      + '<div class="settings-field"><label>Vision board file path</label><input class="text-input" id="s-dreams-path" value="'+escapeHtml(cfg.dreamsPath||'vision-board.json')+'"></div>'
       + '<div class="settings-field"><label>Personal access token</label><input class="text-input" type="password" id="s-token" value="'+escapeHtml(cfg.token)+'" placeholder="fine-grained PAT, Contents: read & write"></div>'
       + '<div class="settings-help">Create a fine-grained token at github.com → Settings → Developer settings → Personal access tokens, scoped to just this repo with <strong>Contents: Read and write</strong> permission. It is stored only in this browser, never committed to the repo. Everyone in the family needs to enter their own token here on their own device.</div>'
       + '<div class="settings-actions">'
@@ -2496,6 +2879,7 @@
         branch: document.getElementById('s-branch').value.trim() || 'main',
         path: document.getElementById('s-path').value.trim() || 'tasks.json',
         calendarPath: document.getElementById('s-cal-path').value.trim() || 'family-calendar.json',
+        dreamsPath: document.getElementById('s-dreams-path').value.trim() || 'vision-board.json',
         token: document.getElementById('s-token').value.trim()
       };
       if(!newCfg.owner || !newCfg.repo || !newCfg.token){
@@ -2506,6 +2890,7 @@
       close();
       loadFromGitHub();
       loadCalendarFromGitHub();
+      loadDreamsFromGitHub();
     });
   }
 
@@ -2646,6 +3031,7 @@
   document.getElementById('add-event-btn').addEventListener('click', function(){ openAddEventModal(state.calAnchor); });
   document.getElementById('open-my-calendars').addEventListener('click', openMyCalendarsModal);
   document.getElementById('open-family-settings').addEventListener('click', openFamilySettingsModal);
+  document.getElementById('add-dream-btn').addEventListener('click', openAddDreamModal);
 
   /* app title/subtitle persistence (local only, cosmetic) */
   function loadMeta(){
@@ -2674,6 +3060,7 @@
   });
   loadFromGitHub();
   loadCalendarFromGitHub();
+  loadDreamsFromGitHub();
 
 })();
 </script>
