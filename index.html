@@ -65,8 +65,8 @@
   .view-switcher button.active{background:var(--surface);color:var(--ink);box-shadow:0 2px 6px rgba(50,35,24,0.12);}
 
   .header-row2{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:14px;justify-content:space-between;}
-  .filters-search{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
-  .pill-tabs{display:inline-flex;gap:4px;background:rgba(213,204,196,0.3);padding:4px;border-radius:var(--radius-pill);}
+  .filters-search{display:flex;flex-wrap:wrap;gap:10px;align-items:center;min-width:0;}
+  .pill-tabs{display:inline-flex;flex-wrap:wrap;gap:4px;background:rgba(213,204,196,0.3);padding:4px;border-radius:var(--radius-pill);max-width:100%;}
   .pill-tabs button{border:none;background:transparent;padding:7px 14px;border-radius:var(--radius-pill);font-size:12.5px;font-weight:600;color:var(--ink-muted);}
   .pill-tabs button.active{background:var(--primary-btn);color:#fff;}
 
@@ -210,6 +210,11 @@
   .event-chip{display:flex;align-items:center;gap:5px;padding:3px 8px;border-radius:var(--radius-pill);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;}
   .event-chip .ec-icon{flex:none;}
   .event-chip .ec-title{overflow:hidden;text-overflow:ellipsis;}
+  .event-chip.task-chip{font-style:italic;}
+  .event-chip .ec-title.done{text-decoration:line-through;opacity:0.8;}
+  .agenda-card.task-agenda-card{font-style:italic;}
+  .agenda-card .ac-title.done{text-decoration:line-through;opacity:0.55;}
+  .agenda-card.task-agenda-card.done{opacity:0.7;}
 
   /* Month grid (Fridge Calendar) */
   .month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
@@ -375,9 +380,9 @@
       <div style="display:flex;align-items:center;gap:10px;">
         <div class="view-switcher" id="view-switcher">
           <button data-view="matrix" class="active">Matrix</button>
+          <button data-view="calendar">Calendar</button>
           <button data-view="list">List</button>
           <button data-view="archive">Archive</button>
-          <button data-view="calendar">Calendar</button>
         </div>
         <button class="settings-gear" id="open-family-settings" title="Manage family members">👪</button>
         <button class="settings-gear" id="open-settings" title="GitHub sync settings">⚙</button>
@@ -585,8 +590,9 @@
   function lockedPersonId(){
     return (state.currentFamilyMember && state.currentFamilyMember.role === 'kid') ? state.currentFamilyMember.id : null;
   }
-  function defaultTaskAssignee(){
-    return state.currentFamilyMember ? state.currentFamilyMember.id : 'shared';
+  function defaultTaskAssignees(){
+    if(state.currentFamilyMember) return [state.currentFamilyMember.id];
+    return state.family.map(function(m){ return m.id; }); // identity unresolved: default to everyone, editable
   }
   function loadIdentity(){
     try{
@@ -681,7 +687,7 @@
       .then(function(r){
         if(r.notFound){
           state.ghSha = null;
-          state.tasks = loadLocalTasksOnly();
+          state.tasks = migrateTasks(loadLocalTasksOnly());
           updateSyncStatus('ok');
           showSetupBanner(false);
           render();
@@ -691,7 +697,7 @@
         state.ghSha = r.data.sha;
         var parsed;
         try{ parsed = JSON.parse(b64DecodeUnicode(r.data.content)); }catch(e){ parsed = {tasks:[]}; }
-        state.tasks = parsed.tasks || [];
+        state.tasks = migrateTasks(parsed.tasks || []);
         cacheLocal();
         updateSyncStatus('ok');
         showSetupBanner(false);
@@ -732,7 +738,7 @@
     }catch(e){ return []; }
   }
   function loadLocal(){
-    state.tasks = loadLocalTasksOnly();
+    state.tasks = migrateTasks(loadLocalTasksOnly());
   }
   function cacheLocal(){
     localStorage.setItem(LS_TASKS, JSON.stringify({tasks: state.tasks}));
@@ -881,11 +887,23 @@
   }
 
   /* ================= FILTERING ================= */
+  function isSharedTask(t){ return (t.assignees||[]).length > 1; } // "shared" = assigned to more than one specific person
+  // Normalizes tasks to the current assignees:[memberId,...] shape (any task missing it -- e.g.
+  // old test/dummy data -- just starts out unassigned rather than trying to guess).
+  function migrateTasks(tasks){
+    return (tasks||[]).map(function(t){
+      if(t.assignees) return t;
+      var copy = Object.assign({}, t, { assignees: [] });
+      delete copy.assignee;
+      return copy;
+    });
+  }
   function personMatch(t){
     var filter = lockedPersonId() || state.person;
+    var assignees = t.assignees || [];
     if(filter === 'all') return true;
-    if(filter === 'shared') return t.assignee === 'shared';
-    return t.assignee === filter || t.assignee === 'shared';
+    if(filter === 'shared') return assignees.length > 1;
+    return assignees.indexOf(filter) !== -1;
   }
   function searchMatch(t){
     if(!state.search) return true;
@@ -899,17 +917,12 @@
   }
 
   /* ================= RENDER: MATRIX / LIST / ARCHIVE ================= */
-  function avatarHtml(assignee){
-    if(assignee === 'shared'){
-      var members = state.family.slice(0,4);
-      if(!members.length) return '<span class="tc-avatars"><span class="avatar" style="background:var(--primary-btn)">?</span></span>';
-      return '<span class="tc-avatars">'+members.map(function(m,i){
-        return '<span class="avatar" style="background:'+m.color+';'+(i>0?'margin-left:-8px;':'')+'">'+escapeHtml((m.name||'?')[0])+'</span>';
-      }).join('')+'</span>';
-    }
-    var m = familyMember(assignee);
-    if(!m) return '<span class="tc-avatars"><span class="avatar" style="background:var(--ink-muted)">?</span></span>';
-    return '<span class="tc-avatars"><span class="avatar" style="background:'+m.color+'">'+escapeHtml((m.name||'?')[0])+'</span></span>';
+  function avatarHtml(assignees){
+    var list = (assignees||[]).map(familyMember).filter(Boolean);
+    if(!list.length) return '<span class="tc-avatars"><span class="avatar" style="background:var(--ink-muted)">?</span></span>';
+    return '<span class="tc-avatars">'+list.slice(0,4).map(function(m,i){
+      return '<span class="avatar" style="background:'+m.color+';'+(i>0?'margin-left:-8px;':'')+'">'+escapeHtml((m.name||'?')[0])+'</span>';
+    }).join('')+'</span>';
   }
   function metaPillsHtml(t){
     var pills = '';
@@ -938,7 +951,7 @@
       + '<div class="tc-top">'
       + '<span class="tc-check'+(t.completed?' checked':'')+'" data-action="toggle" data-id="'+t.id+'">'+(t.completed?'✓':'')+'</span>'
       + '<span class="tc-title'+(t.completed?' done':'')+'">'+escapeHtml(t.title)+'</span>'
-      + avatarHtml(t.assignee)
+      + avatarHtml(t.assignees)
       + '</div>'
       + '<div class="tc-meta">'+metaPillsHtml(t)+'</div>'
       + '</div>';
@@ -994,7 +1007,7 @@
           + '<span class="tc-check'+(t.completed?' checked':'')+'" data-action="toggle" data-id="'+t.id+'">'+(t.completed?'✓':'')+'</span>'
           + '<span class="tc-title'+(t.completed?' done':'')+'">'+escapeHtml(t.title)+'</span>'
           + (t.due ? '<span class="meta-pill'+(t.due<todayStr()?' due-overdue':(t.due===todayStr()?' due-today':''))+'">'+fmtDate(t.due)+'</span>' : '')
-          + avatarHtml(t.assignee)
+          + avatarHtml(t.assignees)
           + '</div>';
       }).join('') : '<div class="list-empty">Nothing here.</div>';
       return '<div class="list-group"><div class="q-header" style="background:'+ {doFirst:'var(--do-first-tint)',schedule:'var(--schedule-tint)',delegate:'var(--delegate-tint)',eliminate:'var(--eliminate-tint)'}[qkey] +'">'
@@ -1011,7 +1024,7 @@
       .sort(function(a,b){ return (b.completedAt||'').localeCompare(a.completedAt||''); });
     var html = done.length ? done.map(function(t){
       return '<div class="archive-row" data-id="'+t.id+'">'
-        + avatarHtml(t.assignee)
+        + avatarHtml(t.assignees)
         + '<span class="tc-title done" style="flex:1">'+escapeHtml(t.title)+'</span>'
         + '<span class="archive-date">Completed '+(t.completedAt?fmtDate(t.completedAt.slice(0,10)):'')+'</span>'
         + '<button class="btn-sm" data-action="restore" data-id="'+t.id+'">Restore</button>'
@@ -1058,8 +1071,13 @@
 
   function eventMatchesFilter(occ){
     if(state.calFilter !== 'all'){
-      var att = occ.attendees || ['all'];
-      if(att.indexOf('all') === -1 && att.indexOf(state.calFilter) === -1) return false;
+      if(occ.kind === 'task'){
+        var as = occ.attendees || [];
+        if(as.indexOf(state.calFilter) === -1) return false;
+      } else {
+        var att = occ.attendees || ['all'];
+        if(att.indexOf('all') === -1 && att.indexOf(state.calFilter) === -1) return false;
+      }
     }
     if(state.calSearch){
       var q = state.calSearch.toLowerCase();
@@ -1082,6 +1100,61 @@
     var importedMark = occ.source === 'ics' ? '📥 ' : '';
     return '<div class="event-chip" style="background:'+cat.color+'" data-occ="'+occ.occurrenceId+'" title="'+escapeHtml((occ.source==='ics'?'Imported · ':'')+occ.title)+'">'
       + '<span class="ec-icon">'+cat.icon+'</span><span class="ec-title">'+importedMark+escapeHtml(occ.title)+'</span></div>';
+  }
+
+  /* ---- Tasks-with-due-dates, shown alongside events on the calendar ---- */
+  // Tasks stay a separate data model from Events (per design), but any task with a due date is
+  // projected into a lightweight pseudo-occurrence so it can slot into the same day cells / agenda
+  // rows as events. Clicking one opens the real Task modal, not the Event modal.
+  function taskAsCalOccurrence(t){
+    return {
+      kind:'task',
+      occurrenceId: 'task::'+t.id,
+      taskId: t.id,
+      occurrenceDate: t.due,
+      title: t.title,
+      attendees: (t.assignees || []).slice(),
+      completed: !!t.completed,
+      quadrant: quadrantOf(t)
+    };
+  }
+  function taskOccurrencesInRange(rangeStart, rangeEnd){
+    return state.tasks.filter(function(t){ return t.due && t.due >= rangeStart && t.due <= rangeEnd; }).map(taskAsCalOccurrence);
+  }
+  function taskAssigneeAvatarsHtml(occ){
+    var members = (occ.attendees||[]).map(familyMember).filter(Boolean);
+    return members.map(function(m){
+      return '<span class="avatar" style="background:'+m.color+';margin-left:-6px;" title="'+escapeHtml(m.name)+'">'+escapeHtml((m.name||'?')[0])+'</span>';
+    }).join('');
+  }
+  function taskChipHtml(occ){
+    var q = QUADRANTS[occ.quadrant];
+    var style = occ.completed
+      ? 'background:transparent;border:1.5px dashed var(--hairline);color:var(--ink-muted);'
+      : 'background:'+q.accent+';';
+    return '<div class="event-chip task-chip" style="'+style+'" data-task="'+occ.taskId+'" title="'+escapeHtml('Task · '+occ.title)+'">'
+      + '<span class="ec-icon">'+(occ.completed?'✅':'☐')+'</span><span class="ec-title'+(occ.completed?' done':'')+'">'+escapeHtml(occ.title)+'</span></div>';
+  }
+  function chipHtml(occ){ return occ.kind === 'task' ? taskChipHtml(occ) : eventChipHtml(occ); }
+
+  function agendaCardHtml(occ){
+    if(occ.kind === 'task'){
+      var q = QUADRANTS[occ.quadrant];
+      return '<div class="agenda-card task-agenda-card'+(occ.completed?' done':'')+'" style="border-left-color:'+(occ.completed?'var(--hairline)':q.accent)+'" data-task="'+occ.taskId+'">'
+        + '<span class="ac-icon">'+(occ.completed?'✅':'☐')+'</span>'
+        + '<div class="ac-body"><div class="ac-title'+(occ.completed?' done':'')+'">'+escapeHtml(occ.title)+'</div><div class="ac-meta">Task · '+escapeHtml(q.title)+'</div></div>'
+        + '<span class="ac-avatars">'+taskAssigneeAvatarsHtml(occ)+'</span>'
+        + '</div>';
+    }
+    var cat = categoryOf(occ);
+    var timeLabel = occ.allDay ? 'All day' : (occ.time||'');
+    var loc = occ.location ? ' · '+escapeHtml(occ.location) : '';
+    var importedMark = occ.source === 'ics' ? '📥 ' : '';
+    return '<div class="agenda-card" style="border-left-color:'+cat.color+'" data-occ="'+occ.occurrenceId+'">'
+      + '<span class="ac-icon">'+cat.icon+'</span>'
+      + '<div class="ac-body"><div class="ac-title">'+importedMark+escapeHtml(occ.title)+'</div><div class="ac-meta">'+timeLabel+loc+'</div></div>'
+      + '<span class="ac-avatars">'+attendeeAvatarsHtml(occ)+'</span>'
+      + '</div>';
   }
 
   function renderCountdownStrip(){
@@ -1123,7 +1196,7 @@
       var extra = dayList.length - list.length;
       cells += '<div class="month-cell'+(inMonth?'':' outside')+(isToday?' today':'')+'" data-date="'+d+'">'
         + '<div class="mc-num">'+parseInt(d.slice(8,10),10)+'</div>'
-        + list.map(eventChipHtml).join('')
+        + list.map(chipHtml).join('')
         + (extra>0 ? '<div class="month-more" data-jump="'+d+'">+'+extra+' more</div>' : '')
         + '</div>';
       d = dateAdd(d,1);
@@ -1158,7 +1231,7 @@
     var rows = '<div class="week-lane-label"><span class="adot" style="background:var(--primary-btn)"></span>Everyone</div>'
       + days.map(function(d){
           var list = (byPersonDate.everyone && byPersonDate.everyone[d]) || [];
-          return '<div class="week-cell'+(d===today?' today':'')+'" data-date="'+d+'">'+list.map(eventChipHtml).join('')+'</div>';
+          return '<div class="week-cell'+(d===today?' today':'')+'" data-date="'+d+'">'+list.map(chipHtml).join('')+'</div>';
         }).join('');
 
     state.family.forEach(function(m){
@@ -1166,7 +1239,7 @@
       rows += '<div class="week-lane-label"><span class="adot" style="background:'+m.color+'"></span>'+escapeHtml(m.name)+'</div>'
         + days.map(function(d){
             var list = (byPersonDate[m.id] && byPersonDate[m.id][d]) || [];
-            return '<div class="week-cell'+(d===today?' today':'')+'" data-date="'+d+'">'+list.map(eventChipHtml).join('')+'</div>';
+            return '<div class="week-cell'+(d===today?' today':'')+'" data-date="'+d+'">'+list.map(chipHtml).join('')+'</div>';
           }).join('');
     });
 
@@ -1184,18 +1257,12 @@
     var days = dates.map(function(d){
       var isToday = d === today;
       var isTomorrow = d === dateAdd(today,1);
-      var list = byDate[d].slice().sort(function(a,b){ return (a.time||'').localeCompare(b.time||''); });
-      var cards = list.map(function(o){
-        var cat = categoryOf(o);
-        var timeLabel = o.allDay ? 'All day' : (o.time||'');
-        var loc = o.location ? ' · '+escapeHtml(o.location) : '';
-        var importedMark = o.source === 'ics' ? '📥 ' : '';
-        return '<div class="agenda-card" style="border-left-color:'+cat.color+'" data-occ="'+o.occurrenceId+'">'
-          + '<span class="ac-icon">'+cat.icon+'</span>'
-          + '<div class="ac-body"><div class="ac-title">'+importedMark+escapeHtml(o.title)+'</div><div class="ac-meta">'+timeLabel+loc+'</div></div>'
-          + '<span class="ac-avatars">'+attendeeAvatarsHtml(o)+'</span>'
-          + '</div>';
-      }).join('');
+      var list = byDate[d].slice().sort(function(a,b){
+        if(a.kind === 'task' && b.kind !== 'task') return 1;
+        if(a.kind !== 'task' && b.kind === 'task') return -1;
+        return (a.time||'').localeCompare(b.time||'');
+      });
+      var cards = list.map(agendaCardHtml).join('');
       return '<div class="agenda-day">'
         + '<div class="agenda-day-label">'+fmtLong(d)+(isToday?'<span class="today-badge">Today</span>':(isTomorrow?'<span class="today-badge" style="background:var(--ink-muted)">Tomorrow</span>':''))+'</div>'
         + '<div class="agenda-cards">'+cards+'</div>'
@@ -1257,7 +1324,9 @@
       rangeEnd = dateAdd(rangeStart, 20);
     }
 
-    var occurrences = expandOccurrences(rangeStart, rangeEnd).filter(eventMatchesFilter);
+    var eventOccs = expandOccurrences(rangeStart, rangeEnd).map(function(o){ o.kind = 'event'; return o; });
+    var taskOccs = taskOccurrencesInRange(rangeStart, rangeEnd);
+    var occurrences = eventOccs.concat(taskOccs).filter(eventMatchesFilter);
 
     var html = '<div class="cal-wrap">' + renderCountdownStrip();
     if(state.calSubView === 'month') html += renderMonthGrid(rangeStart, rangeEnd, occurrences);
@@ -1274,6 +1343,12 @@
         if(occ) openEventModal(occ);
       });
     });
+    document.getElementById('view-root').querySelectorAll('[data-task]').forEach(function(el){
+      el.addEventListener('click', function(e){
+        e.stopPropagation();
+        openTaskModal(el.dataset.task);
+      });
+    });
     document.getElementById('view-root').querySelectorAll('.month-more').forEach(function(el){
       el.addEventListener('click', function(e){
         e.stopPropagation();
@@ -1284,7 +1359,7 @@
     });
     document.getElementById('view-root').querySelectorAll('.month-cell,.week-cell').forEach(function(cell){
       cell.addEventListener('click', function(e){
-        if(e.target.closest('[data-occ]') || e.target.closest('.month-more')) return;
+        if(e.target.closest('[data-occ]') || e.target.closest('[data-task]') || e.target.closest('.month-more')) return;
         openAddEventModal(cell.dataset.date);
       });
     });
@@ -1370,7 +1445,7 @@
     if(!t) return;
     t.completed = !t.completed;
     t.completedAt = t.completed ? nowISO() : null;
-    if(t.assignee === 'shared') logActivity(t, t.completed ? 'Marked complete' : 'Marked incomplete');
+    if(isSharedTask(t)) logActivity(t, t.completed ? 'Marked complete' : 'Marked incomplete');
     persist(); render();
   }
 
@@ -1383,7 +1458,7 @@
     t.urgency = q.urgent;
     if(changed){
       t.quadrantEnteredAt = nowISO();
-      if(t.assignee === 'shared') logActivity(t, 'Moved to '+q.title);
+      if(isSharedTask(t)) logActivity(t, 'Moved to '+q.title);
     }
     persist(); render();
   }
@@ -1427,11 +1502,10 @@
     text = text.trim();
     if(!text) return;
     var guess = guessQuadrantFromText(text);
-    var assignee = defaultTaskAssignee();
     var task = {
       id: uid(), title: text, notes: '',
       importance: guess.importance, urgency: guess.urgency,
-      assignee: assignee, due: null, tags: [],
+      assignees: defaultTaskAssignees(), due: null, tags: [],
       subtasks: [], completed: false, completedAt: null,
       quadrantEnteredAt: nowISO(), activity: []
     };
@@ -1465,7 +1539,7 @@
     var t = {
       id: uid(), title: '', notes: '',
       importance: true, urgency: false, // default: Schedule quadrant, same "no signal" default as quick-add
-      assignee: defaultTaskAssignee(), due: null, tags: [],
+      assignees: defaultTaskAssignees(), due: null, tags: [],
       subtasks: [], completed: false, completedAt: null,
       quadrantEnteredAt: nowISO(), activity: []
     };
@@ -1476,165 +1550,208 @@
   }
 
   function openTaskModal(id){
-    var t = findTask(id);
-    if(!t) return;
+    var sourceTask = findTask(id);
+    if(!sourceTask) return;
     var isNew = (pendingNewTaskId === id);
-    var qkey = quadrantOf(t);
-    var priorityBtns = QUADRANT_ORDER.map(function(k){
-      var q = QUADRANTS[k];
-      var sel = (k === qkey) ? ' sel-'+ (k==='doFirst'?'do-first':k) : '';
-      return '<button class="priority-btn'+sel+'" data-q="'+k+'">'+q.title+'</button>';
-    }).join('');
 
-    var assigneeBtns = state.family.map(function(m){
-      return '<button type="button" class="cat-btn'+(t.assignee===m.id?' selected':'')+'" data-a="'+m.id+'">'+escapeHtml(m.name)+'</button>';
-    }).join('') + '<button type="button" class="cat-btn'+(t.assignee==='shared'?' selected':'')+'" data-a="shared">Shared</button>';
+    // Everything in this modal edits a draft copy -- nothing touches real data (or GitHub) until
+    // Save is clicked. Cancel, or clicking outside the modal, throws the draft away untouched.
+    var draft = Object.assign({}, sourceTask);
+    draft.tags = (sourceTask.tags || []).slice();
+    draft.subtasks = (sourceTask.subtasks || []).map(function(s){ return Object.assign({}, s); });
+    draft.assignees = (sourceTask.assignees || []).slice();
+    draft.activity = (sourceTask.activity || []).slice();
 
-    var tagsHtml = (t.tags||[]).map(function(tag,i){
-      return '<span class="tag-chip">'+escapeHtml(tag)+'<button data-idx="'+i+'" data-action="rm-tag">✕</button></span>';
-    }).join('');
+    function renderTaskForm(){
+      var qkey = quadrantOf(draft);
+      var priorityBtns = QUADRANT_ORDER.map(function(k){
+        var q = QUADRANTS[k];
+        var sel = (k === qkey) ? ' sel-'+ (k==='doFirst'?'do-first':k) : '';
+        return '<button class="priority-btn'+sel+'" data-q="'+k+'">'+q.title+'</button>';
+      }).join('');
 
-    var subtasksHtml = (t.subtasks||[]).map(function(s){
-      return '<div class="subtask-row" data-id="'+s.id+'">'
-        + '<input type="checkbox" '+(s.done?'checked':'')+' data-action="st-toggle">'
-        + '<span class="st-text'+(s.done?' done':'')+'">'+escapeHtml(s.text)+'</span>'
-        + '<button class="rm" data-action="st-remove">✕</button></div>';
-    }).join('');
+      var assignees = draft.assignees || [];
+      var assigneeChips = state.family.length ? state.family.map(function(m){
+        var on = assignees.indexOf(m.id) !== -1;
+        return '<span class="tag-chip attendee-chip'+(on?' active':'')+'" data-a="'+m.id+'"><span class="adot" style="background:'+m.color+'"></span>'+escapeHtml(m.name)+'</span>';
+      }).join('') : '<span class="settings-help" style="margin:0;">Add family members in Family Settings to assign tasks to specific people.</span>';
 
-    var activityHtml = '';
-    if(t.assignee === 'shared' && t.activity && t.activity.length){
-      activityHtml = '<div class="field-label">Activity</div><div class="activity-log">'
-        + t.activity.map(function(a){ return '<div>'+escapeHtml(a.text)+' — '+fmtRelative(a.ts)+'</div>'; }).join('')
-        + '</div>';
-    }
+      var tagsHtml = (draft.tags||[]).map(function(tag,i){
+        return '<span class="tag-chip">'+escapeHtml(tag)+'<button data-idx="'+i+'" data-action="rm-tag">✕</button></span>';
+      }).join('');
 
-    var html = ''
-      + '<div class="scrim" id="scrim">'
-      + '<div class="modal">'
-      + '<input class="modal-title-input" id="m-title" placeholder="Task title" value="'+escapeHtml(t.title)+'">'
-      + '<div class="field-label">Priority</div><div class="priority-grid">'+priorityBtns+'</div>'
-      + '<div class="field-label">Assigned to</div><div class="category-grid" id="m-assignee">'+assigneeBtns+'</div>'
-      + '<div class="row-2" style="margin-top:18px;">'
-      + '<div><div class="field-label" style="margin-top:0;">Due date</div><input type="date" id="m-due" value="'+(t.due||'')+'"></div>'
-      + '<div><div class="field-label" style="margin-top:0;">Status</div><button class="status-toggle'+(t.completed?' complete':'')+'" id="m-status">'+(t.completed?'↺ Mark incomplete':'✓ Mark complete')+'</button></div>'
-      + '</div>'
-      + '<div class="field-label">Tags</div><div class="tag-list" id="m-tags">'+tagsHtml+'</div>'
-      + '<input class="dashed-input" id="m-tag-input" placeholder="Add a tag, press Enter">'
-      + '<div class="field-label">Subtasks</div><div id="m-subtasks">'+subtasksHtml+'</div>'
-      + '<input class="dashed-input" id="m-subtask-input" placeholder="Add a subtask, press Enter">'
-      + '<div class="field-label">Notes</div><textarea class="notes" id="m-notes">'+escapeHtml(t.notes||'')+'</textarea>'
-      + activityHtml
-      + '<div class="modal-footer">'
-      + '<button class="btn-delete" id="m-delete">Delete task</button>'
-      + '<button class="btn-close" id="m-close">Done</button>'
-      + '</div>'
-      + '</div></div>';
+      var subtasksHtml = (draft.subtasks||[]).map(function(s){
+        return '<div class="subtask-row" data-id="'+s.id+'">'
+          + '<input type="checkbox" '+(s.done?'checked':'')+' data-action="st-toggle">'
+          + '<span class="st-text'+(s.done?' done':'')+'">'+escapeHtml(s.text)+'</span>'
+          + '<button class="rm" data-action="st-remove">✕</button></div>';
+      }).join('');
 
-    document.getElementById('modal-root').innerHTML = html;
+      var activityHtml = '';
+      if(isSharedTask(draft) && draft.activity && draft.activity.length){
+        activityHtml = '<div class="field-label">Activity</div><div class="activity-log">'
+          + draft.activity.map(function(a){ return '<div>'+escapeHtml(a.text)+' — '+fmtRelative(a.ts)+'</div>'; }).join('')
+          + '</div>';
+      }
 
-    if(isNew){
-      var titleEl = document.getElementById('m-title');
-      titleEl.focus();
-    }
+      var html = ''
+        + '<div class="scrim" id="scrim">'
+        + '<div class="modal">'
+        + '<input class="modal-title-input" id="m-title" placeholder="Task title" value="'+escapeHtml(draft.title)+'">'
+        + '<div class="field-label">Priority</div><div class="priority-grid">'+priorityBtns+'</div>'
+        + '<div class="field-label">Assigned to</div><div class="tag-list" id="m-assignee">'+assigneeChips+'</div>'
+        + '<div class="row-2" style="margin-top:18px;">'
+        + '<div><div class="field-label" style="margin-top:0;">Due date</div><input type="date" id="m-due" value="'+(draft.due||'')+'"></div>'
+        + '<div><div class="field-label" style="margin-top:0;">Status</div><button class="status-toggle'+(draft.completed?' complete':'')+'" id="m-status">'+(draft.completed?'↺ Mark incomplete':'✓ Mark complete')+'</button></div>'
+        + '</div>'
+        + '<div class="field-label">Tags</div><div class="tag-list" id="m-tags">'+tagsHtml+'</div>'
+        + '<input class="dashed-input" id="m-tag-input" placeholder="Add a tag, press Enter">'
+        + '<div class="field-label">Subtasks</div><div id="m-subtasks">'+subtasksHtml+'</div>'
+        + '<input class="dashed-input" id="m-subtask-input" placeholder="Add a subtask, press Enter">'
+        + '<div class="field-label">Notes</div><textarea class="notes" id="m-notes">'+escapeHtml(draft.notes||'')+'</textarea>'
+        + activityHtml
+        + '<div class="modal-footer">'
+        + '<button class="btn-delete" id="m-delete">Delete task</button>'
+        + '<div style="display:flex;gap:10px;">'
+        + '<button class="btn-sm" id="m-cancel">Cancel</button>'
+        + '<button class="btn-close" id="m-save">Save</button>'
+        + '</div>'
+        + '</div>'
+        + '</div></div>';
 
-    function closeModal(){
-      document.getElementById('modal-root').innerHTML = '';
-      if(pendingNewTaskId === id){
-        pendingNewTaskId = null;
-        if(!t.title || !t.title.trim()){
-          state.tasks = state.tasks.filter(function(x){ return x.id !== id; });
-          persist(); render();
-          return;
+      document.getElementById('modal-root').innerHTML = html;
+
+      if(isNew) document.getElementById('m-title').focus();
+
+      document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id === 'scrim') doCancel(); });
+      document.getElementById('m-cancel').addEventListener('click', doCancel);
+      document.getElementById('m-save').addEventListener('click', doSave);
+
+      document.getElementById('m-title').addEventListener('input', function(e){ draft.title = e.target.value; });
+
+      document.querySelectorAll('.priority-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var qk = btn.dataset.q, q = QUADRANTS[qk];
+          var changed = (draft.importance !== q.important) || (draft.urgency !== q.urgent);
+          draft.importance = q.important; draft.urgency = q.urgent;
+          if(changed){
+            draft.quadrantEnteredAt = nowISO();
+            if(isSharedTask(draft)) logActivity(draft, 'Reassigned to '+q.title);
+          }
+          renderTaskForm();
+        });
+      });
+
+      document.querySelectorAll('#m-assignee .attendee-chip').forEach(function(chip){
+        chip.addEventListener('click', function(){
+          var memberId = chip.dataset.a;
+          draft.assignees = draft.assignees || [];
+          var wasShared = isSharedTask(draft);
+          var idx = draft.assignees.indexOf(memberId);
+          if(idx === -1) draft.assignees.push(memberId); else draft.assignees.splice(idx,1);
+          if(wasShared || isSharedTask(draft)){
+            var names = draft.assignees.map(function(aid){ return (familyMember(aid)||{}).name; }).filter(Boolean).join(', ');
+            logActivity(draft, 'Reassigned to '+(names || 'nobody'));
+          }
+          renderTaskForm();
+        });
+      });
+
+      document.getElementById('m-due').addEventListener('change', function(e){ draft.due = e.target.value || null; });
+
+      document.getElementById('m-status').addEventListener('click', function(){
+        draft.completed = !draft.completed;
+        draft.completedAt = draft.completed ? nowISO() : null;
+        if(isSharedTask(draft)) logActivity(draft, draft.completed?'Marked complete':'Marked incomplete');
+        renderTaskForm();
+      });
+
+      document.querySelectorAll('[data-action="rm-tag"]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          draft.tags.splice(parseInt(btn.dataset.idx,10),1);
+          renderTaskForm();
+        });
+      });
+      document.getElementById('m-tag-input').addEventListener('keydown', function(e){
+        if(e.key === 'Enter' && e.target.value.trim()){
+          draft.tags = draft.tags || [];
+          draft.tags.push(e.target.value.trim());
+          renderTaskForm();
         }
-        var addedQ = quadrantOf(t);
+      });
+
+      document.querySelectorAll('[data-action="st-toggle"]').forEach(function(cb){
+        cb.addEventListener('change', function(){
+          var row = cb.closest('.subtask-row');
+          var s = (draft.subtasks||[]).find(function(x){ return x.id === row.dataset.id; });
+          if(s) s.done = cb.checked;
+          renderTaskForm();
+        });
+      });
+      document.querySelectorAll('[data-action="st-remove"]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var row = btn.closest('.subtask-row');
+          draft.subtasks = (draft.subtasks||[]).filter(function(x){ return x.id !== row.dataset.id; });
+          renderTaskForm();
+        });
+      });
+      document.getElementById('m-subtask-input').addEventListener('keydown', function(e){
+        if(e.key === 'Enter' && e.target.value.trim()){
+          draft.subtasks = draft.subtasks || [];
+          draft.subtasks.push({ id: uid(), text: e.target.value.trim(), done:false });
+          renderTaskForm();
+        }
+      });
+
+      document.getElementById('m-notes').addEventListener('input', function(e){ draft.notes = e.target.value; });
+
+      document.getElementById('m-delete').addEventListener('click', function(){
+        document.getElementById('modal-root').innerHTML = '';
+        if(pendingNewTaskId === id) pendingNewTaskId = null;
+        deleteTask(id);
+      });
+    }
+
+    function doCancel(){
+      document.getElementById('modal-root').innerHTML = '';
+      if(isNew){
+        pendingNewTaskId = null;
+        state.tasks = state.tasks.filter(function(x){ return x.id !== id; });
+      }
+      render();
+    }
+
+    function doSave(){
+      var titleTrim = (draft.title||'').trim();
+      document.getElementById('modal-root').innerHTML = '';
+      if(isNew && !titleTrim){
+        pendingNewTaskId = null;
+        state.tasks = state.tasks.filter(function(x){ return x.id !== id; });
+        render();
+        return;
+      }
+      var fields = {
+        title: titleTrim || sourceTask.title,
+        importance: draft.importance, urgency: draft.urgency,
+        assignees: (draft.assignees||[]).slice(),
+        due: draft.due || null,
+        tags: (draft.tags||[]).slice(),
+        subtasks: (draft.subtasks||[]).map(function(s){ return Object.assign({}, s); }),
+        completed: draft.completed, completedAt: draft.completedAt,
+        quadrantEnteredAt: draft.quadrantEnteredAt,
+        notes: draft.notes || '',
+        activity: (draft.activity||[]).slice()
+      };
+      Object.assign(sourceTask, fields);
+      persist(); render();
+      if(isNew){
+        pendingNewTaskId = null;
+        var addedQ = quadrantOf(sourceTask);
         showToast('Added to '+QUADRANTS[addedQ].title, false, 2400);
       }
-      persist(); render();
     }
 
-    document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id === 'scrim') closeModal(); });
-    document.getElementById('m-close').addEventListener('click', closeModal);
-
-    document.getElementById('m-title').addEventListener('input', function(e){ t.title = e.target.value; });
-
-    document.querySelectorAll('.priority-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var qk = btn.dataset.q, q = QUADRANTS[qk];
-        var changed = (t.importance !== q.important) || (t.urgency !== q.urgent);
-        t.importance = q.important; t.urgency = q.urgent;
-        if(changed){
-          t.quadrantEnteredAt = nowISO();
-          if(t.assignee === 'shared') logActivity(t, 'Reassigned to '+q.title);
-        }
-        openTaskModal(id);
-      });
-    });
-
-    document.querySelectorAll('#m-assignee button').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var prev = t.assignee;
-        t.assignee = btn.dataset.a;
-        if(t.assignee !== prev && (t.assignee === 'shared' || prev === 'shared')){
-          var whoName = t.assignee === 'shared' ? 'Shared' : ((familyMember(t.assignee)||{}).name || 'Unknown');
-          logActivity(t, 'Reassigned to '+whoName);
-        }
-        openTaskModal(id);
-      });
-    });
-
-    document.getElementById('m-due').addEventListener('change', function(e){ t.due = e.target.value || null; });
-
-    document.getElementById('m-status').addEventListener('click', function(){
-      t.completed = !t.completed;
-      t.completedAt = t.completed ? nowISO() : null;
-      if(t.assignee === 'shared') logActivity(t, t.completed?'Marked complete':'Marked incomplete');
-      openTaskModal(id);
-    });
-
-    document.querySelectorAll('[data-action="rm-tag"]').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        t.tags.splice(parseInt(btn.dataset.idx,10),1);
-        openTaskModal(id);
-      });
-    });
-    document.getElementById('m-tag-input').addEventListener('keydown', function(e){
-      if(e.key === 'Enter' && e.target.value.trim()){
-        t.tags = t.tags || [];
-        t.tags.push(e.target.value.trim());
-        openTaskModal(id);
-      }
-    });
-
-    document.querySelectorAll('[data-action="st-toggle"]').forEach(function(cb){
-      cb.addEventListener('change', function(){
-        var row = cb.closest('.subtask-row');
-        var s = (t.subtasks||[]).find(function(x){ return x.id === row.dataset.id; });
-        if(s) s.done = cb.checked;
-        openTaskModal(id);
-      });
-    });
-    document.querySelectorAll('[data-action="st-remove"]').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var row = btn.closest('.subtask-row');
-        t.subtasks = (t.subtasks||[]).filter(function(x){ return x.id !== row.dataset.id; });
-        openTaskModal(id);
-      });
-    });
-    document.getElementById('m-subtask-input').addEventListener('keydown', function(e){
-      if(e.key === 'Enter' && e.target.value.trim()){
-        t.subtasks = t.subtasks || [];
-        t.subtasks.push({ id: uid(), text: e.target.value.trim(), done:false });
-        openTaskModal(id);
-      }
-    });
-
-    document.getElementById('m-notes').addEventListener('input', function(e){ t.notes = e.target.value; });
-
-    document.getElementById('m-delete').addEventListener('click', function(){
-      document.getElementById('modal-root').innerHTML = '';
-      if(pendingNewTaskId === id) pendingNewTaskId = null;
-      deleteTask(id);
-    });
+    renderTaskForm();
   }
 
   /* ================= CALENDAR: DATE HELPERS ================= */
