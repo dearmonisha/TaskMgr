@@ -132,10 +132,15 @@
       "due": "2026-07-22",
       "tags": [],
       "subtasks": [],
-      "completed": false,
-      "completedAt": null,
+      "completed": true,
+      "completedAt": "2026-07-19T22:32:27.860Z",
       "quadrantEnteredAt": "2026-07-19T22:32:05.105Z",
       "activity": [
+        {
+          "id": "3e90467c-8264-41a0-9b4e-6c8f8ae8adee",
+          "text": "Marked complete",
+          "ts": "2026-07-19T22:32:27.860Z"
+        },
         {
           "id": "c2c769a5-7aee-43d5-8065-1ba33f64449b",
           "text": "Reassigned to Aadi, Shiva",
