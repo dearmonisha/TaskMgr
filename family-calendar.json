@@ -14,6 +14,20 @@
       "color": "#955c82",
       "email": "tanviverma2023@gmail.com",
       "role": "kid"
+    },
+    {
+      "id": "29cf05fd-ef1d-4d77-816d-a1aceaa4daa2",
+      "name": "Tamanna",
+      "color": "#bc5460",
+      "email": "deartamannarajan@gmail.com",
+      "role": "kid"
+    },
+    {
+      "id": "a1174824-4285-40a3-9dac-2c1327839aa5",
+      "name": "Aadi",
+      "color": "#008fa0",
+      "email": "dearaadirajan@gmail.com",
+      "role": "kid"
     }
   ],
   "events": [
