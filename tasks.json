@@ -118,50 +118,6 @@
       "assignees": [
         "6d5c9f8b-bd79-45b8-aafa-52ebb3cf0e46"
       ]
-    },
-    {
-      "id": "356453a5-bfa5-4a3e-bac1-8b63062652ae",
-      "title": "Test for Aadi",
-      "notes": "",
-      "importance": true,
-      "urgency": false,
-      "assignees": [
-        "f110b39f-784a-4c52-9f55-3d8f3df41226",
-        "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6"
-      ],
-      "due": "2026-07-22",
-      "tags": [],
-      "subtasks": [],
-      "completed": true,
-      "completedAt": "2026-07-19T22:33:42.227Z",
-      "quadrantEnteredAt": "2026-07-19T22:32:05.105Z",
-      "activity": [
-        {
-          "id": "30db028e-a735-4e32-8793-1ab74f412903",
-          "text": "Marked complete",
-          "ts": "2026-07-19T22:33:42.227Z"
-        },
-        {
-          "id": "3e90467c-8264-41a0-9b4e-6c8f8ae8adee",
-          "text": "Marked complete",
-          "ts": "2026-07-19T22:32:27.860Z"
-        },
-        {
-          "id": "c2c769a5-7aee-43d5-8065-1ba33f64449b",
-          "text": "Reassigned to Aadi, Shiva",
-          "ts": "2026-07-19T22:32:13.067Z"
-        },
-        {
-          "id": "1175903d-bbc5-4e7e-abac-aee04f2a3d89",
-          "text": "Reassigned to Aadi",
-          "ts": "2026-07-19T22:32:12.417Z"
-        },
-        {
-          "id": "63d77b96-c010-40b0-ab29-1468c4ad8685",
-          "text": "Reassigned to Shiva, Aadi",
-          "ts": "2026-07-19T22:32:11.065Z"
-        }
-      ]
     }
   ]
 }
