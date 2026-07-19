@@ -76,7 +76,9 @@
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-19T21:52:33.454Z",
       "activity": [],
-      "assignees": []
+      "assignees": [
+        "6d5c9f8b-bd79-45b8-aafa-52ebb3cf0e46"
+      ]
     },
     {
       "id": "a56d57e3-6e12-4d58-ae29-027227106762",
