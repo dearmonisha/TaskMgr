@@ -11600,6 +11600,28 @@
       "overrideDate": null,
       "createdBy": "6d5c9f8b-bd79-45b8-aafa-52ebb3cf0e46",
       "createdAt": "2026-07-20T02:22:23.183Z"
+    },
+    {
+      "id": "9e596d37-b9d3-4c6f-9097-e9331338f331",
+      "title": "Aadi shadowing Dr Patel",
+      "category": "other",
+      "attendees": [
+        "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6",
+        "6d5c9f8b-bd79-45b8-aafa-52ebb3cf0e46",
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-07-22",
+      "endDate": null,
+      "allDay": false,
+      "time": "08:30",
+      "location": "",
+      "notes": "8:45 am-5 pm or whenever Dr Patel gets done Aadi will call to get picked up. ",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "createdBy": "6d5c9f8b-bd79-45b8-aafa-52ebb3cf0e46",
+      "createdAt": "2026-07-20T02:23:37.743Z"
     }
   ],
   "calendarSubscriptions": [
