@@ -2180,6 +2180,19 @@
     }
 
     function doSave(){
+      // The tag/subtask inputs only add their entry to the draft on Enter - if the user typed
+      // something and clicked Save directly instead, that text would otherwise just be sitting
+      // unread in the input when we wipe the modal below, and silently vanish. Commit it first.
+      var pendingTag = (document.getElementById('m-tag-input')||{}).value;
+      if(pendingTag && pendingTag.trim()){
+        draft.tags = draft.tags || [];
+        draft.tags.push(pendingTag.trim());
+      }
+      var pendingSubtask = (document.getElementById('m-subtask-input')||{}).value;
+      if(pendingSubtask && pendingSubtask.trim()){
+        draft.subtasks = draft.subtasks || [];
+        draft.subtasks.push({ id: uid(), text: pendingSubtask.trim(), done:false });
+      }
       var titleTrim = (draft.title||'').trim();
       document.getElementById('modal-root').innerHTML = '';
       if(isNew && !titleTrim){
