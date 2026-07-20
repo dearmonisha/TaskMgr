@@ -155,6 +155,23 @@
       "completedAt": "2026-07-20T18:26:07.514Z",
       "quadrantEnteredAt": "2026-07-20T02:15:07.625Z",
       "activity": []
+    },
+    {
+      "id": "400ef977-c3f1-45dd-9dde-a38021910d0f",
+      "title": "Renew Mama CD",
+      "notes": "",
+      "importance": true,
+      "urgency": false,
+      "assignees": [
+        "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6"
+      ],
+      "due": null,
+      "tags": [],
+      "subtasks": [],
+      "completed": false,
+      "completedAt": null,
+      "quadrantEnteredAt": "2026-07-20T18:28:10.208Z",
+      "activity": []
     }
   ]
 }
