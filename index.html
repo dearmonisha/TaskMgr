@@ -867,12 +867,31 @@
       'Accept': 'application/vnd.github+json'
     };
   }
+  function ghBlobUrl(cfg, sha){
+    return 'https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+'/git/blobs/'+sha;
+  }
   // Generic single-file fetch: resolves {notFound:true} | {data:<github contents api response>}
+  // GitHub's Contents API only inlines file content for files under 1MB; above that it returns
+  // content:"" / encoding:"none" with no error. If that happens, fall back to the Git Blobs API
+  // (via the sha we do get back) which has no such inline-size restriction, so large files
+  // (e.g. a calendar with a lot of synced events) don't silently look empty to the app.
   function loadGithubFile(cfg, path){
     return fetch(ghGetUrl(cfg, path), { headers: ghHeaders(cfg) }).then(function(res){
       if(res.status === 404) return { notFound:true };
       if(!res.ok) throw new Error('GitHub error '+res.status);
-      return res.json().then(function(data){ return { data: data }; });
+      return res.json().then(function(data){
+        if((!data.content || data.encoding === 'none') && data.sha){
+          return fetch(ghBlobUrl(cfg, data.sha), { headers: ghHeaders(cfg) }).then(function(blobRes){
+            if(!blobRes.ok) throw new Error('GitHub blob error '+blobRes.status);
+            return blobRes.json().then(function(blob){
+              data.content = blob.content;
+              data.encoding = blob.encoding;
+              return { data: data };
+            });
+          });
+        }
+        return { data: data };
+      });
     });
   }
   // Generic single-file save with one 409-conflict retry. Resolves the new sha.
@@ -3445,8 +3464,25 @@
   }
 
   // Maps parsed ICS VEVENTs into this app's Event schema, tagged to a subscription.
+  // Recurring-series masters (ev.rrule set) are always kept, however old their DTSTART is,
+  // since they're needed to project future occurrences. Single-instance/override VEVENTs
+  // (common in Google Calendar exports: one VEVENT per edited occurrence, sharing the base
+  // UID) are only kept if they fall within a bounded window around today - without this,
+  // a calendar with years of per-instance edits can balloon the synced JSON file to
+  // multiple MB, which pushes it past GitHub's 1MB Contents-API inline-read limit and makes
+  // the whole file (family roster included) silently fail to load.
+  var ICS_KEEP_PAST_DAYS = 60;
+  var ICS_KEEP_FUTURE_DAYS = 540;
   function icsEventsToOurs(icsEvents, sub){
-    return icsEvents.filter(function(ev){ return ev.dtstart; }).map(function(ev){
+    var todayIso = todayStr();
+    var minDate = dateAdd(todayIso, -ICS_KEEP_PAST_DAYS);
+    var maxDate = dateAdd(todayIso, ICS_KEEP_FUTURE_DAYS);
+    return icsEvents.filter(function(ev){
+      if(!ev.dtstart) return false;
+      if(ev.rrule) return true; // always keep recurring-series masters
+      var d = ev.dtstart.date;
+      return d >= minDate && d <= maxDate;
+    }).map(function(ev){
       var start = ev.dtstart;
       var endDate = null;
       if(ev.dtend && ev.dtend.date !== start.date){
