@@ -94,36 +94,6 @@
       "createdAt": "2026-07-19T22:08:25.326Z"
     },
     {
-      "id": "b1edafbf-1a4a-416b-875a-e1c76dd3ead2",
-      "title": "Saxophone Class",
-      "category": "band",
-      "attendees": [
-        "4e763cb0-2259-4631-9c0f-727b31f8b086",
-        "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6",
-        "6d5c9f8b-bd79-45b8-aafa-52ebb3cf0e46"
-      ],
-      "date": "2026-07-22",
-      "endDate": null,
-      "allDay": false,
-      "time": "13:50",
-      "location": "",
-      "notes": "",
-      "recurrence": {
-        "freq": "weekly",
-        "interval": 1,
-        "byWeekday": [
-          3
-        ],
-        "until": null,
-        "count": null
-      },
-      "exceptionDates": [],
-      "recurrenceId": null,
-      "overrideDate": null,
-      "createdBy": "4e763cb0-2259-4631-9c0f-727b31f8b086",
-      "createdAt": "2026-07-19T22:35:42.094Z"
-    },
-    {
       "id": "ics-a44242b7-a79d-44b7-b674-29defa82b03f-5si8f6cckbqsteos0mu0jkoo00@google.com",
       "title": "Competition Band (Stadium ?)",
       "category": "band",
