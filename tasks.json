@@ -163,15 +163,26 @@
       "importance": true,
       "urgency": false,
       "assignees": [
-        "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6"
+        "6d5c9f8b-bd79-45b8-aafa-52ebb3cf0e46"
       ],
-      "due": null,
+      "due": "2026-07-24",
       "tags": [],
       "subtasks": [],
       "completed": false,
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-20T18:28:10.208Z",
-      "activity": []
+      "activity": [
+        {
+          "id": "d15aa923-acc4-4f12-9665-4a7496a575de",
+          "text": "Reassigned to Monisha",
+          "ts": "2026-07-20T18:28:19.200Z"
+        },
+        {
+          "id": "8ed1f3cf-7cfe-4fa3-b2bf-89d021ee29e9",
+          "text": "Reassigned to Shiva, Monisha",
+          "ts": "2026-07-20T18:28:18.407Z"
+        }
+      ]
     }
   ]
 }
