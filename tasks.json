@@ -112,6 +112,11 @@
       "quadrantEnteredAt": "2026-07-19T21:55:22.089Z",
       "activity": [
         {
+          "id": "6d6b7d0a-e14e-4571-a041-e8604cba88a8",
+          "text": "Reassigned to Monisha, Shiva",
+          "ts": "2026-07-20T02:19:47.216Z"
+        },
+        {
           "id": "815b67ac-fc67-49f6-aa78-133e516207f0",
           "text": "Reassigned to Shiva",
           "ts": "2026-07-19T21:57:45.573Z"
@@ -128,10 +133,13 @@
         }
       ],
       "assignees": [
-        "6d5c9f8b-bd79-45b8-aafa-52ebb3cf0e46"
+        "6d5c9f8b-bd79-45b8-aafa-52ebb3cf0e46",
+        "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6"
       ]
     },
     {
+      "deleted": false,
+      "deletedAt": null,
       "id": "255d3b94-6327-41dd-839b-bf5122b10eea",
       "title": "F/W Blake - Research Invoicing Manual Workaround",
       "notes": "",
