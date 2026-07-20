@@ -151,8 +151,8 @@
       "due": "2026-07-20",
       "tags": [],
       "subtasks": [],
-      "completed": false,
-      "completedAt": null,
+      "completed": true,
+      "completedAt": "2026-07-20T18:26:07.514Z",
       "quadrantEnteredAt": "2026-07-20T02:15:07.625Z",
       "activity": []
     }
