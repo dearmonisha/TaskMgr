@@ -224,7 +224,9 @@
       "completed": false,
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-20T18:36:12.731Z",
-      "activity": []
+      "activity": [],
+      "deleted": true,
+      "deletedAt": "2026-07-20T18:37:58.907Z"
     }
   ]
 }
