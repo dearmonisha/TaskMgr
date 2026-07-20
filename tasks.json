@@ -183,6 +183,23 @@
           "ts": "2026-07-20T18:28:18.407Z"
         }
       ]
+    },
+    {
+      "id": "885c9fae-ac96-4218-810c-8021ce60a8e2",
+      "title": "Publish Cabinet Deck by this Friday",
+      "notes": "",
+      "importance": true,
+      "urgency": false,
+      "assignees": [
+        "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6"
+      ],
+      "due": null,
+      "tags": [],
+      "subtasks": [],
+      "completed": false,
+      "completedAt": null,
+      "quadrantEnteredAt": "2026-07-20T18:30:40.155Z",
+      "activity": []
     }
   ]
 }
