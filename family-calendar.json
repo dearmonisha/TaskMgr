@@ -11620,6 +11620,3297 @@
       "sourceUid": "67kj421iacnqe2noba9hji771p@google.com",
       "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
       "createdAt": "2026-07-20T22:33:29.832Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-05F4785E-C599-41CE-842E-DD965FB62E6F",
+      "title": "Pit Orchestra",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2015-01-05",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          1,
+          2
+        ],
+        "until": "2015-01-13",
+        "count": null
+      },
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "05F4785E-C599-41CE-842E-DD965FB62E6F",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-A5964B3E-0226-4F5E-ABF4-A5D74E35832C",
+      "title": "Trumpet Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2016-02-05",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2016-04-15",
+        "count": null
+      },
+      "exceptionDates": [
+        "2016-03-11",
+        "2016-03-25",
+        "2016-04-01",
+        "2016-04-08",
+        "2016-04-15"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "A5964B3E-0226-4F5E-ABF4-A5D74E35832C",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-6co3u36ra4sj3llia6i6knkfhc@google.com-2026-11-11",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-11-11",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "6co3u36ra4sj3llia6i6knkfhc@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-1flgeruva8vhmn65hrh3426idm@google.com",
+      "title": "Sectional - Low Brass",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2020-01-15",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          3
+        ],
+        "until": "2020-04-08",
+        "count": null
+      },
+      "exceptionDates": [
+        "2020-01-15",
+        "2020-03-18",
+        "2020-02-12",
+        "2020-04-08",
+        "2020-04-01",
+        "2020-03-25"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "1flgeruva8vhmn65hrh3426idm@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-0FAA3EA6-78F5-4FCF-AC2F-A0BFABD313B4",
+      "title": "Woodwinds/Percussion",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2013-04-02",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          2
+        ],
+        "until": "2013-04-16",
+        "count": null
+      },
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "0FAA3EA6-78F5-4FCF-AC2F-A0BFABD313B4",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-0633moblnhqa2tc8j4uqn6umpj@google.com-2026-08-31",
+      "title": "Midwest Pictures",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-08-31",
+      "endDate": "2026-08-31",
+      "allDay": true,
+      "time": null,
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "0633moblnhqa2tc8j4uqn6umpj@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-5C5E1098-18A6-4707-87F3-CA1F0C4441CC",
+      "title": "Brass",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2013-04-03",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          3
+        ],
+        "until": "2013-04-24",
+        "count": null
+      },
+      "exceptionDates": [
+        "2013-04-24"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "5C5E1098-18A6-4707-87F3-CA1F0C4441CC",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-778CC1D3-6164-4D6B-8898-45FF11CE0E90",
+      "title": "Clarinet Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2014-01-28",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2014-04-08",
+        "count": null
+      },
+      "exceptionDates": [
+        "2014-02-11",
+        "2014-03-11"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "778CC1D3-6164-4D6B-8898-45FF11CE0E90",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-BE6E80AB-1205-451E-BE4D-70C50171BDB0",
+      "title": "Horn Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2016-02-03",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2016-04-13",
+        "count": null
+      },
+      "exceptionDates": [
+        "2016-03-09",
+        "2016-03-23",
+        "2016-03-30",
+        "2016-04-06",
+        "2016-04-13"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "BE6E80AB-1205-451E-BE4D-70C50171BDB0",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-1gc4jmd5325dms77csjtn2qsgb@google.com-2026-09-28",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-09-28",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "1gc4jmd5325dms77csjtn2qsgb@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-22768iscdu7rrlf67l2ud6g9aq@google.com-2026-10-05",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-10-05",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "22768iscdu7rrlf67l2ud6g9aq@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-9pvik9pvokld9o8qqgodjk1a3g@google.com-2026-07-25",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-07-25",
+      "endDate": null,
+      "allDay": false,
+      "time": "13:00",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "9pvik9pvokld9o8qqgodjk1a3g@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-83uthcmuaabgimvu2oo2i77l6s@google.com",
+      "title": "Low Brass",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2013-01-17",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          4
+        ],
+        "until": "2013-04-03",
+        "count": null
+      },
+      "exceptionDates": [
+        "2013-02-14",
+        "2013-03-14"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "83uthcmuaabgimvu2oo2i77l6s@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-6cgdc2qbirlt5icslqg9jfd3r4@google.com",
+      "title": "WS Sax/Low Reeds",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2023-01-19",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          4
+        ],
+        "until": "2023-04-19",
+        "count": null
+      },
+      "exceptionDates": [
+        "2023-02-09",
+        "2023-03-16",
+        "2023-03-30",
+        "2023-04-13"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "6cgdc2qbirlt5icslqg9jfd3r4@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-ffr66kvi1a4n8b1ppdisua54bs@google.com",
+      "title": "Wind Symphony",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2015-07-30",
+      "endDate": null,
+      "allDay": false,
+      "time": "13:00",
+      "location": "",
+      "notes": "Join with Google Hangouts: https://hangouts.google.com/hangouts/_/go.lisd.net/fmhsjaguarband?hceid=NG9laXRuNm9udDU3aDk5YmQ1cnBlM3IzZHNAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ.ffr66kvi1a4n8b1ppdisua54bs&hs=121",
+      "recurrence": {
+        "freq": "daily",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2015-07-31",
+        "count": null
+      },
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "ffr66kvi1a4n8b1ppdisua54bs@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-372f3cqfpod5m2qf6t0j74gl74@google.com",
+      "title": "Sectional - Trumpet/Horn",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2020-01-17",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          5
+        ],
+        "until": "2020-04-17",
+        "count": null
+      },
+      "exceptionDates": [
+        "2020-01-17",
+        "2020-01-24",
+        "2020-02-14",
+        "2020-02-28",
+        "2020-03-20",
+        "2020-03-27",
+        "2020-04-03",
+        "2020-04-10",
+        "2020-04-17"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "372f3cqfpod5m2qf6t0j74gl74@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-7tfrtv6ohjmjrjc8iuv7o3l5c8@google.com-2026-10-19",
+      "title": "Wind Symphony Midwest Concert",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-10-19",
+      "endDate": null,
+      "allDay": false,
+      "time": "19:00",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "7tfrtv6ohjmjrjc8iuv7o3l5c8@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-197do6bo9tps1n4m17iclubn45@google.com-2026-12-07",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-12-07",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "197do6bo9tps1n4m17iclubn45@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-62r4kg2joo1t03nitp2sspsl0g@google.com-2026-12-04",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-12-04",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "62r4kg2joo1t03nitp2sspsl0g@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-6drceh1kspamocc923f6fk4h40@google.com",
+      "title": "Sectional - Flute",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2012-01-23",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          1
+        ],
+        "until": "2012-04-08",
+        "count": null
+      },
+      "exceptionDates": [
+        "2012-02-06",
+        "2012-03-05",
+        "2012-03-12"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "6drceh1kspamocc923f6fk4h40@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-3b50ag0o71oud165naqn3956g3@google.com-2026-12-11",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-12-11",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "3b50ag0o71oud165naqn3956g3@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-6tvi97p93ek0d7l94835rdl0l0@google.com-2026-09-16",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-09-16",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "6tvi97p93ek0d7l94835rdl0l0@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-du93i4bvofil62nk8agu5dtcjc@google.com",
+      "title": "Trumpet",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2013-01-18",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          5
+        ],
+        "until": "2013-04-04",
+        "count": null
+      },
+      "exceptionDates": [
+        "2013-01-25",
+        "2013-02-15",
+        "2013-03-08",
+        "2013-03-15",
+        "2013-03-22",
+        "2013-03-29"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "du93i4bvofil62nk8agu5dtcjc@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-ev8r6a6d6g3h6mmq47kbnab4bc@google.com",
+      "title": "Wind Symphony",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2015-08-26",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          3
+        ],
+        "until": "2015-09-30",
+        "count": null
+      },
+      "exceptionDates": [
+        "2015-09-09",
+        "2015-09-23"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "ev8r6a6d6g3h6mmq47kbnab4bc@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-2ov98l4cmvmapqo6p2vdkg5isd@google.com-2026-11-12",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-11-12",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "2ov98l4cmvmapqo6p2vdkg5isd@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-226m1c6adnji427h0bgurd0kn0@google.com",
+      "title": "WS Clarinet",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2024-01-10",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          3
+        ],
+        "until": "2024-04-09",
+        "count": null
+      },
+      "exceptionDates": [
+        "2024-02-07",
+        "2024-03-13"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "226m1c6adnji427h0bgurd0kn0@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-227rtgcg13q62uk6jan42c0lbl@google.com",
+      "title": "WS Sax/Low Reed",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2022-01-20",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          4
+        ],
+        "until": "2022-04-14",
+        "count": null
+      },
+      "exceptionDates": [
+        "2022-02-10",
+        "2022-03-17"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "227rtgcg13q62uk6jan42c0lbl@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-6vm5174ldaiocbugl11r50pt6b@google.com",
+      "title": "WS Trumpet",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2023-01-23",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          1
+        ],
+        "until": "2023-04-23",
+        "count": null
+      },
+      "exceptionDates": [
+        "2023-02-06",
+        "2023-03-13",
+        "2023-03-27",
+        "2023-04-17"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "6vm5174ldaiocbugl11r50pt6b@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-B2671654-B7F4-4C1E-A470-48CCB4E6F9B9",
+      "title": "Clarinet Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2015-01-27",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2015-03-16",
+        "count": null
+      },
+      "exceptionDates": [
+        "2015-02-10",
+        "2015-02-17",
+        "2015-02-24",
+        "2015-03-10"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "B2671654-B7F4-4C1E-A470-48CCB4E6F9B9",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-1kramke518i3cqu3hbpdpj2mkp@google.com-2026-11-20",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-11-20",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "1kramke518i3cqu3hbpdpj2mkp@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-40619cnn6mdua62a9lup5dnuq8@google.com",
+      "title": "Sectional - Low Reeds",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2012-01-25",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          3
+        ],
+        "until": "2012-04-10",
+        "count": null
+      },
+      "exceptionDates": [
+        "2012-02-08",
+        "2012-03-07",
+        "2012-03-14"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "40619cnn6mdua62a9lup5dnuq8@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-7ds3jis0p6ttfenblj39ig0onl@google.com-2026-09-21",
+      "title": "Wind Symphony Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-09-21",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "7ds3jis0p6ttfenblj39ig0onl@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-cn7lf14lstaebcuh62cfsn7210@google.com",
+      "title": "Horn",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2013-01-17",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          4
+        ],
+        "until": "2013-04-03",
+        "count": null
+      },
+      "exceptionDates": [
+        "2013-01-24",
+        "2013-02-14",
+        "2013-03-07",
+        "2013-03-14",
+        "2013-03-21"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "cn7lf14lstaebcuh62cfsn7210@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-gsvl4367r3iu1o6rhd5ik2qiuk@google.com",
+      "title": "Sectional - Trumpet",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2012-01-23",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          1
+        ],
+        "until": "2012-04-08",
+        "count": null
+      },
+      "exceptionDates": [
+        "2012-02-06",
+        "2012-03-12"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "gsvl4367r3iu1o6rhd5ik2qiuk@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-ietms9ifl4tvf8at5bunj79psk@google.com",
+      "title": "Clarinet",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2013-01-16",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          3
+        ],
+        "until": "2013-04-02",
+        "count": null
+      },
+      "exceptionDates": [
+        "2013-02-13",
+        "2013-03-13"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "ietms9ifl4tvf8at5bunj79psk@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-0c31qdnuvg0ckc7j91oma24smt@google.com-2026-12-09",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-12-09",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "0c31qdnuvg0ckc7j91oma24smt@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-c033ijrnig883jsqt8sonuld4g@google.com",
+      "title": "Wind Symphony",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2015-10-14",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          3
+        ],
+        "until": "2015-10-28",
+        "count": null
+      },
+      "exceptionDates": [
+        "2015-10-14"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "c033ijrnig883jsqt8sonuld4g@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-005DE344-2C18-474E-B87D-5AFB63637673",
+      "title": "Sectional - All Brass",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2012-04-11",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          3
+        ],
+        "until": "2012-04-11",
+        "count": null
+      },
+      "exceptionDates": [
+        "2012-02-08",
+        "2012-03-07",
+        "2012-03-14",
+        "2012-03-14"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "005DE344-2C18-474E-B87D-5AFB63637673",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-7epugr9g05c0up2hj0c9dimkn8@google.com",
+      "title": "WS Low Brass",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2022-01-24",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          1
+        ],
+        "until": "2022-04-11",
+        "count": null
+      },
+      "exceptionDates": [
+        "2022-02-21",
+        "2022-03-14"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "7epugr9g05c0up2hj0c9dimkn8@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-91nv40kdmj3dg1pju29pvh3704@google.com",
+      "title": "WS W1 Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2022-04-18",
+      "endDate": null,
+      "allDay": false,
+      "time": "17:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2022-05-25",
+        "count": null
+      },
+      "exceptionDates": [
+        "2022-05-09",
+        "2022-05-16",
+        "2022-05-23"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "91nv40kdmj3dg1pju29pvh3704@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-33F55F92-0FED-482B-9145-1DFFE220AE4C",
+      "title": "Clarinet Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2016-02-02",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2016-04-12",
+        "count": null
+      },
+      "exceptionDates": [
+        "2016-03-08",
+        "2016-03-22",
+        "2016-03-29",
+        "2016-04-05",
+        "2016-04-12"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "33F55F92-0FED-482B-9145-1DFFE220AE4C",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-694D9E61-BB60-4403-B24C-3979D349808E",
+      "title": "Horn Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2015-03-16",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2015-04-14",
+        "count": null
+      },
+      "exceptionDates": [
+        "2015-03-30",
+        "2015-04-06",
+        "2015-04-13"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "694D9E61-BB60-4403-B24C-3979D349808E",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-D0FFBB95-E1EA-467B-8035-7E0DF52A574F",
+      "title": "Pit Orchestra Dress Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2014-01-21",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "daily",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2014-01-22",
+        "count": null
+      },
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "D0FFBB95-E1EA-467B-8035-7E0DF52A574F",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-3rovqrrklvamqsis79dg4v55va@google.com-2026-12-14",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-12-14",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "3rovqrrklvamqsis79dg4v55va@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-p0gf8a49q8g2e63bra3tf8ah44@google.com",
+      "title": "Sectional - Clarinet",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2012-01-26",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          4
+        ],
+        "until": "2012-04-11",
+        "count": null
+      },
+      "exceptionDates": [
+        "2012-02-09",
+        "2012-03-08",
+        "2012-03-15"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "p0gf8a49q8g2e63bra3tf8ah44@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-fua25b452i0f7jkjmlsn203e4g@google.com",
+      "title": "Trumpet Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2015-02-06",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "Join with Google Hangouts: https://hangouts.google.com/hangouts/_/go.lisd.net/trumpet?hceid=NG9laXRuNm9udDU3aDk5YmQ1cnBlM3IzZHNAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ.fua25b452i0f7jkjmlsn203e4g&hs=121",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          5
+        ],
+        "until": "2015-04-03",
+        "count": null
+      },
+      "exceptionDates": [
+        "2015-02-13",
+        "2015-02-20",
+        "2015-03-13",
+        "2015-04-03"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "fua25b452i0f7jkjmlsn203e4g@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-6m24hmcb208oel454rsspu7b87@google.com",
+      "title": "WS Trumpet",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2022-01-19",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          3
+        ],
+        "until": "2022-04-12",
+        "count": null
+      },
+      "exceptionDates": [
+        "2022-02-09",
+        "2022-03-16",
+        "2022-03-30"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "6m24hmcb208oel454rsspu7b87@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-5aooo04cdc70m3ct4udtj5jtos@google.com-2026-12-02",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-12-02",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "5aooo04cdc70m3ct4udtj5jtos@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-E8CBC672-4638-460D-9578-DAC6DD78B9CA",
+      "title": "Flute/Oboe Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2016-02-01",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2016-04-11",
+        "count": null
+      },
+      "exceptionDates": [
+        "2016-03-07",
+        "2016-03-21",
+        "2016-03-28",
+        "2016-04-04",
+        "2016-04-11"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "E8CBC672-4638-460D-9578-DAC6DD78B9CA",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-7h7rkhtd9jj8nmrcmdfmdasqfa@google.com",
+      "title": "WS Group C",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2024-04-10",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          3
+        ],
+        "until": "2024-04-24",
+        "count": null
+      },
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "7h7rkhtd9jj8nmrcmdfmdasqfa@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-arine1mtfpj9p6o1sga02gbpso@google.com",
+      "title": "Sax/Low Reeds Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2015-02-04",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "Join with Google Hangouts: https://hangouts.google.com/hangouts/_/go.lisd.net/sax-low-reeds?hceid=NG9laXRuNm9udDU3aDk5YmQ1cnBlM3IzZHNAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ.arine1mtfpj9p6o1sga02gbpso&hs=121",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          3
+        ],
+        "until": "2015-04-01",
+        "count": null
+      },
+      "exceptionDates": [
+        "2015-02-11",
+        "2015-02-25",
+        "2015-03-11",
+        "2015-04-01"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "arine1mtfpj9p6o1sga02gbpso@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-7dqii8qango9b51s1k8ge4nbnc@google.com",
+      "title": "WS Horns",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2024-01-09",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          2
+        ],
+        "until": "2024-04-08",
+        "count": null
+      },
+      "exceptionDates": [
+        "2024-02-06",
+        "2024-03-12"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "7dqii8qango9b51s1k8ge4nbnc@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-7lbbrasbj369fcase8rv5mub41@google.com",
+      "title": "WS Clarinet",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2023-01-18",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          3
+        ],
+        "until": "2023-04-18",
+        "count": null
+      },
+      "exceptionDates": [
+        "2023-01-18",
+        "2023-02-08",
+        "2023-03-15",
+        "2023-03-29",
+        "2023-04-05"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "7lbbrasbj369fcase8rv5mub41@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-1padr7t5l4pggd4vh7grp6fohu@google.com",
+      "title": "WS Group B",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2024-04-09",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          2
+        ],
+        "until": "2024-04-23",
+        "count": null
+      },
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "1padr7t5l4pggd4vh7grp6fohu@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-6ftnn4qt9msceri20lug3mnsv4@google.com",
+      "title": "WS Horn",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2022-01-18",
+      "endDate": null,
+      "allDay": false,
+      "time": "17:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          2
+        ],
+        "until": "2022-04-12",
+        "count": null
+      },
+      "exceptionDates": [
+        "2022-02-08",
+        "2022-03-08",
+        "2022-03-15",
+        "2022-03-22",
+        "2022-03-29"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "6ftnn4qt9msceri20lug3mnsv4@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-0es10slauqp5ch4uomhc4e3uku@google.com-2026-12-01",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-12-01",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "0es10slauqp5ch4uomhc4e3uku@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-51DCEA3C-7115-45DA-A78F-355A141B92DF",
+      "title": "Flute Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2014-01-31",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2014-04-11",
+        "count": null
+      },
+      "exceptionDates": [
+        "2014-02-14",
+        "2014-03-14",
+        "2014-04-04",
+        "2014-04-11"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "51DCEA3C-7115-45DA-A78F-355A141B92DF",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-spnu54hcv8nolttipn5hddoghg@google.com",
+      "title": "Flute/Oboe",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2013-01-15",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          2
+        ],
+        "until": "2013-04-01",
+        "count": null
+      },
+      "exceptionDates": [
+        "2013-02-12",
+        "2013-03-12"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "spnu54hcv8nolttipn5hddoghg@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-e6sdbajthus7hfg6cph546kvrk@google.com",
+      "title": "Alto/Low Reed",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2013-01-14",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          1
+        ],
+        "until": "2013-03-31",
+        "count": null
+      },
+      "exceptionDates": [
+        "2013-01-14",
+        "2013-01-21",
+        "2013-02-18",
+        "2013-03-11"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "e6sdbajthus7hfg6cph546kvrk@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-7fgsvq19g1e40tuarff7c2cq5k@google.com-2026-07-24",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-07-24",
+      "endDate": null,
+      "allDay": false,
+      "time": "18:00",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "7fgsvq19g1e40tuarff7c2cq5k@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-5qqd45ad69eq7dsia3l5t7je0j@google.com",
+      "title": "WS Flute",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2024-01-10",
+      "endDate": null,
+      "allDay": false,
+      "time": "17:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          3
+        ],
+        "until": "2024-04-09",
+        "count": null
+      },
+      "exceptionDates": [
+        "2024-02-07",
+        "2024-03-13"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "5qqd45ad69eq7dsia3l5t7je0j@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-E6528B3C-3E03-483D-81B2-41E5CB5E4B41",
+      "title": "Low Brass Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2014-01-30",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2014-04-10",
+        "count": null
+      },
+      "exceptionDates": [
+        "2014-02-13",
+        "2014-03-13"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "E6528B3C-3E03-483D-81B2-41E5CB5E4B41",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-0h2ndkaobbhis3jcnpdf61c6oj@google.com",
+      "title": "WS Sax/Low Reed",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2024-01-11",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          4
+        ],
+        "until": "2024-04-10",
+        "count": null
+      },
+      "exceptionDates": [
+        "2024-02-08",
+        "2024-03-14",
+        "2024-03-28"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "0h2ndkaobbhis3jcnpdf61c6oj@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-66186CF9-C81F-40DE-B748-6B0C2DC41626",
+      "title": "Flute Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2015-01-26",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2015-03-15",
+        "count": null
+      },
+      "exceptionDates": [
+        "2015-02-09",
+        "2015-02-16",
+        "2015-02-23",
+        "2015-03-09"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "66186CF9-C81F-40DE-B748-6B0C2DC41626",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-1ojarhsg040okcijkn8466roll@google.com-2026-11-13",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-11-13",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "1ojarhsg040okcijkn8466roll@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-87E45D2E-90C1-46A6-9A09-B8B2E1652F39",
+      "title": "Sectional - All Woodwinds",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2012-04-10",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          2
+        ],
+        "until": "2012-04-10",
+        "count": null
+      },
+      "exceptionDates": [
+        "2012-02-07",
+        "2012-03-06",
+        "2012-03-13",
+        "2012-03-13"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "87E45D2E-90C1-46A6-9A09-B8B2E1652F39",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-5hdqqlcjfffoc4qpgsnjvoe64h@google.com-2026-12-03",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-12-03",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "5hdqqlcjfffoc4qpgsnjvoe64h@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-j33fi5ogao3g5j35qu31fg1br8@google.com",
+      "title": "WS W3 Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2022-04-21",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2022-05-26",
+        "count": null
+      },
+      "exceptionDates": [
+        "2022-04-21",
+        "2022-05-05",
+        "2022-05-26"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "j33fi5ogao3g5j35qu31fg1br8@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-44fe9s0tu2edo3nklvepemj2l0@google.com-2026-11-30",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-11-30",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "44fe9s0tu2edo3nklvepemj2l0@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-ibah208fbvdc0nae7tc49iqb58@google.com",
+      "title": "WS B2 Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2022-04-19",
+      "endDate": null,
+      "allDay": false,
+      "time": "17:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2022-05-24",
+        "count": null
+      },
+      "exceptionDates": [
+        "2022-04-26",
+        "2022-05-03",
+        "2022-05-24"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "ibah208fbvdc0nae7tc49iqb58@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-g6orm67n1upl866perrscmb5gc@google.com",
+      "title": "WS W2 Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2022-04-19",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2022-05-24",
+        "count": null
+      },
+      "exceptionDates": [
+        "2022-04-26",
+        "2022-05-03",
+        "2022-05-24"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "g6orm67n1upl866perrscmb5gc@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-nktadrd23l9enj34hf3mmv6og4@google.com",
+      "title": "Sectional - Horn",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2012-01-24",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          2
+        ],
+        "until": "2012-04-09",
+        "count": null
+      },
+      "exceptionDates": [
+        "2012-03-06",
+        "2012-03-13"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "nktadrd23l9enj34hf3mmv6og4@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-38s2gcfie7c7ul0hfl1agck4lg@google.com",
+      "title": "Sectional - Low Brass",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2012-01-25",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          3
+        ],
+        "until": "2012-04-10",
+        "count": null
+      },
+      "exceptionDates": [
+        "2012-03-07",
+        "2012-03-14"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "38s2gcfie7c7ul0hfl1agck4lg@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-4F1F90C8-9879-4661-BDA4-9C6B5221846B",
+      "title": "Pit Orchestra Dress Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2016-02-01",
+      "endDate": null,
+      "allDay": false,
+      "time": "17:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "daily",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2016-02-03",
+        "count": null
+      },
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "4F1F90C8-9879-4661-BDA4-9C6B5221846B",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-5b2ktn8p0k25todg5as36chjgf@google.com",
+      "title": "WS Group A",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2024-04-08",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          1
+        ],
+        "until": "2024-04-22",
+        "count": null
+      },
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "5b2ktn8p0k25todg5as36chjgf@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-87965DD1-B4BE-4356-AA3E-1A5853670800",
+      "title": "Trumpet Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2014-01-27",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2014-04-07",
+        "count": null
+      },
+      "exceptionDates": [
+        "2014-02-10",
+        "2014-02-17",
+        "2014-03-10",
+        "2014-03-31",
+        "2014-04-07"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "87965DD1-B4BE-4356-AA3E-1A5853670800",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-aebcdfulecfbjv4but4h50v74c@google.com-2026-07-27",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-07-27",
+      "endDate": null,
+      "allDay": false,
+      "time": "13:00",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "aebcdfulecfbjv4but4h50v74c@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-m7pd272b8n3b9cei27jm2brsv4@google.com",
+      "title": "Low Brass Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2015-02-05",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "Join with Google Hangouts: https://hangouts.google.com/hangouts/_/go.lisd.net/low-brass?hceid=NG9laXRuNm9udDU3aDk5YmQ1cnBlM3IzZHNAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ.m7pd272b8n3b9cei27jm2brsv4&hs=121",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          4
+        ],
+        "until": "2015-04-02",
+        "count": null
+      },
+      "exceptionDates": [
+        "2015-02-12",
+        "2015-02-19",
+        "2015-03-12",
+        "2015-04-02"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "m7pd272b8n3b9cei27jm2brsv4@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-21o7n4rvjko10a03dqmhbdmr37@google.com",
+      "title": "WS Clarinet",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2022-01-24",
+      "endDate": null,
+      "allDay": false,
+      "time": "17:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          1
+        ],
+        "until": "2022-04-11",
+        "count": null
+      },
+      "exceptionDates": [
+        "2022-02-21",
+        "2022-03-14"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "21o7n4rvjko10a03dqmhbdmr37@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-0m4fjdsmen698a7nb0gl6i50k0@google.com-2026-11-18",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-11-18",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "0m4fjdsmen698a7nb0gl6i50k0@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-E127DB8C-5689-47A4-89F0-01602F1F5B0D",
+      "title": "Clarinet Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2015-03-17",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2015-04-07",
+        "count": null
+      },
+      "exceptionDates": [
+        "2015-03-31",
+        "2015-04-07"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "E127DB8C-5689-47A4-89F0-01602F1F5B0D",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-38E82F10-04B7-4AFE-9ADF-A1C587E19171",
+      "title": "Sax/Low Reeds Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2016-02-04",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2016-04-14",
+        "count": null
+      },
+      "exceptionDates": [
+        "2016-03-10",
+        "2016-03-24",
+        "2016-03-31",
+        "2016-04-07",
+        "2016-04-14"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "38E82F10-04B7-4AFE-9ADF-A1C587E19171",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-3b1i78ocd05ejr74r6a2857oqq@google.com-2026-12-13",
+      "title": "Midwest Send-Off Concert",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-12-13",
+      "endDate": "2026-12-13",
+      "allDay": true,
+      "time": null,
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "3b1i78ocd05ejr74r6a2857oqq@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-21BFEAEC-A03A-4CBF-9FC4-5386ECCF0611",
+      "title": "Horn Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2015-01-26",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2015-03-15",
+        "count": null
+      },
+      "exceptionDates": [
+        "2015-02-09",
+        "2015-02-16",
+        "2015-02-23",
+        "2015-03-09"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "21BFEAEC-A03A-4CBF-9FC4-5386ECCF0611",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-3haqa22a60ldsouv91sms9q84i@google.com",
+      "title": "WS Flute/Oboe",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2022-01-18",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          2
+        ],
+        "until": "2022-04-12",
+        "count": null
+      },
+      "exceptionDates": [
+        "2022-02-08",
+        "2022-03-08",
+        "2022-03-15",
+        "2022-03-22",
+        "2022-03-29"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "3haqa22a60ldsouv91sms9q84i@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-917tdeltn3oaeg12dqgigsvoos@google.com",
+      "title": "WS B1 Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2022-04-18",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2022-05-24",
+        "count": null
+      },
+      "exceptionDates": [
+        "2022-05-09",
+        "2022-05-16",
+        "2022-05-23"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "917tdeltn3oaeg12dqgigsvoos@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-g74n4716uk709gi9l1vkoo2u6o@google.com",
+      "title": "WS Brass Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2021-02-17",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:15",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2021-04-23",
+        "count": null
+      },
+      "exceptionDates": [
+        "2021-04-21",
+        "2021-03-17",
+        "2021-04-14"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "g74n4716uk709gi9l1vkoo2u6o@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-27oq206om65facq4c1glaub0q3@google.com-2026-08-26",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-08-26",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "27oq206om65facq4c1glaub0q3@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-4q32r2nlvv8mtjcl8abp0apqhi@google.com",
+      "title": "WS Flute/Oboe",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2023-01-17",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          2
+        ],
+        "until": "2023-04-24",
+        "count": null
+      },
+      "exceptionDates": [
+        "2023-03-14",
+        "2023-03-28",
+        "2023-04-04",
+        "2023-04-11",
+        "2023-04-18"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "4q32r2nlvv8mtjcl8abp0apqhi@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-03ifclke090chlsq0s5gqd6sbo@google.com-2026-09-02",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-09-02",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "03ifclke090chlsq0s5gqd6sbo@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-D95ED706-1AFF-46A1-B058-375F9529F0EF",
+      "title": "Low Brass Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2016-02-01",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2016-04-11",
+        "count": null
+      },
+      "exceptionDates": [
+        "2016-03-07",
+        "2016-03-21",
+        "2016-04-04",
+        "2016-03-28",
+        "2016-04-11"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "D95ED706-1AFF-46A1-B058-375F9529F0EF",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-2sclocs68jquhio9mmfc0kkajs@google.com-2026-12-10",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-12-10",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "2sclocs68jquhio9mmfc0kkajs@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-8ji3i6h0i92e1nv5ab283qo8ko@google.com",
+      "title": "WS Woodwind Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2021-02-17",
+      "endDate": null,
+      "allDay": false,
+      "time": "17:15",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2021-04-23",
+        "count": null
+      },
+      "exceptionDates": [
+        "2021-04-21",
+        "2021-03-17",
+        "2021-04-14"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "8ji3i6h0i92e1nv5ab283qo8ko@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-5jq8d1ni4hi9b9ttp1nj60lvmk@google.com-2026-10-26",
+      "title": "Wind Symphony Midwest Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-10-26",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:30",
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "5jq8d1ni4hi9b9ttp1nj60lvmk@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-rihrjl3uk1mn5u7dsu6g4sboi8@google.com",
+      "title": "Wind Symphony",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2015-11-09",
+      "endDate": null,
+      "allDay": false,
+      "time": "16:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          1,
+          3
+        ],
+        "until": "2015-12-14",
+        "count": null
+      },
+      "exceptionDates": [
+        "2015-11-23",
+        "2015-11-25"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "rihrjl3uk1mn5u7dsu6g4sboi8@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-F5EA93ED-BD10-4370-846D-68E9032F40BE",
+      "title": "Pit Orchestra Dress Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2015-02-02",
+      "endDate": null,
+      "allDay": false,
+      "time": "17:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "daily",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2015-02-04",
+        "count": null
+      },
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "F5EA93ED-BD10-4370-846D-68E9032F40BE",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-vn3tu7bm0m3jpfjnrk072sugi0@google.com",
+      "title": "Sax/Low Reeds Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2014-01-27",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          1
+        ],
+        "until": "2014-04-07",
+        "count": null
+      },
+      "exceptionDates": [
+        "2014-02-10",
+        "2014-02-17",
+        "2014-03-10",
+        "2014-03-31",
+        "2014-04-07"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "vn3tu7bm0m3jpfjnrk072sugi0@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-ssjvm4eg0fjq2ta0p78l1nd6lg@google.com",
+      "title": "WS B3 Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2022-04-20",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2022-05-25",
+        "count": null
+      },
+      "exceptionDates": [
+        "2022-05-11",
+        "2022-05-25"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "ssjvm4eg0fjq2ta0p78l1nd6lg@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-7ibsqahafsjaaae7nun1hfe8no@google.com",
+      "title": "WS Horn",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2023-01-20",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          5
+        ],
+        "until": "2023-04-20",
+        "count": null
+      },
+      "exceptionDates": [
+        "2023-02-10",
+        "2023-03-17",
+        "2023-03-31",
+        "2023-04-07",
+        "2023-04-14"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "7ibsqahafsjaaae7nun1hfe8no@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-vfdrrue5719ua6fnahfd0f5ius@google.com-2026-12-16",
+      "title": "Midwest Clinic",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2026-12-16",
+      "endDate": "2026-12-20",
+      "allDay": true,
+      "time": null,
+      "location": "",
+      "notes": "",
+      "recurrence": null,
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "vfdrrue5719ua6fnahfd0f5ius@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-00hr80kgd9vlf0s2tapqpv5o1i@google.com",
+      "title": "WS Trumpet ",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2024-01-08",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          1
+        ],
+        "until": "2024-04-07",
+        "count": null
+      },
+      "exceptionDates": [
+        "2024-01-15",
+        "2024-02-05",
+        "2024-02-19",
+        "2024-03-11",
+        "2024-04-01"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "00hr80kgd9vlf0s2tapqpv5o1i@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-A6D636FD-D834-409A-86DF-11ADCFCD0BB3",
+      "title": "Flute Sectional",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2015-03-16",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2015-04-06",
+        "count": null
+      },
+      "exceptionDates": [
+        "2015-03-30",
+        "2015-04-06"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "A6D636FD-D834-409A-86DF-11ADCFCD0BB3",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-3h7c7gh2ir88emhbcn99hohkmi@google.com",
+      "title": "WS Low Brass",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2023-01-23",
+      "endDate": null,
+      "allDay": false,
+      "time": "17:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          1
+        ],
+        "until": "2023-04-16",
+        "count": null
+      },
+      "exceptionDates": [
+        "2023-02-06",
+        "2023-03-13",
+        "2023-03-27",
+        "2023-04-03",
+        "2023-04-10"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "3h7c7gh2ir88emhbcn99hohkmi@google.com",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-2A85FF95-1415-4771-A3B0-77425415C65C",
+      "title": "Pit Orchestra Rehearsal",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2014-01-06",
+      "endDate": null,
+      "allDay": false,
+      "time": "15:45",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "daily",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2014-01-09",
+        "count": null
+      },
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "2A85FF95-1415-4771-A3B0-77425415C65C",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-6EFE78D1-297B-48BB-87C3-0AB3BEF90DE1",
+      "title": "Little Mermaid Performance",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2015-02-05",
+      "endDate": null,
+      "allDay": false,
+      "time": "19:00",
+      "location": "",
+      "notes": "Call Time 6:20pm",
+      "recurrence": {
+        "freq": "daily",
+        "interval": 1,
+        "byWeekday": null,
+        "until": "2015-02-07",
+        "count": null
+      },
+      "exceptionDates": [],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "6EFE78D1-297B-48BB-87C3-0AB3BEF90DE1",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
+    },
+    {
+      "id": "ics-1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c-AF359779-8305-4E0F-B6B5-C46BBA092822",
+      "title": "Full Band",
+      "category": "band",
+      "attendees": [
+        "f110b39f-784a-4c52-9f55-3d8f3df41226"
+      ],
+      "date": "2013-04-04",
+      "endDate": null,
+      "allDay": false,
+      "time": "07:00",
+      "location": "",
+      "notes": "",
+      "recurrence": {
+        "freq": "weekly",
+        "interval": 1,
+        "byWeekday": [
+          4
+        ],
+        "until": "2013-04-25",
+        "count": null
+      },
+      "exceptionDates": [
+        "2013-04-25"
+      ],
+      "recurrenceId": null,
+      "overrideDate": null,
+      "source": "ics",
+      "subscriptionId": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "sourceUid": "AF359779-8305-4E0F-B6B5-C46BBA092822",
+      "createdBy": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "createdAt": "2026-07-20T22:34:43.315Z"
     }
   ],
   "calendarSubscriptions": [
@@ -11642,6 +14933,17 @@
       "category": "band",
       "enabled": true,
       "lastSyncedAt": "2026-07-20T22:33:29.832Z",
+      "lastError": null,
+      "syncStatus": "ok"
+    },
+    {
+      "id": "1896e1d0-5dbc-4ef0-b13c-6a55f96fd19c",
+      "ownerFamilyMemberId": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "name": "Wind Symphony",
+      "url": "https://calendar.google.com/calendar/ical/4oeitn6ont57h99bd5rpe3r3ds%40group.calendar.google.com/public/basic.ics",
+      "category": "band",
+      "enabled": true,
+      "lastSyncedAt": "2026-07-20T22:34:43.316Z",
       "lastError": null,
       "syncStatus": "ok"
     }
