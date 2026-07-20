@@ -676,6 +676,44 @@
       t = setTimeout(function(){ fn.apply(ctx,args); }, ms);
     };
   }
+  // Builds a debounced "save this file to GitHub" function that also serializes writes to that
+  // one file. Without this, two saves triggered close together (e.g. an ICS background sync
+  // finishing its own save just as the user saves an edit in a modal) could both read the same
+  // starting sha and PUT concurrently; the second request then races the first, and the
+  // save-then-retry-on-409 dance for both at once occasionally surfaces as a raw "Failed to
+  // fetch" instead of a clean retry. Here, if a save is already in flight when another is
+  // requested, we just remember that and immediately re-run once the in-flight one settles,
+  // using whatever the current state is at that point - so nothing is ever sent twice at once.
+  function makeGithubSaver(opts){
+    // opts: { getPath(cfg), getSha(), setSha(sha), buildPayload(), message, cacheLocal }
+    var saving = false, pending = false;
+    function run(){
+      var cfg = getConfig();
+      if(!cfg || !cfg.owner || !cfg.repo || !cfg.token){
+        opts.cacheLocal();
+        updateSyncStatus('local');
+        return;
+      }
+      if(saving){ pending = true; return; }
+      saving = true;
+      updateSyncStatus('busy');
+      var path = opts.getPath(cfg);
+      saveGithubFile(cfg, path, opts.getSha(), opts.buildPayload(), opts.message)
+        .then(function(sha){
+          opts.setSha(sha);
+          opts.cacheLocal();
+          updateSyncStatus('ok');
+        }).catch(function(err){
+          console.error(err);
+          opts.cacheLocal();
+          updateSyncStatus('err');
+        }).then(function(){
+          saving = false;
+          if(pending){ pending = false; run(); }
+        });
+    }
+    return debounce(run, 1200);
+  }
   function b64EncodeUnicode(str){
     return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(_,p1){
       return String.fromCharCode('0x'+p1);
@@ -870,18 +908,29 @@
   function ghBlobUrl(cfg, sha){
     return 'https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+'/git/blobs/'+sha;
   }
+  // Wraps fetch() with one retry after a short delay when the request fails at the network
+  // level (TypeError: Failed to fetch - dropped connection, brief offline blip, etc.). Does NOT
+  // retry on a real HTTP response (4xx/5xx), only on the fetch itself never completing, since
+  // those are the transient failures a second attempt can plausibly recover from.
+  function fetchWithRetry(url, opts){
+    return fetch(url, opts).catch(function(err){
+      return new Promise(function(resolve){ setTimeout(resolve, 800); }).then(function(){
+        return fetch(url, opts);
+      });
+    });
+  }
   // Generic single-file fetch: resolves {notFound:true} | {data:<github contents api response>}
   // GitHub's Contents API only inlines file content for files under 1MB; above that it returns
   // content:"" / encoding:"none" with no error. If that happens, fall back to the Git Blobs API
   // (via the sha we do get back) which has no such inline-size restriction, so large files
   // (e.g. a calendar with a lot of synced events) don't silently look empty to the app.
   function loadGithubFile(cfg, path){
-    return fetch(ghGetUrl(cfg, path), { headers: ghHeaders(cfg) }).then(function(res){
+    return fetchWithRetry(ghGetUrl(cfg, path), { headers: ghHeaders(cfg) }).then(function(res){
       if(res.status === 404) return { notFound:true };
       if(!res.ok) throw new Error('GitHub error '+res.status);
       return res.json().then(function(data){
         if((!data.content || data.encoding === 'none') && data.sha){
-          return fetch(ghBlobUrl(cfg, data.sha), { headers: ghHeaders(cfg) }).then(function(blobRes){
+          return fetchWithRetry(ghBlobUrl(cfg, data.sha), { headers: ghHeaders(cfg) }).then(function(blobRes){
             if(!blobRes.ok) throw new Error('GitHub blob error '+blobRes.status);
             return blobRes.json().then(function(blob){
               data.content = blob.content;
@@ -903,7 +952,7 @@
     };
     if(sha) body.sha = sha;
     function put(b){
-      return fetch(ghContentsUrl(cfg, path), {
+      return fetchWithRetry(ghContentsUrl(cfg, path), {
         method: 'PUT',
         headers: Object.assign({'Content-Type':'application/json'}, ghHeaders(cfg)),
         body: JSON.stringify(b)
@@ -965,25 +1014,14 @@
       });
   }
 
-  var saveToGitHub = debounce(function(){
-    var cfg = getConfig();
-    if(!cfg || !cfg.owner || !cfg.repo || !cfg.token){
-      cacheLocal();
-      updateSyncStatus('local');
-      return;
-    }
-    updateSyncStatus('busy');
-    saveGithubFile(cfg, cfg.path, state.ghSha, {version:1, tasks: state.tasks}, 'Update tasks.json via Task Manager app')
-      .then(function(sha){
-        state.ghSha = sha;
-        cacheLocal();
-        updateSyncStatus('ok');
-      }).catch(function(err){
-        console.error(err);
-        cacheLocal();
-        updateSyncStatus('err');
-      });
-  }, 1200);
+  var saveToGitHub = makeGithubSaver({
+    getPath: function(cfg){ return cfg.path; },
+    getSha: function(){ return state.ghSha; },
+    setSha: function(sha){ state.ghSha = sha; },
+    buildPayload: function(){ return {version:1, tasks: state.tasks}; },
+    message: 'Update tasks.json via Task Manager app',
+    cacheLocal: cacheLocal
+  });
 
   function loadLocalTasksOnly(){
     try{
@@ -1043,25 +1081,14 @@
       });
   }
 
-  var saveCalendarToGitHub = debounce(function(){
-    var cfg = getConfig();
-    if(!cfg || !cfg.owner || !cfg.repo || !cfg.token){
-      cacheCalendarLocal();
-      return;
-    }
-    var path = cfg.calendarPath || 'family-calendar.json';
-    updateSyncStatus('busy');
-    saveGithubFile(cfg, path, state.calSha, {version:1, family: state.family, events: state.events, calendarSubscriptions: state.calendarSubscriptions, homeTimezone: state.homeTimezone}, 'Update family-calendar.json via Task Manager app')
-      .then(function(sha){
-        state.calSha = sha;
-        cacheCalendarLocal();
-        updateSyncStatus('ok');
-      }).catch(function(err){
-        console.error(err);
-        cacheCalendarLocal();
-        updateSyncStatus('err');
-      });
-  }, 1200);
+  var saveCalendarToGitHub = makeGithubSaver({
+    getPath: function(cfg){ return cfg.calendarPath || 'family-calendar.json'; },
+    getSha: function(){ return state.calSha; },
+    setSha: function(sha){ state.calSha = sha; },
+    buildPayload: function(){ return {version:1, family: state.family, events: state.events, calendarSubscriptions: state.calendarSubscriptions, homeTimezone: state.homeTimezone}; },
+    message: 'Update family-calendar.json via Task Manager app',
+    cacheLocal: cacheCalendarLocal
+  });
 
   function loadCalendarLocalOnly(){
     try{
@@ -1112,25 +1139,14 @@
       });
   }
 
-  var saveDreamsToGitHub = debounce(function(){
-    var cfg = getConfig();
-    if(!cfg || !cfg.owner || !cfg.repo || !cfg.token){
-      cacheDreamsLocal();
-      return;
-    }
-    var path = cfg.dreamsPath || 'vision-board.json';
-    updateSyncStatus('busy');
-    saveGithubFile(cfg, path, state.dreamSha, {version:1, dreams: state.dreams}, 'Update vision-board.json via Task Manager app')
-      .then(function(sha){
-        state.dreamSha = sha;
-        cacheDreamsLocal();
-        updateSyncStatus('ok');
-      }).catch(function(err){
-        console.error(err);
-        cacheDreamsLocal();
-        updateSyncStatus('err');
-      });
-  }, 1200);
+  var saveDreamsToGitHub = makeGithubSaver({
+    getPath: function(cfg){ return cfg.dreamsPath || 'vision-board.json'; },
+    getSha: function(){ return state.dreamSha; },
+    setSha: function(sha){ state.dreamSha = sha; },
+    buildPayload: function(){ return {version:1, dreams: state.dreams}; },
+    message: 'Update vision-board.json via Task Manager app',
+    cacheLocal: cacheDreamsLocal
+  });
 
   function loadDreamsLocalOnly(){
     try{
@@ -1181,25 +1197,14 @@
       });
   }
 
-  var saveCompassToGitHub = debounce(function(){
-    var cfg = getConfig();
-    if(!cfg || !cfg.owner || !cfg.repo || !cfg.token){
-      cacheCompassLocal();
-      return;
-    }
-    var path = cfg.compassPath || 'compass.json';
-    updateSyncStatus('busy');
-    saveGithubFile(cfg, path, state.compassSha, {version:1, profiles: state.compassProfiles, goals: state.compassGoals, priorities: state.compassPriorities}, 'Update compass.json via Task Manager app')
-      .then(function(sha){
-        state.compassSha = sha;
-        cacheCompassLocal();
-        updateSyncStatus('ok');
-      }).catch(function(err){
-        console.error(err);
-        cacheCompassLocal();
-        updateSyncStatus('err');
-      });
-  }, 1200);
+  var saveCompassToGitHub = makeGithubSaver({
+    getPath: function(cfg){ return cfg.compassPath || 'compass.json'; },
+    getSha: function(){ return state.compassSha; },
+    setSha: function(sha){ state.compassSha = sha; },
+    buildPayload: function(){ return {version:1, profiles: state.compassProfiles, goals: state.compassGoals, priorities: state.compassPriorities}; },
+    message: 'Update compass.json via Task Manager app',
+    cacheLocal: cacheCompassLocal
+  });
 
   function loadCompassLocalOnly(){
     try{
