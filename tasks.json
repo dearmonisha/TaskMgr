@@ -204,29 +204,6 @@
       "completedAt": null,
       "quadrantEnteredAt": "2026-07-20T18:30:50.569Z",
       "activity": []
-    },
-    {
-      "id": "544255f7-f14d-483a-b038-a5ae7101f2f8",
-      "title": "Tag save test task",
-      "notes": "",
-      "importance": true,
-      "urgency": false,
-      "assignees": [
-        "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6"
-      ],
-      "due": null,
-      "tags": [
-        "urgent-repro-tag",
-        "urgent-repro-tag-2",
-        "clean-repro-tag"
-      ],
-      "subtasks": [],
-      "completed": false,
-      "completedAt": null,
-      "quadrantEnteredAt": "2026-07-20T18:36:12.731Z",
-      "activity": [],
-      "deleted": true,
-      "deletedAt": "2026-07-20T18:37:58.907Z"
     }
   ]
 }
