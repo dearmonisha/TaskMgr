@@ -8,13 +8,13 @@
       "title": "Kickoff Deck for User Advisory Group",
       "notes": "",
       "importance": true,
-      "urgency": false,
+      "urgency": true,
       "due": "2026-07-20",
       "tags": [],
       "subtasks": [],
       "completed": false,
       "completedAt": null,
-      "quadrantEnteredAt": "2026-07-09T02:46:20.429Z",
+      "quadrantEnteredAt": "2026-07-20T02:14:44.641Z",
       "activity": [],
       "assignees": [
         "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6"
