@@ -3477,7 +3477,7 @@
     var todayIso = todayStr();
     var minDate = dateAdd(todayIso, -ICS_KEEP_PAST_DAYS);
     var maxDate = dateAdd(todayIso, ICS_KEEP_FUTURE_DAYS);
-    return icsEvents.filter(function(ev){
+    var mapped = icsEvents.filter(function(ev){
       if(!ev.dtstart) return false;
       if(ev.rrule) return true; // always keep recurring-series masters
       var d = ev.dtstart.date;
@@ -3489,7 +3489,7 @@
         endDate = start.allDay ? dateAdd(ev.dtend.date, -1) : ev.dtend.date; // ICS all-day DTEND is exclusive
       }
       return {
-        id: 'ics-'+sub.id+'-'+(ev.uid || uid()),
+        id: 'ics-'+sub.id+'-'+(ev.uid || uid())+(ev.rrule ? '' : '-'+start.date),
         title: ev.summary || 'Untitled event',
         category: sub.category || 'other',
         attendees: [sub.ownerFamilyMemberId],
@@ -3503,6 +3503,25 @@
         createdBy: sub.ownerFamilyMemberId, createdAt: nowISO()
       };
     });
+    // Google Calendar (and others) sometimes export a recurring "placeholder" series (e.g. a
+    // generic weekly "FB vs. ?" slot) alongside separate one-off VEVENTs that share the SAME UID
+    // once a specific week's details are confirmed (e.g. "FB vs. Hebron (Away)"). Both our
+    // recurrence engine and the ICS spec's RECURRENCE-ID mechanism agree these one-offs should
+    // replace, not duplicate, that week's occurrence of the series - so mark the confirmed
+    // instance's date as an exception on the recurring master, suppressing the redundant
+    // placeholder that would otherwise still render on the same day.
+    var overrideDatesByUid = {};
+    mapped.forEach(function(m){
+      if(!m.recurrence && m.sourceUid){
+        (overrideDatesByUid[m.sourceUid] = overrideDatesByUid[m.sourceUid] || []).push(m.date);
+      }
+    });
+    mapped.forEach(function(m){
+      if(m.recurrence && m.sourceUid && overrideDatesByUid[m.sourceUid]){
+        m.exceptionDates = (m.exceptionDates||[]).concat(overrideDatesByUid[m.sourceUid]);
+      }
+    });
+    return mapped;
   }
 
   function findSubscription(id){
