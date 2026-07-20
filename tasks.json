@@ -130,6 +130,25 @@
       "assignees": [
         "6d5c9f8b-bd79-45b8-aafa-52ebb3cf0e46"
       ]
+    },
+    {
+      "id": "f9ccba98-e5f5-42db-8440-525c97c4edb7",
+      "title": "Test",
+      "notes": "",
+      "importance": true,
+      "urgency": false,
+      "assignees": [
+        "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6"
+      ],
+      "due": null,
+      "tags": [],
+      "subtasks": [],
+      "completed": false,
+      "completedAt": null,
+      "quadrantEnteredAt": "2026-07-20T02:13:41.240Z",
+      "activity": [],
+      "deleted": true,
+      "deletedAt": "2026-07-20T02:14:16.066Z"
     }
   ]
 }
