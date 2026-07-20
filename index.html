@@ -92,11 +92,16 @@
   .stat-dot{width:8px;height:8px;border-radius:50%;flex:none;}
   .stat-pill.done-today{background:#e6f3e7;border-color:#bfe0c2;color:#2c6b30;}
 
-  .sync-status{font-size:11.5px;color:var(--ink-muted);display:flex;align-items:center;gap:6px;margin-left:auto;cursor:pointer;user-select:none;}
-  .sync-status .dot{width:7px;height:7px;border-radius:50%;background:#9aa;}
+  /* Lives in the header (outside any single tab's toolbar) so a sync error stays visible no
+     matter which view you're on. Quiet by default; becomes an actual banner on error so it's
+     hard to miss regardless of which tab you're looking at. */
+  .sync-banner{display:flex;justify-content:flex-end;margin-top:10px;}
+  .sync-status{font-size:11.5px;color:var(--ink-muted);display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;padding:4px 6px;border-radius:var(--radius-pill);}
+  .sync-status .dot{width:7px;height:7px;border-radius:50%;background:#9aa;flex:none;}
   .sync-status.ok .dot{background:#3e8f44;}
-  .sync-status.err .dot{background:#a8372e;}
   .sync-status.busy .dot{background:#c9922f;}
+  .sync-status.err{width:100%;justify-content:center;background:var(--overdue-bg);border:1px solid var(--overdue);color:var(--overdue);font-weight:700;padding:8px 12px;}
+  .sync-status.err .dot{background:var(--overdue);}
   .settings-gear{border:1px solid var(--hairline);background:var(--surface);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;}
 
   .cal-nav{display:flex;align-items:center;gap:6px;}
@@ -194,8 +199,10 @@
   .archive-view{margin-top:22px;background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius-panel);overflow:hidden;}
   .archive-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--hairline);}
   .archive-row:last-child{border-bottom:none;}
+  .archive-row.deleted{background:rgba(168,55,46,0.04);}
   .archive-row .tc-title{flex:1;font-size:13.5px;}
   .archive-date{font-size:11.5px;color:var(--ink-muted);white-space:nowrap;}
+  .archive-row.deleted .archive-date{color:var(--overdue);}
   .btn-sm{border:1px solid var(--hairline);background:var(--surface);padding:5px 12px;border-radius:var(--radius-pill);font-size:11.5px;font-weight:600;color:var(--ink);}
   .btn-sm:hover{background:rgba(50,35,24,0.05);}
   .btn-sm.danger{border-color:var(--overdue);color:var(--overdue);}
@@ -476,7 +483,7 @@
         <div class="view-switcher" id="view-switcher">
           <button data-view="matrix" class="active">Matrix</button>
           <button data-view="calendar">Calendar</button>
-          <button data-view="dreams">Dreams</button>
+          <button data-view="dreams" class="hidden">Dreams</button>
           <button data-view="compass">Compass</button>
           <button data-view="list">List</button>
           <button data-view="archive">Archive</button>
@@ -485,6 +492,8 @@
         <button class="settings-gear" id="open-settings" title="GitHub sync settings">⚙</button>
       </div>
     </div>
+
+    <div class="sync-banner" id="sync-banner"><span class="sync-status" id="sync-status"></span></div>
 
     <div class="header-row2" id="task-toolbar">
       <div class="filters-search">
@@ -1265,6 +1274,7 @@
     var counts = {doFirst:0,schedule:0,delegate:0,eliminate:0};
     var doneToday = 0;
     state.tasks.filter(personMatch).forEach(function(t){
+      if(t.deleted) return;
       if(!t.completed) counts[quadrantOf(t)]++;
       if(t.completed && t.completedAt && t.completedAt.slice(0,10) === todayStr()) doneToday++;
     });
@@ -1275,13 +1285,7 @@
     if(doneToday > 0){
       html += '<span class="stat-pill done-today">✓ '+doneToday+' done today</span>';
     }
-    html += '<span class="sync-status" id="sync-status"></span>';
     document.getElementById('stats-row').innerHTML = html;
-    document.getElementById('sync-status').addEventListener('click', function(){
-      var cfg = getConfig();
-      if(!cfg){ openSettingsModal(); } else { loadFromGitHub(); loadCalendarFromGitHub(); }
-    });
-    updateSyncStatus(state.syncStatus);
   }
 
   /* ================= FILTERING ================= */
@@ -1290,8 +1294,8 @@
   // old test/dummy data -- just starts out unassigned rather than trying to guess).
   function migrateTasks(tasks){
     return (tasks||[]).map(function(t){
-      if(t.assignees) return t;
-      var copy = Object.assign({}, t, { assignees: [] });
+      var copy = Object.assign({ deleted:false, deletedAt:null }, t);
+      if(!copy.assignees) copy.assignees = [];
       delete copy.assignee;
       return copy;
     });
@@ -1311,7 +1315,7 @@
     return false;
   }
   function visibleTasks(){
-    return state.tasks.filter(function(t){ return !t.completed && personMatch(t) && searchMatch(t); });
+    return state.tasks.filter(function(t){ return !t.completed && !t.deleted && personMatch(t) && searchMatch(t); });
   }
 
   /* ================= RENDER: MATRIX / LIST / ARCHIVE ================= */
@@ -1418,17 +1422,23 @@
   }
 
   function renderArchive(){
-    var done = state.tasks.filter(function(t){ return t.completed && personMatch(t); })
-      .sort(function(a,b){ return (b.completedAt||'').localeCompare(a.completedAt||''); });
-    var html = done.length ? done.map(function(t){
-      return '<div class="archive-row" data-id="'+t.id+'">'
+    // Archive holds both completed tasks and soft-deleted tasks. Deleting a task anywhere else
+    // in the app just moves it here (deleted:true) - it stays fully recoverable via Restore.
+    // Only the Delete button in this view actually removes a record for good.
+    var items = state.tasks.filter(function(t){ return (t.completed || t.deleted) && personMatch(t); })
+      .sort(function(a,b){ return ((b.deletedAt||b.completedAt)||'').localeCompare((a.deletedAt||a.completedAt)||''); });
+    var html = items.length ? items.map(function(t){
+      var label = t.deleted
+        ? 'Deleted '+(t.deletedAt?fmtDate(t.deletedAt.slice(0,10)):'')
+        : 'Completed '+(t.completedAt?fmtDate(t.completedAt.slice(0,10)):'');
+      return '<div class="archive-row'+(t.deleted?' deleted':'')+'" data-id="'+t.id+'">'
         + avatarHtml(t.assignees)
         + '<span class="tc-title done" style="flex:1">'+escapeHtml(t.title)+'</span>'
-        + '<span class="archive-date">Completed '+(t.completedAt?fmtDate(t.completedAt.slice(0,10)):'')+'</span>'
+        + '<span class="archive-date">'+label+'</span>'
         + '<button class="btn-sm" data-action="restore" data-id="'+t.id+'">Restore</button>'
         + '<button class="btn-sm danger" data-action="delete" data-id="'+t.id+'">Delete</button>'
         + '</div>';
-    }).join('') : '<div class="list-empty">No completed tasks yet.</div>';
+    }).join('') : '<div class="list-empty">Nothing archived yet.</div>';
     document.getElementById('view-root').innerHTML = '<div class="archive-view">'+html+'</div>';
 
     document.getElementById('view-root').querySelectorAll('[data-action="restore"]').forEach(function(btn){
@@ -1531,7 +1541,7 @@
     };
   }
   function taskOccurrencesInRange(rangeStart, rangeEnd){
-    return state.tasks.filter(function(t){ return t.due && t.due >= rangeStart && t.due <= rangeEnd; }).map(taskAsCalOccurrence);
+    return state.tasks.filter(function(t){ return t.due && !t.deleted && t.due >= rangeStart && t.due <= rangeEnd; }).map(taskAsCalOccurrence);
   }
   function taskAssigneeAvatarsHtml(occ){
     var members = (occ.attendees||[]).map(familyMember).filter(Boolean);
@@ -1888,29 +1898,52 @@
     persist(); render();
   }
 
+  // Restore un-does whichever removal state put a task in the Archive: if it was soft-deleted,
+  // clear that; otherwise it was just completed, so un-complete it.
   function restoreTask(id){
     var t = findTask(id);
     if(!t) return;
-    t.completed = false;
-    t.completedAt = null;
+    if(t.deleted){
+      t.deleted = false;
+      t.deletedAt = null;
+    } else {
+      t.completed = false;
+      t.completedAt = null;
+    }
     persist(); render();
   }
 
-  function deleteTask(id, skipUndo){
+  // Deleting a task normally just moves it to the Archive (deleted:true) - the record is kept
+  // and fully recoverable via Restore. Only when `permanent` is true (the Archive view's own
+  // Delete button) does the record actually get removed from state.
+  function deleteTask(id, permanent){
     var idx = state.tasks.findIndex(function(t){ return t.id === id; });
     if(idx === -1) return;
     var task = state.tasks[idx];
-    state.tasks.splice(idx,1);
-    persist(); render();
-    state.deletedBuffer = { task: task, index: idx };
-    showToast('Deleted "'+escapeHtml(task.title)+'"', true, 5000);
+    if(permanent){
+      state.tasks.splice(idx,1);
+      persist(); render();
+      state.deletedBuffer = { mode:'hard', task: task, index: idx };
+      showToast('Permanently deleted "'+escapeHtml(task.title)+'"', true, 5000);
+    } else {
+      task.deleted = true;
+      task.deletedAt = nowISO();
+      persist(); render();
+      state.deletedBuffer = { mode:'soft', taskId: id };
+      showToast('Moved "'+escapeHtml(task.title)+'" to Archive', true, 5000);
+    }
   }
 
   function undoDelete(){
     if(!state.deletedBuffer) return;
     var buf = state.deletedBuffer;
-    var idx = Math.min(buf.index, state.tasks.length);
-    state.tasks.splice(idx, 0, buf.task);
+    if(buf.mode === 'hard'){
+      var idx = Math.min(buf.index, state.tasks.length);
+      state.tasks.splice(idx, 0, buf.task);
+    } else {
+      var t = findTask(buf.taskId);
+      if(t){ t.deleted = false; t.deletedAt = null; }
+    }
     state.deletedBuffer = null;
     persist(); render();
     hideToast();
@@ -3831,6 +3864,10 @@
   }
 
   /* ================= EVENT WIRING (static header controls) ================= */
+  document.getElementById('sync-status').addEventListener('click', function(){
+    var cfg = getConfig();
+    if(!cfg){ openSettingsModal(); } else { loadFromGitHub(); loadCalendarFromGitHub(); }
+  });
   document.getElementById('view-switcher').addEventListener('click', function(e){
     var btn = e.target.closest('button[data-view]');
     if(!btn) return;
