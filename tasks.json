@@ -217,7 +217,8 @@
       "due": null,
       "tags": [
         "urgent-repro-tag",
-        "urgent-repro-tag-2"
+        "urgent-repro-tag-2",
+        "clean-repro-tag"
       ],
       "subtasks": [],
       "completed": false,
