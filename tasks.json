@@ -107,10 +107,15 @@
       "due": "2026-07-20",
       "tags": [],
       "subtasks": [],
-      "completed": false,
-      "completedAt": null,
+      "completed": true,
+      "completedAt": "2026-07-25T23:13:35.335Z",
       "quadrantEnteredAt": "2026-07-19T21:55:22.089Z",
       "activity": [
+        {
+          "id": "bd05a16a-bd6f-4888-9457-a5783ebac35d",
+          "text": "Marked complete",
+          "ts": "2026-07-25T23:13:35.336Z"
+        },
         {
           "id": "6d6b7d0a-e14e-4571-a041-e8604cba88a8",
           "text": "Reassigned to Monisha, Shiva",
