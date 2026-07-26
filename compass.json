@@ -11,5 +11,13 @@
     }
   ],
   "goals": [],
-  "priorities": []
+  "priorities": [
+    {
+      "id": "d1974010-7604-46bf-91b9-44f231825f0a",
+      "ownerId": "f110b39f-784a-4c52-9f55-3d8f3df41226",
+      "text": "",
+      "order": 0,
+      "createdAt": "2026-07-26T16:07:33.362Z"
+    }
+  ]
 }
