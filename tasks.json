@@ -12,8 +12,8 @@
       "due": "2026-07-20",
       "tags": [],
       "subtasks": [],
-      "completed": false,
-      "completedAt": null,
+      "completed": true,
+      "completedAt": "2026-08-22T16:13:40.251Z",
       "quadrantEnteredAt": "2026-07-20T02:14:44.641Z",
       "activity": [],
       "assignees": [
@@ -205,8 +205,8 @@
       "due": "2026-07-24",
       "tags": [],
       "subtasks": [],
-      "completed": false,
-      "completedAt": null,
+      "completed": true,
+      "completedAt": "2026-08-22T16:13:39.176Z",
       "quadrantEnteredAt": "2026-07-20T18:30:50.569Z",
       "activity": []
     }
