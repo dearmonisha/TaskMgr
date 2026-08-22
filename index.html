@@ -2,7 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f6f2ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141210" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Tasks">
+<meta name="color-scheme" content="light dark">
 <title>Task Manager</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -438,7 +445,7 @@
   .settings-help a{color:var(--schedule);}
   .settings-actions{display:flex;gap:10px;margin-top:18px;}
   .btn-primary{border:none;background:var(--primary-btn);color:#fff;padding:9px 18px;border-radius:var(--radius-pill);font-size:12.5px;font-weight:600;}
-  .banner{display:flex;align-items:center;gap:10px;background:var(--due-today-bg);border:1px solid #e0c58e;color:var(--due-today);padding:10px 16px;border-radius:8px;font-size:12.5px;margin-bottom:16px;}
+  .banner{display:flex;align-items:center;gap:10px;background:var(--due-today-bg);border:1px solid #e0c58e;color:var(--due-today);padding:10px 16px;border-radius:10px;font-size:12.5px;margin-bottom:16px;}
   .banner button{margin-left:auto;border:none;background:var(--primary-btn);color:#fff;padding:6px 14px;border-radius:var(--radius-pill);font-size:11.5px;font-weight:600;flex:none;}
   .banner .dismiss{background:transparent;color:var(--due-today);border:1px solid currentColor;}
 
@@ -462,6 +469,473 @@
   .toast button{border:none;background:transparent;color:#ffd27a;font-weight:700;font-size:12.5px;}
 
   .hidden{display:none !important;}
+
+  /* ==========================================================================
+     v2 — MOBILE-FIRST REFRESH
+     Everything below overrides the original desktop-era styles above. It is kept
+     in one block so the older rules stay readable/diffable and this layer can be
+     reasoned about as "the redesign".
+     ========================================================================== */
+
+  /* ---------- 1. Tokens: refreshed palette + dark mode ---------- */
+  :root{
+    --paper:#f6f2ec;
+    --surface:#ffffff;
+    --surface-2:#faf7f3;
+    --ink:#1e1a16;
+    --ink-muted:#6f665e;
+    --ink-faint:#9b928a;
+    --hairline:#e6dfd6;
+    --hairline-strong:#d6cec4;
+
+    --do-first:#c8505f;
+    --schedule:#0e8ea0;
+    --delegate:#7b5fc4;
+    --eliminate:#3f8c4a;
+
+    --do-first-tint:#fbeced;
+    --schedule-tint:#e6f4f6;
+    --delegate-tint:#efeafa;
+    --eliminate-tint:#e9f4ea;
+
+    --due-today:#8a5300;
+    --due-today-bg:#fbeed4;
+    --overdue:#b23a2f;
+    --overdue-bg:#fadedb;
+
+    --primary-btn:#2c2119;
+    --on-primary:#fff;
+    --accent:#0e8ea0;
+
+    --radius-card:14px;
+    --radius-panel:18px;
+    --radius-pill:999px;
+    --radius-sheet:24px;
+
+    --shadow-sm:0 1px 2px rgba(30,26,22,.06), 0 1px 3px rgba(30,26,22,.05);
+    --shadow-md:0 2px 6px rgba(30,26,22,.06), 0 8px 20px rgba(30,26,22,.07);
+    --shadow-lg:0 10px 40px rgba(30,26,22,.18);
+
+    --tap:44px;
+    --nav-h:64px;
+    --safe-b:env(safe-area-inset-bottom, 0px);
+  }
+
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#141210;
+      --surface:#1d1a17;
+      --surface-2:#232019;
+      --ink:#f2ece4;
+      --ink-muted:#a79d93;
+      --ink-faint:#7e756c;
+      --hairline:#322d27;
+      --hairline-strong:#413a32;
+
+      --do-first:#e5737f;
+      --schedule:#3fb8c9;
+      --delegate:#a68ce8;
+      --eliminate:#5fb96c;
+
+      --do-first-tint:#33201f;
+      --schedule-tint:#152c2f;
+      --delegate-tint:#241f33;
+      --eliminate-tint:#182b1b;
+
+      --due-today:#f0c375;
+      --due-today-bg:#33280f;
+      --overdue:#f08b80;
+      --overdue-bg:#3a1f1b;
+
+      --primary-btn:#f2ece4;
+      --on-primary:#191512;
+      --accent:#3fb8c9;
+
+      --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+      --shadow-md:0 2px 8px rgba(0,0,0,.35), 0 10px 24px rgba(0,0,0,.3);
+      --shadow-lg:0 12px 48px rgba(0,0,0,.6);
+    }
+    /* Emoji-free UI still uses a couple of colour-on-colour chips; keep them legible. */
+    .stat-pill.done-today{background:#1c3320;border-color:#2f5936;color:#8fd39a;}
+    .banner{background:var(--due-today-bg);border-color:#5a4520;color:var(--due-today);}
+    input,textarea,select{color-scheme:dark;}
+  }
+
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    background:var(--paper);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    letter-spacing:-0.005em;
+  }
+  /* Nothing in this app is allowed to make the page wider than the screen —
+     that horizontal overflow was the "grey band down the right side" on phones. */
+  .wrap{max-width:1240px;padding:20px 20px 40px;overflow-x:clip;}
+
+  ::-webkit-scrollbar{height:6px;width:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--hairline-strong);border-radius:999px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  /* Inline SVG icon defaults */
+  .ic{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round;vertical-align:-0.14em;}
+  .ic-fill{fill:currentColor;stroke:none;}
+  .only-phone{display:none!important;}
+
+  /* ---------- 2. Chrome: header, switcher, toolbars ---------- */
+  header.app-header{margin-bottom:16px;}
+  .brand h1{font-size:28px;letter-spacing:-0.02em;}
+  .brand p{font-size:13px;color:var(--ink-muted);}
+
+  .view-switcher{background:rgba(120,110,100,0.12);padding:4px;gap:2px;}
+  .view-switcher button{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;}
+  .view-switcher button.active{background:var(--surface);box-shadow:var(--shadow-sm);}
+  .view-switcher .ic{width:15px;height:15px;}
+
+  .settings-gear{width:38px;height:38px;color:var(--ink-muted);transition:background .15s;}
+  .settings-gear:hover{background:var(--surface-2);color:var(--ink);}
+  .settings-gear .ic{width:17px;height:17px;}
+
+  .pill-tabs{background:rgba(120,110,100,0.1);flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;}
+  .pill-tabs::-webkit-scrollbar{display:none;}
+  .pill-tabs button{white-space:nowrap;padding:8px 14px;}
+  .pill-tabs button.active{background:var(--primary-btn);color:var(--on-primary);}
+
+  .search-box{min-width:0;flex:1 1 200px;border-radius:var(--radius-pill);}
+  .search-box:focus-within{border-color:var(--accent);}
+
+  /* The old fixed min-widths here are exactly what forced the page wider than a
+     phone screen. Width now comes from the flex row, never from a hard floor. */
+  .quick-add{min-width:0;flex:1 1 260px;max-width:560px;}
+  #calendar-toolbar .quick-add{min-width:0;}
+  .quick-add input{min-width:0;border-style:solid;border-color:var(--hairline);background:var(--surface);}
+  .quick-add button{background:var(--primary-btn);color:var(--on-primary);}
+  .quick-add button.btn-add-detail{border-color:var(--hairline-strong);color:var(--ink);}
+
+  .stats-row{gap:7px;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;padding-bottom:2px;}
+  .stats-row::-webkit-scrollbar{display:none;}
+  .stat-pill{white-space:nowrap;flex:none;}
+
+  .cal-nav button{color:var(--ink);}
+  .cal-nav button:hover{background:var(--surface-2);}
+
+  /* ---------- 3. Cards / panels ---------- */
+  .quadrant{border-radius:var(--radius-panel);box-shadow:var(--shadow-sm);}
+  .q-header{padding:14px 16px 12px;}
+  .q-header-text .q-title{font-style:normal;letter-spacing:-0.01em;}
+  .q-count{background:rgba(120,110,100,0.14);}
+  .q-body{max-height:none;}
+
+  .task-card{background:var(--surface);border-radius:var(--radius-card);box-shadow:var(--shadow-sm);transition:box-shadow .15s,transform .1s;}
+  .task-card:hover{box-shadow:var(--shadow-md);}
+  .tc-check{width:22px;height:22px;border-width:1.5px;color:transparent;transition:background .12s,border-color .12s;}
+  .tc-check .ic{width:13px;height:13px;stroke-width:2.6;}
+  .tc-check.checked{color:#fff;}
+  .avatar{border-color:var(--surface);}
+  .meta-pill{background:rgba(120,110,100,0.12);}
+  .meta-pill .ic{width:11px;height:11px;margin-right:3px;}
+
+  .list-group{border-radius:var(--radius-panel);box-shadow:var(--shadow-sm);}
+  .list-row{padding:13px 16px;min-height:52px;}
+  .archive-view{border-radius:var(--radius-panel);box-shadow:var(--shadow-sm);}
+  .archive-row{padding:13px 16px;}
+
+  /* ---------- 4. Calendar ---------- */
+  .countdown-strip{gap:10px;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  .countdown-strip::-webkit-scrollbar{display:none;}
+  .countdown-card{scroll-snap-align:start;border-radius:var(--radius-panel);box-shadow:var(--shadow-sm);min-width:158px;}
+  .countdown-card .cc-icon{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;}
+  .countdown-card .cc-icon .ic{width:17px;height:17px;}
+  .countdown-card .cc-title{font-size:14px;}
+
+  .event-chip{border-radius:8px;padding:4px 8px;gap:6px;line-height:1.25;}
+  .event-chip .ec-icon .ic{width:12px;height:12px;}
+  .event-chip.task-chip{font-style:normal;}
+
+  .month-grid{gap:5px;}
+  .month-cell{border-radius:10px;box-shadow:none;}
+  .month-cell.today{border-color:var(--accent);}
+  .month-cell.today .mc-num{background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+
+  .week-cell{border-radius:10px;}
+  .agenda-card{border-radius:var(--radius-card);box-shadow:var(--shadow-sm);border-left-width:4px;padding:13px 15px;}
+  .agenda-card .ac-icon{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;}
+  .agenda-card .ac-icon .ic{width:16px;height:16px;}
+  .agenda-day-label{font-size:15px;}
+
+  /* Phone month view: a dot per event instead of unreadable 9px chips.
+     Tapping a day opens the day sheet (see .day-sheet). */
+  .month-cell.compact{min-height:0;aspect-ratio:1/1;align-items:center;justify-content:flex-start;gap:0;padding:5px 2px 4px;cursor:pointer;}
+  .month-cell.compact .mc-num{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px;}
+  .month-cell.compact.outside .mc-num{color:var(--ink-faint);}
+  .mc-dots{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;align-items:center;max-width:100%;}
+  .mc-dot{width:6px;height:6px;border-radius:50%;flex:none;}
+  .mc-dot.hollow{background:transparent!important;box-shadow:inset 0 0 0 1.5px var(--hairline-strong);}
+  .mc-plus{font-size:9px;font-weight:700;color:var(--ink-faint);line-height:1;}
+  .month-cell.compact.has-events{background:var(--surface);}
+  .month-cell.compact.sel{border-color:var(--ink);border-width:2px;}
+  .month-cell.compact.today .mc-num{background:var(--accent);color:#fff;}
+  .agenda-card.task-agenda-card{font-style:normal;}
+  .month-day-section{margin-top:20px;}
+  .month-day-section .agenda-day-label{margin-bottom:10px;}
+  .wk-day.empty .wk-day-head{border-bottom:none;opacity:.65;}
+  .wk-day.empty{box-shadow:none;background:transparent;}
+
+  /* Phone week view: one stacked block per day instead of a 700px sideways grid. */
+  .week-stack{display:flex;flex-direction:column;gap:12px;}
+  .wk-day{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius-panel);overflow:hidden;box-shadow:var(--shadow-sm);}
+  .wk-day-head{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--hairline);font-weight:700;font-size:13.5px;}
+  .wk-day-head .wk-dow{color:var(--ink-muted);font-weight:600;}
+  .wk-day.today .wk-day-head{background:var(--schedule-tint);color:var(--accent);}
+  .wk-day-body{padding:10px 12px;display:flex;flex-direction:column;gap:7px;}
+  .wk-empty{font-size:12.5px;color:var(--ink-faint);font-style:italic;padding:2px 2px 4px;}
+  .wk-row{display:flex;align-items:center;gap:9px;}
+  .wk-row .event-chip{flex:1;min-width:0;}
+
+  /* ---------- 5. Modals → bottom sheets on phones ---------- */
+  .scrim{background:rgba(20,16,12,0.45);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
+  .modal{border-radius:20px;box-shadow:var(--shadow-lg);}
+  .sheet-handle{display:none;}
+
+  /* ---------- 6. Bottom navigation (phones only) ---------- */
+  .mobile-nav{
+    display:none;
+    position:fixed;left:0;right:0;bottom:0;z-index:90;
+    background:color-mix(in srgb, var(--surface) 88%, transparent);
+    backdrop-filter:saturate(180%) blur(18px);
+    -webkit-backdrop-filter:saturate(180%) blur(18px);
+    border-top:1px solid var(--hairline);
+    padding-bottom:var(--safe-b);
+  }
+  .mobile-nav-inner{display:flex;align-items:stretch;height:var(--nav-h);}
+  .mobile-nav button{
+    flex:1;border:none;background:transparent;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:4px;padding:0;
+    color:var(--ink-faint);font-size:10.5px;font-weight:600;letter-spacing:0.01em;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .mobile-nav button .ic{width:22px;height:22px;stroke-width:1.8;transition:transform .18s;}
+  .mobile-nav button.active{color:var(--ink);}
+  .mobile-nav button.active .ic{stroke-width:2.15;transform:translateY(-1px);}
+  .mobile-nav button.active .nav-label{color:var(--ink);}
+
+  /* ---------- 7. Floating action button (phones only) ---------- */
+  .fab{
+    display:none;position:fixed;right:16px;z-index:85;
+    bottom:calc(var(--nav-h) + var(--safe-b) + 16px);
+    width:56px;height:56px;border-radius:20px;border:none;
+    background:var(--primary-btn);color:var(--on-primary);
+    box-shadow:0 8px 24px rgba(30,26,22,.28);
+    align-items:center;justify-content:center;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .fab .ic{width:24px;height:24px;stroke-width:2.2;}
+  .fab:active{transform:scale(0.94);}
+
+  /* ---------- 8. Day sheet (phone month view) ---------- */
+  .day-sheet-title{display:flex;align-items:baseline;gap:9px;margin-bottom:14px;}
+  .day-sheet-title h3{margin:0;font-family:var(--font-serif);font-size:19px;font-weight:700;}
+  .day-sheet-title .dst-sub{font-size:12px;color:var(--ink-muted);font-weight:600;}
+  .day-sheet-list{display:flex;flex-direction:column;gap:8px;}
+
+  /* ==========================================================================
+     PHONE  (<=760px)
+     ========================================================================== */
+  @media (max-width:760px){
+    body{font-size:15px;}
+    /* Room for the bottom nav + the iOS home indicator. */
+    .wrap{padding:0 14px calc(var(--nav-h) + var(--safe-b) + 28px);max-width:100%;}
+
+    /* --- sticky compact header --- */
+    header.app-header{
+      position:sticky;top:0;z-index:60;margin:0 -14px 12px;padding:8px 14px 10px;
+      background:color-mix(in srgb, var(--paper) 90%, transparent);
+      backdrop-filter:saturate(180%) blur(14px);
+      -webkit-backdrop-filter:saturate(180%) blur(14px);
+      border-bottom:1px solid var(--hairline);
+    }
+    .header-top{gap:10px;align-items:center;flex-wrap:nowrap;}
+    .brand{min-width:0;flex:1;}
+    .brand h1{font-size:20px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .brand p{display:none;}
+    .view-switcher{display:none;}          /* replaced by the bottom nav */
+    .mobile-nav{display:block;}
+    .fab{display:flex;}
+
+    .header-row2{margin-top:10px;gap:8px;flex-direction:column;align-items:stretch;}
+    /* Explicit widths here, not content-derived ones: a horizontally scrollable pill row
+       reports a wide min-content size, which was stretching the whole toolbar (and with it
+       the page) past the screen edge. */
+    .filters-search{gap:8px;flex-wrap:nowrap;flex-direction:column;align-items:stretch;width:100%;max-width:100%;min-width:0;}
+    .pill-tabs{width:100%;max-width:100%;min-width:0;}
+    .search-box{width:100%;flex:none;padding:10px 14px;}
+    .search-box input{font-size:16px;}    /* 16px stops iOS zooming the page on focus */
+    .quick-add{width:100%;max-width:100%;flex:none;gap:8px;}
+    .quick-add input{flex:1 1 auto;min-width:0;padding:11px 16px;font-size:16px;}
+    .quick-add button{padding:11px 18px;min-height:var(--tap);}
+    .quick-add .btn-add-detail{display:none;}   /* the FAB does this now */
+    #open-my-calendars{display:none;}           /* reachable from the settings sheet */
+    #add-goal-btn,#add-dream-btn{display:none;} /* the FAB does these now */
+    #add-event-btn{display:none;}               /* the FAB does this now */
+
+    .banner{font-size:12px;padding:10px 12px;gap:8px;margin:10px 0 0;border-radius:12px;flex-wrap:wrap;}
+    .banner span{flex:1 1 100%;}
+    .banner button{padding:8px 14px;}
+    #setup-banner{margin-bottom:0;}
+    /* Search is one tap away rather than permanently eating a row of a small screen. */
+    .only-phone{display:flex!important;}
+    #task-toolbar .search-box,#calendar-toolbar .quick-add{display:none;}
+    #task-toolbar.search-open .search-box{display:flex;}
+    #calendar-toolbar.search-open .quick-add{display:flex;}
+    #cal-toggle-search{margin-left:8px;}
+    .sync-banner{margin-top:6px;}
+    .sync-status{font-size:11px;}
+    .stats-row{margin:10px -14px 0;padding:0 14px 2px;}
+
+    /* --- matrix --- */
+    .matrix-outer{margin-top:14px;}
+    .matrix-cross{gap:12px;}
+    .q-body{min-height:0;padding:10px;gap:9px;}
+    .q-header{padding:13px 15px 11px;}
+    .q-header-text .q-title{font-size:16.5px;}
+    .q-header-text .q-subtitle{font-size:11.5px;}
+    .task-card{padding:13px 14px;}
+    .tc-title{font-size:15px;}
+    .tc-check{width:26px;height:26px;}
+    .meta-pill{font-size:11px;padding:4px 10px;}
+
+    /* --- list / archive --- */
+    .list-view{margin-top:14px;gap:14px;}
+    .list-row{padding:14px;gap:11px;min-height:56px;}
+    .list-row .tc-title{font-size:15px;}
+    .archive-view{margin-top:14px;}
+    .archive-row{flex-wrap:wrap;gap:9px;padding:14px;}
+    /* !important because the row's title carries an inline flex:1 from the renderer. */
+    .archive-row .tc-title{flex:1 1 100%!important;order:1;font-size:14.5px;}
+    .archive-row .tc-avatars{order:0;}
+    .archive-row .archive-date{order:2;margin-right:auto;}
+    .archive-row .btn-sm{order:3;padding:8px 14px;}
+
+    /* --- calendar --- */
+    .cal-wrap{margin-top:12px;}
+    .countdown-strip{margin:0 -14px 16px;padding:0 14px 10px;}
+    #cal-subview-tabs{display:flex;width:100%;}
+    #cal-subview-tabs button{flex:1;text-align:center;}
+    .cal-nav{width:100%;gap:6px;}
+    .cal-nav button{min-height:var(--tap);min-width:var(--tap);display:flex;align-items:center;justify-content:center;}
+    .cal-nav #cal-prev,.cal-nav #cal-next{width:var(--tap);}
+    .cal-nav #cal-today{padding:6px 14px;}
+    .cal-period-label{margin-left:auto;font-size:15px;}
+
+    .month-grid{gap:4px;}
+    .month-weekday{font-size:10px;padding-bottom:4px;}
+    .agenda-rail{gap:18px;}
+    .agenda-card{padding:14px;gap:11px;}
+    .agenda-card .ac-title{font-size:15px;}
+    .agenda-card .ac-meta{font-size:12px;}
+
+    /* --- compass / dreams --- */
+    .compass-wrap,.dream-wrap{margin-top:14px;}
+    .compass-vision-text{font-size:17px;}
+    .priority-card{padding:14px;}
+    .dream-card{padding:14px;}
+    #compass-mode-toggle{width:100%!important;}
+
+    /* --- modals become bottom sheets --- */
+    .scrim{padding:0;align-items:flex-end;}
+    .modal{
+      max-width:100%;width:100%;margin:0;
+      border-radius:var(--radius-sheet) var(--radius-sheet) 0 0;
+      padding:8px 18px 0;
+      max-height:92vh;max-height:92dvh;overflow-y:auto;min-height:0;
+      animation:sheet-up .26s cubic-bezier(.22,1,.36,1);
+      -webkit-overflow-scrolling:touch;
+    }
+    /* Grab handle drawn on every sheet without touching each modal's markup. */
+    .modal::before{content:"";display:block;width:38px;height:4px;border-radius:999px;background:var(--hairline-strong);margin:6px auto 14px;}
+    @keyframes sheet-up{from{transform:translateY(24px);opacity:.7;}to{transform:translateY(0);opacity:1;}}
+    .modal-title-input{font-size:19px;}
+    .field-label{margin:16px 0 7px;}
+    .row-2{flex-direction:column;gap:14px;}
+    .priority-grid{grid-template-columns:1fr 1fr;gap:8px;}
+    .priority-btn{padding:13px 10px;font-size:13px;white-space:normal;}
+    .seg3 button{padding:12px 4px;font-size:12.5px;}
+    input[type=date],.text-input,textarea.notes,.time-select{font-size:16px;padding:12px;}
+    .status-toggle{padding:13px;}
+    /* Sticky action bar: sits flush on the sheet's bottom edge (the sheet itself has no
+       bottom padding) so scrolled content can never peek out underneath it. */
+    .modal-footer{
+      position:sticky;bottom:0;margin-top:20px;padding:14px 0 calc(18px + var(--safe-b));
+      background:var(--surface);gap:10px;box-shadow:0 -12px 16px -12px rgba(0,0,0,.25);
+    }
+    .modal-footer button{flex:1;padding:13px 16px;font-size:14px;}
+    .cat-btn{padding:10px 14px;font-size:12.5px;}
+    .weekday-picker button{width:var(--tap);height:var(--tap);font-size:13px;}
+    .check-inline{min-height:var(--tap);}
+    .subtask-row{padding:7px 0;}
+    .subtask-row input[type=checkbox]{width:20px;height:20px;}
+    .family-row{gap:7px;padding:12px 12px 14px;border:1px solid var(--hairline);border-radius:var(--radius-card);background:var(--surface-2);position:relative;}
+    .family-row .fam-remove{position:absolute;top:8px;right:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;}
+    .family-row .fam-remove .ic{width:15px;height:15px;}
+
+    /* --- toast clears the nav --- */
+    .toast-wrap{bottom:calc(var(--nav-h) + var(--safe-b) + 20px);padding:0 16px;}
+    .toast{width:100%;justify-content:center;}
+  }
+
+  /* Small phones */
+  @media (max-width:380px){
+    .mobile-nav button{font-size:9.5px;}
+    .mobile-nav button .ic{width:21px;height:21px;}
+    .brand h1{font-size:18px;}
+    .month-cell.compact .mc-num{font-size:12px;}
+  }
+
+  /* Tablet: two-up matrix, keep the desktop switcher */
+  @media (min-width:761px) and (max-width:1024px){
+    .wrap{padding:20px 18px 48px;}
+    .matrix-cross{grid-template-columns:20px 1fr 1fr;}
+    .brand h1{font-size:25px;}
+  }
+
+  /* ---------- 8b. Contrast: anything that hard-coded #fff on a themed background ----------
+     In dark mode the "dark" button colour becomes light, so white-on-it disappears.
+     These all read off the theme instead. */
+  .btn-close,.btn-primary,.banner button,.toast{background:var(--primary-btn);color:var(--on-primary);}
+  .banner .dismiss{background:transparent;color:var(--due-today);}
+  .toast button{color:var(--accent);}
+  .seg3 button.active,.weekday-picker button.selected{background:var(--primary-btn);color:var(--on-primary);border-color:var(--primary-btn);}
+  .today-badge{background:var(--accent);color:var(--paper);}
+  .status-toggle.complete,.tc-check.checked{background:var(--eliminate);color:var(--paper);}
+  .month-cell.compact.today .mc-num{color:var(--paper);}
+  .dream-card.achieved{background:color-mix(in srgb, var(--eliminate) 10%, transparent);}
+
+  /* ---------- 9. Icon fit-and-finish in the places emoji used to sit ---------- */
+  /* Every "remove" control shares one look — some of these had no rule at all and were
+     falling back to the browser's default grey button. */
+  button.rm{border:none;background:transparent;color:var(--ink-faint);display:inline-flex;
+    align-items:center;justify-content:center;gap:5px;border-radius:50%;padding:6px;
+    min-width:32px;min-height:32px;font-size:12.5px;font-weight:600;}
+  button.rm:hover{background:rgba(120,110,100,0.14);color:var(--overdue);}
+  .priority-card .rm{border-radius:var(--radius-pill);padding:6px 12px;}
+  .cat-btn{display:inline-flex;align-items:center;gap:6px;}
+  .cat-btn .ic{width:14px;height:14px;}
+  .dream-check .ic{width:18px;height:18px;}
+  .dream-card.achieved .dream-check{color:var(--eliminate);}
+  .goal-junior-stars{display:flex;gap:3px;letter-spacing:0;font-size:0;}
+  .goal-junior-stars .ic{width:17px;height:17px;color:#e0a52a;}
+  .goal-junior-stars .star-off{opacity:.3;}
+  .dream-group-header .ic{width:17px;height:17px;}
+  .tag-chip button .ic,.subtask-row button.rm .ic,.priority-card .rm .ic,.mission-row .rm .ic,.family-row .rm .ic{width:12px;height:12px;}
+  .status-toggle{display:inline-flex;align-items:center;justify-content:center;gap:7px;}
+  .status-toggle .ic{width:15px;height:15px;}
+  .btn-close .ic{width:14px;height:14px;margin-right:5px;}
+  .settings-help .ic{width:13px;height:13px;margin-right:4px;}
+  .agenda-card .ac-icon,.countdown-card .cc-icon{box-shadow:var(--shadow-sm);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms!important;transition-duration:.001ms!important;}
+  }
+
 </style>
 </head>
 <body>
@@ -488,8 +962,9 @@
           <button data-view="list">List</button>
           <button data-view="archive">Archive</button>
         </div>
-        <button class="settings-gear" id="open-family-settings" title="Manage family members">👪</button>
-        <button class="settings-gear" id="open-settings" title="GitHub sync settings">⚙</button>
+        <button class="settings-gear only-phone" id="toggle-search" title="Search" aria-label="Search"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5L16.7 16.7"/></svg></button>
+        <button class="settings-gear" id="open-family-settings" title="Manage family members" aria-label="Family members"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17.5" cy="9.5" r="2.4"/><path d="M16 14.4a5.5 5.5 0 0 1 5.5 5.6"/></svg></button>
+        <button class="settings-gear" id="open-settings" title="Settings" aria-label="Settings"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 14.5a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1v.3a2 2 0 0 1-4 0v-.2a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7h-.3a2 2 0 0 1 0-4h.2a1.6 1.6 0 0 0 1.4-2.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3 1.6 1.6 0 0 0 1-1.5v-.3a2 2 0 0 1 4 0v.2a1.6 1.6 0 0 0 2.7 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8 1.6 1.6 0 0 0 1.5 1h.3a2 2 0 0 1 0 4h-.2a1.6 1.6 0 0 0-1.5 1z"/></svg></button>
       </div>
     </div>
 
@@ -522,6 +997,7 @@
           <button id="cal-today" title="Jump to today">Today</button>
           <button id="cal-next" title="Next">›</button>
           <span class="cal-period-label" id="cal-period-label"></span>
+          <button class="settings-gear only-phone" id="cal-toggle-search" title="Search events" aria-label="Search events"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5L16.7 16.7"/></svg></button>
         </div>
         <div class="pill-tabs" id="cal-family-tabs"></div>
       </div>
@@ -559,6 +1035,9 @@
 
   <main id="view-root"></main>
 </div>
+
+<nav class="mobile-nav" id="mobile-nav" aria-label="Main"><div class="mobile-nav-inner" id="mobile-nav-inner"></div></nav>
+<button class="fab" id="fab" aria-label="Add"></button>
 
 <div id="modal-root"></div>
 <div class="toast-wrap"><div class="toast" id="toast"></div></div>
@@ -794,18 +1273,70 @@
       // events with source:'ics' are auto-imported and read-only in the UI -- re-synced wholesale on each subscription sync
     }
   */
+  /* ================= ICONS =================
+     Inline SVG instead of emoji: emoji render differently on every device (and look
+     like clip-art at small sizes). These inherit currentColor and font-size, so one
+     definition works on a nav bar, a 12px chip and a 32px card badge alike. */
+  var ICON_PATHS = {
+    matrix:    '<rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/>',
+    calendar:  '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+    compass:   '<circle cx="12" cy="12" r="9"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z"/>',
+    list:      '<path d="M8.5 6h12M8.5 12h12M8.5 18h12M3.6 6h.01M3.6 12h.01M3.6 18h.01"/>',
+    archive:   '<rect x="3" y="4" width="18" height="4.5" rx="1.8"/><path d="M5 8.5V19a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5M10 12.5h4"/>',
+    star:      '<path d="M12 3.2l2.6 6.1 6.6.5-5 4.3 1.5 6.4L12 17.1l-5.7 3.4 1.5-6.4-5-4.3 6.6-.5z"/>',
+    plus:      '<path d="M12 5v14M5 12h14"/>',
+    search:    '<circle cx="11" cy="11" r="7"/><path d="M20.5 20.5L16.7 16.7"/>',
+    gear:      '<circle cx="12" cy="12" r="3.2"/><path d="M19.4 14.5a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1v.3a2 2 0 0 1-4 0v-.2a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7h-.3a2 2 0 0 1 0-4h.2a1.6 1.6 0 0 0 1.4-2.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3 1.6 1.6 0 0 0 1-1.5v-.3a2 2 0 0 1 4 0v.2a1.6 1.6 0 0 0 2.7 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8 1.6 1.6 0 0 0 1.5 1h.3a2 2 0 0 1 0 4h-.2a1.6 1.6 0 0 0-1.5 1z"/>',
+    family:    '<circle cx="9" cy="8" r="3.2"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17.5" cy="9.5" r="2.4"/><path d="M16 14.4a5.5 5.5 0 0 1 5.5 5.6"/>',
+    check:     '<path d="M5 12.5l4.6 4.5L19 7.5"/>',
+    circle:    '<circle cx="12" cy="12" r="8.6"/>',
+    checkcirc: '<circle cx="12" cy="12" r="8.6"/><path d="M8.2 12.3l2.5 2.5 5-5.2"/>',
+    checksq:   '<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M8 12.3l2.6 2.6 5.4-5.6"/>',
+    clock:     '<circle cx="12" cy="12" r="8.6"/><path d="M12 7.4V12l3 1.8"/>',
+    download:  '<path d="M12 3.5v11M7.8 10.4L12 14.6l4.2-4.2M4.5 19.5h15"/>',
+    chevleft:  '<path d="M14.5 5.5L8 12l6.5 6.5"/>',
+    chevright: '<path d="M9.5 5.5L16 12l-6.5 6.5"/>',
+    close:     '<path d="M6 6l12 12M18 6L6 18"/>',
+    pin:       '<circle cx="12" cy="10" r="2.8"/><path d="M12 21.2s7-6.4 7-11.2a7 7 0 1 0-14 0c0 4.8 7 11.2 7 11.2z"/>',
+    /* event categories */
+    music:     '<path d="M9 17.5V5.2l10-2v12"/><ellipse cx="6.2" cy="17.8" rx="2.9" ry="2.5"/><ellipse cx="16.2" cy="15.5" rx="2.9" ry="2.5"/>',
+    book:      '<path d="M4 19.2A2.2 2.2 0 0 1 6.2 17H20"/><path d="M6.2 3H20v18H6.2A2.2 2.2 0 0 1 4 18.8V5.2A2.2 2.2 0 0 1 6.2 3z"/>',
+    mic:       '<rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.2 11v1a6.8 6.8 0 0 0 13.6 0v-1M12 18.8V21.5M8.6 21.5h6.8"/>',
+    tools:     '<path d="M14.8 6.2a3.6 3.6 0 0 0 4.7 4.7l-8.4 8.4a2.4 2.4 0 0 1-3.4-3.4z"/><path d="M14.8 6.2L18.4 2.6l3 3-3.6 3.6"/><path d="M5.5 5.5l3.6 3.6"/>',
+    clipboard: '<rect x="8.5" y="2.5" width="7" height="3.6" rx="1.4"/><path d="M15.5 4.3H18a2 2 0 0 1 2 2v13.2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6.3a2 2 0 0 1 2-2h2.5"/><path d="M8.8 13.6l2.3 2.3 4.3-4.6"/>',
+    dumbbell:  '<path d="M6.8 6.5v11M17.2 6.5v11M3.2 9.2v5.6M20.8 9.2v5.6M6.8 12h10.4"/>',
+    cake:      '<path d="M3.2 21h17.6M4.6 21v-6.4a2 2 0 0 1 2-2h10.8a2 2 0 0 1 2 2V21"/><path d="M8.4 12.6V9.6M12 12.6V9.6M15.6 12.6V9.6M8.4 6.4V6M12 6.4V6M15.6 6.4V6"/><path d="M4.6 17.2c1.8 1 2.7-1 3.7 0s1.9 1 3.7 0 2.7-1 3.7 0 1.9 1 3.7 0"/>',
+    pulse:     '<path d="M3 12.5h4L9.4 6l4 12.6 2.3-6.1H21"/>',
+    plane:     '<path d="M10.4 3.6a1.7 1.7 0 0 1 3.2 0v5.2l7 3.9v2.4l-7-2v4.1l2.3 1.7v1.5L12 19.9l-3.9 1.5v-1.5l2.3-1.7v-4.1l-7 2v-2.4l7-3.9z"/>',
+    sparkle:   '<path d="M11.2 3.4l1.7 4.4 4.4 1.7-4.4 1.7-1.7 4.4-1.7-4.4L5.1 9.5l4.4-1.7z"/><path d="M17.6 14.6l.9 2.3 2.3.9-2.3.9-.9 2.3-.9-2.3-2.3-.9 2.3-.9z"/>',
+    /* dream + goal categories */
+    mountain:  '<path d="M2.5 19.5h19L14.2 6.2 10.6 12l-2-3z"/><path d="M12.1 10.4l2.1-4.2 3.1 5.6"/>',
+    heart:     '<path d="M12 20.4l-7.2-7A4.4 4.4 0 0 1 12 7.3a4.4 4.4 0 0 1 7.2 6.1z"/>',
+    brush:     '<path d="M9.5 14.5l-3 3a2.1 2.1 0 1 0 3 3l3-3"/><path d="M13.4 17.1L20 10.5a2.6 2.6 0 0 0-3.7-3.7L9.7 13.4"/><path d="M6.5 8.6l2.4-4.9 4.9-2.4"/>',
+    trophy:    '<path d="M7.5 3.5h9v5.2a4.5 4.5 0 0 1-9 0z"/><path d="M7.5 5H4.8v1.4A3.2 3.2 0 0 0 8 9.6M16.5 5h2.7v1.4a3.2 3.2 0 0 1-3.2 3.2M12 13.2V17M8.4 20.5h7.2M9.6 17h4.8v3.5H9.6z"/>',
+    leaf:      '<path d="M4.5 19.5C3 14 6.5 5.5 19.5 4.5c1 11-6 15.5-11.5 14.5"/><path d="M4.5 19.5c3-5.4 6.4-8.4 10.5-10.5"/>',
+    refresh:   '<path d="M20 11.5A8 8 0 1 0 18 17M20 5.5v6h-6"/>'
+  };
+  function icon(name, extraClass){
+    var p = ICON_PATHS[name] || ICON_PATHS.pin;
+    return '<svg class="ic'+(extraClass?' '+extraClass:'')+'" viewBox="0 0 24 24" aria-hidden="true">'+p+'</svg>';
+  }
+  // True on phone-sized screens. Several views render a genuinely different (not just
+  // restyled) layout there, so this needs to be a JS check, not only a media query.
+  function isPhone(){ return window.matchMedia('(max-width:760px)').matches; }
+
   var EVENT_CATEGORIES = {
-    band:        { label:'Band',        icon:'🎺', color:'#3b6ea5' },
-    homework:    { label:'Homework',    icon:'📚', color:'#a56a3b' },
-    concert:     { label:'Concert',     icon:'🎤', color:'#b0507e' },
-    projects:    { label:'Projects',    icon:'🛠️', color:'#5c7a89' },
-    test:        { label:'Test',        icon:'📝', color:'#a8372e' },
-    gym:         { label:'Gym',         icon:'🏋️', color:'#d9822b' },
-    birthday:    { label:'Birthday',    icon:'🎂', color:'#bc5460' },
-    appointment: { label:'Appointment', icon:'🩺', color:'#8765be' },
-    trip:        { label:'Trip',        icon:'✈️', color:'#c9922f' },
-    chore:       { label:'Chore',       icon:'🧹', color:'#6d6059' },
-    other:       { label:'Other',       icon:'📌', color:'#462c19' }
+    band:        { label:'Band',        icon:'music',     color:'#3b6ea5' },
+    homework:    { label:'Homework',    icon:'book',      color:'#a56a3b' },
+    concert:     { label:'Concert',     icon:'mic',       color:'#b0507e' },
+    projects:    { label:'Projects',    icon:'tools',     color:'#5c7a89' },
+    test:        { label:'Test',        icon:'clipboard', color:'#a8372e' },
+    gym:         { label:'Gym',         icon:'dumbbell',  color:'#d9822b' },
+    birthday:    { label:'Birthday',    icon:'cake',      color:'#bc5460' },
+    appointment: { label:'Appointment', icon:'pulse',     color:'#8765be' },
+    trip:        { label:'Trip',        icon:'plane',     color:'#c9922f' },
+    chore:       { label:'Chore',       icon:'sparkle',   color:'#6d6059' },
+    other:       { label:'Other',       icon:'pin',       color:'#462c19' }
   };
   var FAMILY_COLOR_PALETTE = ['#13808a','#955c82','#bc5460','#008fa0','#8765be','#3e8f44','#c9922f','#a8372e'];
 
@@ -818,12 +1349,12 @@
     }
   */
   var DREAM_CATEGORIES = {
-    adventure:  { label:'Adventure',  icon:'🏔️', color:'#c9922f' },
-    learning:   { label:'Learning',   icon:'📚', color:'#3b6ea5' },
-    kindness:   { label:'Kindness',   icon:'💛', color:'#bc5460' },
-    creativity: { label:'Creativity', icon:'🎨', color:'#8765be' },
-    sports:     { label:'Sports',     icon:'🏅', color:'#3e8f44' },
-    other:      { label:'Other',      icon:'⭐', color:'#6d6059' }
+    adventure:  { label:'Adventure',  icon:'mountain', color:'#c9922f' },
+    learning:   { label:'Learning',   icon:'book',     color:'#3b6ea5' },
+    kindness:   { label:'Kindness',   icon:'heart',    color:'#bc5460' },
+    creativity: { label:'Creativity', icon:'brush',    color:'#8765be' },
+    sports:     { label:'Sports',     icon:'trophy',   color:'#3e8f44' },
+    other:      { label:'Other',      icon:'star',     color:'#6d6059' }
   };
   var DREAM_CATEGORY_ORDER = ['adventure','learning','kindness','creativity','sports','other'];
 
@@ -845,11 +1376,11 @@
     priority: { id, ownerId, text, order: 0|1|2, createdAt: iso }  // capped at 3 active per kid
   */
   var GOAL_CATEGORIES = {
-    academics:     { label:'Academics',       icon:'📘', color:'#3b6ea5' },
-    personal:      { label:'Personal Growth', icon:'🌱', color:'#3e8f44' },
-    health:        { label:'Health & Sports', icon:'🏅', color:'#c9922f' },
-    relationships: { label:'Relationships',   icon:'🤝', color:'#b0507e' },
-    other:         { label:'Other',           icon:'⭐', color:'#6d6059' }
+    academics:     { label:'Academics',       icon:'book',   color:'#3b6ea5' },
+    personal:      { label:'Personal Growth', icon:'leaf',   color:'#3e8f44' },
+    health:        { label:'Health & Sports', icon:'trophy', color:'#c9922f' },
+    relationships: { label:'Relationships',   icon:'heart',  color:'#b0507e' },
+    other:         { label:'Other',           icon:'star',   color:'#6d6059' }
   };
   var GOAL_CATEGORY_ORDER = ['academics','personal','health','relationships','other'];
   var REFLECTION_INTERVAL_DAYS = 30;
@@ -1283,7 +1814,7 @@
       return '<span class="stat-pill"><span class="stat-dot" style="background:'+q.accent+'"></span>'+counts[k]+' '+q.title+'</span>';
     }).join('');
     if(doneToday > 0){
-      html += '<span class="stat-pill done-today">✓ '+doneToday+' done today</span>';
+      html += '<span class="stat-pill done-today">'+icon('check')+' '+doneToday+' done today</span>';
     }
     document.getElementById('stats-row').innerHTML = html;
   }
@@ -1337,11 +1868,11 @@
     var days = agingDays(t);
     if(days >= 3){
       var isDoFirst = quadrantOf(t) === 'doFirst';
-      pills += '<span class="meta-pill aging'+(isDoFirst?' alert':'')+'">⏳ '+days+'d here</span>';
+      pills += '<span class="meta-pill aging'+(isDoFirst?' alert':'')+'">'+icon('clock')+days+'d here</span>';
     }
     if(t.subtasks && t.subtasks.length){
       var done = t.subtasks.filter(function(s){return s.done;}).length;
-      pills += '<span class="meta-pill">☑ '+done+'/'+t.subtasks.length+'</span>';
+      pills += '<span class="meta-pill">'+icon('checksq')+done+'/'+t.subtasks.length+'</span>';
     }
     (t.tags||[]).forEach(function(tag){
       pills += '<span class="meta-pill tag">'+escapeHtml(tag)+'</span>';
@@ -1351,7 +1882,7 @@
   function taskCardHtml(t){
     return '<div class="task-card" draggable="true" data-id="'+t.id+'">'
       + '<div class="tc-top">'
-      + '<span class="tc-check'+(t.completed?' checked':'')+'" data-action="toggle" data-id="'+t.id+'">'+(t.completed?'✓':'')+'</span>'
+      + '<span class="tc-check'+(t.completed?' checked':'')+'" data-action="toggle" data-id="'+t.id+'">'+(t.completed?icon('check'):'')+'</span>'
       + '<span class="tc-title'+(t.completed?' done':'')+'">'+escapeHtml(t.title)+'</span>'
       + avatarHtml(t.assignees)
       + '</div>'
@@ -1406,7 +1937,7 @@
       var list = byQ[qkey];
       var rows = list.length ? list.map(function(t){
         return '<div class="list-row" data-id="'+t.id+'">'
-          + '<span class="tc-check'+(t.completed?' checked':'')+'" data-action="toggle" data-id="'+t.id+'">'+(t.completed?'✓':'')+'</span>'
+          + '<span class="tc-check'+(t.completed?' checked':'')+'" data-action="toggle" data-id="'+t.id+'">'+(t.completed?icon('check'):'')+'</span>'
           + '<span class="tc-title'+(t.completed?' done':'')+'">'+escapeHtml(t.title)+'</span>'
           + (t.due ? '<span class="meta-pill'+(t.due<todayStr()?' due-overdue':(t.due===todayStr()?' due-today':''))+'">'+fmtDate(t.due)+'</span>' : '')
           + avatarHtml(t.assignees)
@@ -1519,9 +2050,9 @@
 
   function eventChipHtml(occ){
     var cat = categoryOf(occ);
-    var importedMark = occ.source === 'ics' ? '📥 ' : '';
+    var importedMark = occ.source === 'ics' ? icon('download')+' ' : '';
     return '<div class="event-chip" style="background:'+cat.color+'" data-occ="'+occ.occurrenceId+'" title="'+escapeHtml((occ.source==='ics'?'Imported · ':'')+occ.title)+'">'
-      + '<span class="ec-icon">'+cat.icon+'</span><span class="ec-title">'+importedMark+escapeHtml(occ.title)+'</span></div>';
+      + '<span class="ec-icon">'+icon(cat.icon)+'</span><span class="ec-title">'+importedMark+escapeHtml(occ.title)+'</span></div>';
   }
 
   /* ---- Tasks-with-due-dates, shown alongside events on the calendar ---- */
@@ -1555,7 +2086,7 @@
       ? 'background:transparent;border:1.5px dashed var(--hairline);color:var(--ink-muted);'
       : 'background:'+q.accent+';';
     return '<div class="event-chip task-chip" style="'+style+'" data-task="'+occ.taskId+'" title="'+escapeHtml('Task · '+occ.title)+'">'
-      + '<span class="ec-icon">'+(occ.completed?'✅':'☐')+'</span><span class="ec-title'+(occ.completed?' done':'')+'">'+escapeHtml(occ.title)+'</span></div>';
+      + '<span class="ec-icon">'+icon(occ.completed?'checkcirc':'circle')+'</span><span class="ec-title'+(occ.completed?' done':'')+'">'+escapeHtml(occ.title)+'</span></div>';
   }
   function chipHtml(occ){ return occ.kind === 'task' ? taskChipHtml(occ) : eventChipHtml(occ); }
 
@@ -1563,7 +2094,7 @@
     if(occ.kind === 'task'){
       var q = QUADRANTS[occ.quadrant];
       return '<div class="agenda-card task-agenda-card'+(occ.completed?' done':'')+'" style="border-left-color:'+(occ.completed?'var(--hairline)':q.accent)+'" data-task="'+occ.taskId+'">'
-        + '<span class="ac-icon">'+(occ.completed?'✅':'☐')+'</span>'
+        + '<span class="ac-icon" style="background:'+(occ.completed?'var(--ink-faint)':q.accent)+'">'+icon(occ.completed?'checkcirc':'circle')+'</span>'
         + '<div class="ac-body"><div class="ac-title'+(occ.completed?' done':'')+'">'+escapeHtml(occ.title)+'</div><div class="ac-meta">Task · '+escapeHtml(q.title)+'</div></div>'
         + '<span class="ac-avatars">'+taskAssigneeAvatarsHtml(occ)+'</span>'
         + '</div>';
@@ -1571,9 +2102,9 @@
     var cat = categoryOf(occ);
     var timeLabel = displayEventTime(occ);
     var loc = occ.location ? ' · '+escapeHtml(occ.location) : '';
-    var importedMark = occ.source === 'ics' ? '📥 ' : '';
+    var importedMark = occ.source === 'ics' ? icon('download')+' ' : '';
     return '<div class="agenda-card" style="border-left-color:'+cat.color+'" data-occ="'+occ.occurrenceId+'">'
-      + '<span class="ac-icon">'+cat.icon+'</span>'
+      + '<span class="ac-icon" style="background:'+cat.color+'">'+icon(cat.icon)+'</span>'
       + '<div class="ac-body"><div class="ac-title">'+importedMark+escapeHtml(occ.title)+'</div><div class="ac-meta">'+timeLabel+loc+'</div></div>'
       + '<span class="ac-avatars">'+attendeeAvatarsHtml(occ)+'</span>'
       + '</div>';
@@ -1594,7 +2125,7 @@
       var when = days===0 ? 'Today' : days===1 ? 'Tomorrow' : 'in '+days+' days';
       var cat = categoryOf(o);
       return '<div class="countdown-card" data-occ="'+o.occurrenceId+'">'
-        + '<div class="cc-icon">'+cat.icon+'</div>'
+        + '<div class="cc-icon" style="background:'+cat.color+'">'+icon(cat.icon)+'</div>'
         + '<div class="cc-title">'+escapeHtml(o.title)+'</div>'
         + '<div class="cc-when'+(days===0?' today':'')+'">'+when+' · '+fmtDate(o.occurrenceDate)+'</div>'
         + '</div>';
@@ -1602,11 +2133,18 @@
     return '<div class="countdown-strip">'+cards+'</div>';
   }
 
+  // Colour that represents an occurrence in compact (dot) form.
+  function occDotColor(occ){
+    if(occ.kind === 'task') return occ.completed ? '' : QUADRANTS[occ.quadrant].accent;
+    return categoryOf(occ).color;
+  }
+
   function renderMonthGrid(rangeStart, rangeEnd, occurrences){
     var today = todayStr();
     var byDate = {};
     occurrences.forEach(function(o){ (byDate[o.occurrenceDate] = byDate[o.occurrenceDate]||[]).push(o); });
     var monthNum = state.calAnchor.slice(0,7);
+    var phone = isPhone();
     var weekdayHead = WEEKDAY_LABELS.map(function(l){ return '<div class="month-weekday">'+l+'</div>'; }).join('');
     var cells = '';
     var d = rangeStart;
@@ -1614,19 +2152,73 @@
       var inMonth = d.slice(0,7) === monthNum;
       var isToday = d === today;
       var dayList = byDate[d] || [];
-      var list = dayList.slice(0,3);
-      var extra = dayList.length - list.length;
-      cells += '<div class="month-cell'+(inMonth?'':' outside')+(isToday?' today':'')+'" data-date="'+d+'">'
-        + '<div class="mc-num">'+parseInt(d.slice(8,10),10)+'</div>'
-        + list.map(chipHtml).join('')
-        + (extra>0 ? '<div class="month-more" data-jump="'+d+'">+'+extra+' more</div>' : '')
-        + '</div>';
+
+      if(phone){
+        // A 9px event chip is unreadable on a phone, so a day is summarised as up to four
+        // dots (one per event, coloured by category / quadrant) and tapping it opens the
+        // day sheet with the full detail. Same pattern the native calendar apps use.
+        var dots = dayList.slice(0,4).map(function(o){
+          var c = occDotColor(o);
+          return '<span class="mc-dot'+(c?'':' hollow')+'" style="background:'+(c||'transparent')+'"></span>';
+        }).join('');
+        var more = dayList.length > 4 ? '<span class="mc-plus">+'+(dayList.length-4)+'</span>' : '';
+        cells += '<div class="month-cell compact'+(inMonth?'':' outside')+(isToday?' today':'')+(dayList.length?' has-events':'')+'" data-date="'+d+'" data-day-sheet="'+d+'">'
+          + '<div class="mc-num">'+parseInt(d.slice(8,10),10)+'</div>'
+          + '<div class="mc-dots">'+dots+more+'</div>'
+          + '</div>';
+      } else {
+        var list = dayList.slice(0,3);
+        var extra = dayList.length - list.length;
+        cells += '<div class="month-cell'+(inMonth?'':' outside')+(isToday?' today':'')+'" data-date="'+d+'">'
+          + '<div class="mc-num">'+parseInt(d.slice(8,10),10)+'</div>'
+          + list.map(chipHtml).join('')
+          + (extra>0 ? '<div class="month-more" data-jump="'+d+'">+'+extra+' more</div>' : '')
+          + '</div>';
+      }
       d = dateAdd(d,1);
     }
     return '<div class="month-grid">'+weekdayHead+cells+'</div>';
   }
 
+  // Phone week view: seven stacked day cards. The desktop version is a 7-column lane grid
+  // that can only exist at 700px+, which on a phone meant sideways scrolling to find
+  // Thursday. Here the week reads top to bottom like everything else on the page.
+  function renderWeekStack(rangeStart, occurrences){
+    var today = todayStr();
+    var byDate = {};
+    occurrences.forEach(function(o){ (byDate[o.occurrenceDate] = byDate[o.occurrenceDate]||[]).push(o); });
+    var out = '';
+    for(var i=0;i<7;i++){
+      var d = dateAdd(rangeStart,i);
+      var dt = new Date(d+'T00:00:00');
+      var list = (byDate[d]||[]).slice().sort(function(a,b){
+        if(a.kind === 'task' && b.kind !== 'task') return 1;
+        if(a.kind !== 'task' && b.kind === 'task') return -1;
+        return (a.time||'').localeCompare(b.time||'');
+      });
+      // A free day collapses to a single quiet line so the busy days are what you see.
+      var head = '<div class="wk-day-head"><span>'+dt.toLocaleDateString(undefined,{weekday:'long'})+'</span>'
+        + '<span class="wk-dow">'+dt.toLocaleDateString(undefined,{month:'short',day:'numeric'})+'</span>'
+        + (d===today?'<span class="today-badge" style="margin-left:auto">Today</span>':'')
+        + '</div>';
+      if(!list.length){
+        out += '<div class="wk-day empty'+(d===today?' today':'')+'" data-date="'+d+'">'+head+'</div>';
+        continue;
+      }
+      var rows = list.map(function(o){
+        var avatars = o.kind === 'task' ? taskAssigneeAvatarsHtml(o) : attendeeAvatarsHtml(o);
+        return '<div class="wk-row">'+chipHtml(o)+'<span class="ac-avatars" style="display:flex">'+avatars+'</span></div>';
+      }).join('');
+      out += '<div class="wk-day'+(d===today?' today':'')+'">'
+        + head
+        + '<div class="wk-day-body">'+rows+'</div>'
+        + '</div>';
+    }
+    return '<div class="week-stack">'+out+'</div>';
+  }
+
   function renderWeekLanes(rangeStart, rangeEnd, occurrences){
+    if(isPhone()) return renderWeekStack(rangeStart, occurrences);
     var today = todayStr();
     var days = [];
     for(var i=0;i<7;i++) days.push(dateAdd(rangeStart,i));
@@ -1693,6 +2285,23 @@
     return '<div class="agenda-rail">'+days+'</div>';
   }
 
+  function renderTodaySection(){
+    var today = todayStr();
+    var list = expandOccurrences(today, today).map(function(o){ o.kind='event'; return o; })
+      .concat(taskOccurrencesInRange(today, today))
+      .filter(eventMatchesFilter)
+      .sort(function(a,b){
+        if(a.kind === 'task' && b.kind !== 'task') return 1;
+        if(a.kind !== 'task' && b.kind === 'task') return -1;
+        return (a.time||'').localeCompare(b.time||'');
+      });
+    return '<div class="month-day-section">'
+      + '<div class="agenda-day-label">Today<span class="today-badge">'+fmtDate(today)+'</span></div>'
+      + '<div class="agenda-cards">'
+      + (list.length ? list.map(agendaCardHtml).join('') : '<div class="agenda-empty">Nothing scheduled today.</div>')
+      + '</div></div>';
+  }
+
   function renderCalToolbar(){
     document.querySelectorAll('#cal-subview-tabs button').forEach(function(b){
       b.classList.toggle('active', b.dataset.subview === state.calSubView);
@@ -1750,8 +2359,16 @@
     var taskOccs = taskOccurrencesInRange(rangeStart, rangeEnd);
     var occurrences = eventOccs.concat(taskOccs).filter(eventMatchesFilter);
 
-    var html = '<div class="cal-wrap">' + renderCountdownStrip();
-    if(state.calSubView === 'month') html += renderMonthGrid(rangeStart, rangeEnd, occurrences);
+    // The countdown strip is a lovely at-a-glance rail, but on a phone it pushes the month
+    // grid below the fold — so there it rides along with the agenda only.
+    var showStrip = !isPhone() || state.calSubView === 'agenda';
+    var html = '<div class="cal-wrap">' + (showStrip ? renderCountdownStrip() : '');
+    if(state.calSubView === 'month'){
+      html += renderMonthGrid(rangeStart, rangeEnd, occurrences);
+      // The phone grid is only dots, so today's actual plan goes right underneath it
+      // instead of leaving dead space — no tap required to see what's on now.
+      if(isPhone()) html += renderTodaySection();
+    }
     else if(state.calSubView === 'week') html += renderWeekLanes(rangeStart, rangeEnd, occurrences);
     else html += renderAgendaRail(rangeStart, rangeEnd, occurrences);
     html += '</div>';
@@ -1782,7 +2399,10 @@
     document.getElementById('view-root').querySelectorAll('.month-cell,.week-cell').forEach(function(cell){
       cell.addEventListener('click', function(e){
         if(e.target.closest('[data-occ]') || e.target.closest('[data-task]') || e.target.closest('.month-more')) return;
-        openAddEventModal(cell.dataset.date);
+        // On a phone the compact month cell is a summary, so tapping it opens that day's
+        // detail sheet rather than jumping straight into "new event".
+        if(cell.dataset.daySheet) openDaySheet(cell.dataset.daySheet);
+        else openAddEventModal(cell.dataset.date);
       });
     });
 
@@ -1801,6 +2421,7 @@
     document.getElementById('stats-row').classList.toggle('hidden', !isTaskView);
     document.body.classList.toggle('kid-mode', isKidMode()); // applies app-wide, not just on the calendar tab
     document.getElementById('open-family-settings').classList.toggle('hidden', isKidMode()); // roster management is adults-only
+    syncMobileChrome();
   }
 
   function render(){
@@ -2035,14 +2656,14 @@
       }).join('') : '<span class="settings-help" style="margin:0;">Add family members in Family Settings to assign tasks to specific people.</span>';
 
       var tagsHtml = (draft.tags||[]).map(function(tag,i){
-        return '<span class="tag-chip">'+escapeHtml(tag)+'<button data-idx="'+i+'" data-action="rm-tag">✕</button></span>';
+        return '<span class="tag-chip">'+escapeHtml(tag)+'<button data-idx="'+i+'" data-action="rm-tag" aria-label="Remove tag">'+icon('close')+'</button></span>';
       }).join('');
 
       var subtasksHtml = (draft.subtasks||[]).map(function(s){
         return '<div class="subtask-row" data-id="'+s.id+'">'
           + '<input type="checkbox" '+(s.done?'checked':'')+' data-action="st-toggle">'
           + '<span class="st-text'+(s.done?' done':'')+'">'+escapeHtml(s.text)+'</span>'
-          + '<button class="rm" data-action="st-remove">✕</button></div>';
+          + '<button class="rm" data-action="st-remove" aria-label="Remove">'+icon('close')+'</button></div>';
       }).join('');
 
       var activityHtml = '';
@@ -2060,7 +2681,7 @@
         + '<div class="field-label">Assigned to</div><div class="tag-list" id="m-assignee">'+assigneeChips+'</div>'
         + '<div class="row-2" style="margin-top:18px;">'
         + '<div><div class="field-label" style="margin-top:0;">Due date</div><input type="date" id="m-due" value="'+(draft.due||'')+'"></div>'
-        + '<div><div class="field-label" style="margin-top:0;">Status</div><button class="status-toggle'+(draft.completed?' complete':'')+'" id="m-status">'+(draft.completed?'↺ Mark incomplete':'✓ Mark complete')+'</button></div>'
+        + '<div><div class="field-label" style="margin-top:0;">Status</div><button class="status-toggle'+(draft.completed?' complete':'')+'" id="m-status">'+(draft.completed?icon('refresh')+' Mark incomplete':icon('check')+' Mark complete')+'</button></div>'
         + '</div>'
         + '<div class="field-label">Tags</div><div class="tag-list" id="m-tags">'+tagsHtml+'</div>'
         + '<input class="dashed-input" id="m-tag-input" placeholder="Add a tag, press Enter">'
@@ -2429,8 +3050,8 @@
     var html = ''
       + '<div class="scrim" id="scrim">'
       + '<div class="modal">'
-      + '<div class="settings-help" style="margin-top:0;">📥 Imported from '+escapeHtml(sub ? sub.name : 'a subscribed calendar')+(owner?' · '+escapeHtml(owner.name):'')+' · '+syncedLabel+'</div>'
-      + '<div style="font-family:var(--font-serif);font-size:21px;font-weight:600;margin-bottom:14px;">'+cat.icon+' '+escapeHtml(sourceEvent.title)+'</div>'
+      + '<div class="settings-help" style="margin-top:0;">'+icon('download')+' Imported from '+escapeHtml(sub ? sub.name : 'a subscribed calendar')+(owner?' · '+escapeHtml(owner.name):'')+' · '+syncedLabel+'</div>'
+      + '<div style="font-family:var(--font-serif);font-size:21px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:9px;"><span style="color:'+cat.color+'">'+icon(cat.icon)+'</span>'+escapeHtml(sourceEvent.title)+'</div>'
       + '<div class="field-label" style="margin-top:0;">When</div><div style="font-size:13px;">'+whenLabel+(sourceEvent.endDate?' – '+fmtLong(sourceEvent.endDate):'')+'</div>'
       + (sourceEvent.location ? '<div class="field-label">Location</div><div style="font-size:13px;">'+escapeHtml(sourceEvent.location)+'</div>' : '')
       + (sourceEvent.notes ? '<div class="field-label">Notes</div><div style="font-size:13px;white-space:pre-wrap;">'+escapeHtml(sourceEvent.notes)+'</div>' : '')
@@ -2475,7 +3096,7 @@
     function renderEventModal(){
       var catButtons = Object.keys(EVENT_CATEGORIES).map(function(key){
         var c = EVENT_CATEGORIES[key];
-        return '<button type="button" class="cat-btn'+(draft.category===key?' selected':'')+'" data-cat="'+key+'">'+c.icon+' '+c.label+'</button>';
+        return '<button type="button" class="cat-btn'+(draft.category===key?' selected':'')+'" data-cat="'+key+'"><span style="color:'+c.color+'">'+icon(c.icon)+'</span> '+c.label+'</button>';
       }).join('');
 
       var attendeeChips = '<span class="tag-chip attendee-chip'+(draft.attendees.indexOf('all')!==-1?' active':'')+'" data-id="all">Everyone</span>'
@@ -2741,7 +3362,7 @@
     var pct = prog.total ? Math.round(100*prog.done/prog.total) : 0;
     var achieved = !!d.achieved;
     return '<div class="dream-card'+(achieved?' achieved':'')+'" style="border-left-color:'+cat.color+'" data-id="'+d.id+'">'
-      + '<button type="button" class="dream-check" data-action="dream-toggle-achieved" data-id="'+d.id+'" title="'+(achieved?'Mark not achieved yet':'Mark achieved!')+'">'+(achieved?'🎉':cat.icon)+'</button>'
+      + '<button type="button" class="dream-check" data-action="dream-toggle-achieved" data-id="'+d.id+'" title="'+(achieved?'Mark not achieved yet':'Mark achieved!')+'">'+icon(achieved?'trophy':cat.icon)+'</button>'
       + '<div class="dream-body">'
       + '<div class="dream-title'+(achieved?' done':'')+'">'+escapeHtml(d.title)+'</div>'
       + (prog.total ? ('<div class="dream-progress"><div class="dream-progress-bar"><div class="dream-progress-fill" style="width:'+pct+'%;background:'+cat.color+'"></div></div><span class="dream-progress-label">'+prog.done+'/'+prog.total+'</span></div>') : '')
@@ -2796,7 +3417,7 @@
       if(!list.length) return '';
       var cat = DREAM_CATEGORIES[key];
       return '<div class="dream-group">'
-        + '<div class="dream-group-header" style="border-color:'+cat.color+'"><span>'+cat.icon+'</span><span>'+escapeHtml(cat.label)+'</span></div>'
+        + '<div class="dream-group-header" style="border-color:'+cat.color+'"><span style="color:'+cat.color+';display:flex;">'+icon(cat.icon)+'</span><span>'+escapeHtml(cat.label)+'</span></div>'
         + '<div class="dream-cards">'+list.map(dreamCardHtml).join('')+'</div>'
         + '</div>';
     }).join('');
@@ -2844,14 +3465,14 @@
     function renderDreamForm(){
       var catButtons = DREAM_CATEGORY_ORDER.map(function(key){
         var c = DREAM_CATEGORIES[key];
-        return '<button type="button" class="cat-btn'+(draft.category===key?' selected':'')+'" data-cat="'+key+'">'+c.icon+' '+c.label+'</button>';
+        return '<button type="button" class="cat-btn'+(draft.category===key?' selected':'')+'" data-cat="'+key+'"><span style="color:'+c.color+'">'+icon(c.icon)+'</span> '+c.label+'</button>';
       }).join('');
 
       var stepsHtml = (draft.steps||[]).map(function(s){
         return '<div class="subtask-row" data-id="'+s.id+'">'
           + '<input type="checkbox" '+(s.done?'checked':'')+' data-action="st-toggle">'
           + '<span class="st-text'+(s.done?' done':'')+'">'+escapeHtml(s.text)+'</span>'
-          + '<button class="rm" data-action="st-remove">✕</button></div>';
+          + '<button class="rm" data-action="st-remove" aria-label="Remove">'+icon('close')+'</button></div>';
       }).join('');
 
       var html = ''
@@ -2862,7 +3483,7 @@
         + '<div class="field-label">Steps to get there (optional)</div><div id="dr-steps">'+stepsHtml+'</div>'
         + '<input class="dashed-input" id="dr-step-input" placeholder="Add a step, press Enter">'
         + '<div class="field-label">Notes</div><textarea class="notes" id="dr-notes">'+escapeHtml(draft.notes||'')+'</textarea>'
-        + '<div class="field-label">Status</div><button type="button" class="status-toggle'+(draft.achieved?' complete':'')+'" id="dr-achieved">'+(draft.achieved?'🎉 Achieved!':'☐ Not yet achieved')+'</button>'
+        + '<div class="field-label">Status</div><button type="button" class="status-toggle'+(draft.achieved?' complete':'')+'" id="dr-achieved">'+(draft.achieved?icon('trophy')+' Achieved!':icon('circle')+' Not yet achieved')+'</button>'
         + '<div class="modal-footer">'
         + (isNew ? '<span></span>' : '<button class="btn-delete" id="dr-delete">Delete dream</button>')
         + '<div style="display:flex;gap:10px;">'
@@ -3006,16 +3627,16 @@
       var starCount = 5;
       var filled = prog.total ? Math.round((prog.done/prog.total)*starCount) : 0;
       var stars = '';
-      for(var i=0;i<starCount;i++) stars += (i<filled ? '⭐' : '☆');
+      for(var i=0;i<starCount;i++) stars += icon('star', i<filled ? 'ic-fill star-on' : 'star-off');
       progressHtml = prog.total ? '<div class="goal-junior-stars">'+stars+'</div>' : '';
     } else {
       var pct = prog.total ? Math.round(100*prog.done/prog.total) : 0;
       progressHtml = (prog.total ? '<div class="dream-progress"><div class="dream-progress-bar"><div class="dream-progress-fill" style="width:'+pct+'%;background:'+cat.color+'"></div></div><span class="dream-progress-label">'+prog.done+'/'+prog.total+'</span></div>' : '')
         + (g.targetDate ? '<div class="goal-target-date">Due '+fmtDate(g.targetDate)+'</div>' : '');
     }
-    var icon = achieved ? (mode==='junior' ? '🏆' : '✅') : cat.icon;
+    var badge = achieved ? icon('trophy') : icon(cat.icon);
     return '<div class="dream-card goal-card'+(achieved?' achieved':'')+'" style="border-left-color:'+cat.color+'" data-id="'+g.id+'">'
-      + '<button type="button" class="dream-check" data-action="goal-toggle-achieved" data-id="'+g.id+'" title="'+(achieved?'Mark not achieved yet':'Mark achieved!')+'">'+icon+'</button>'
+      + '<button type="button" class="dream-check" data-action="goal-toggle-achieved" data-id="'+g.id+'" title="'+(achieved?'Mark not achieved yet':'Mark achieved!')+'">'+badge+'</button>'
       + '<div class="dream-body">'
       + '<div class="dream-title'+(achieved?' done':'')+'">'+escapeHtml(g.title)+'</div>'
       + progressHtml
@@ -3030,7 +3651,7 @@
         return '<div class="priority-card" data-id="'+p.id+'">'
           + '<div class="priority-num">'+(i+1)+'</div>'
           + '<div class="priority-text" contenteditable="true" data-id="'+p.id+'">'+escapeHtml(p.text)+'</div>'
-          + '<button type="button" class="rm" data-action="rm-priority" data-id="'+p.id+'" title="Remove">✕ Remove</button>'
+          + '<button type="button" class="rm" data-action="rm-priority" data-id="'+p.id+'" title="Remove">'+icon('close')+' Remove</button>'
           + '</div>';
       }
       return '<button type="button" class="priority-card priority-add" data-action="add-priority">'
@@ -3058,7 +3679,7 @@
       return '<div class="mission-row" data-idx="'+i+'">'
         + '<span class="mission-bullet">I will</span>'
         + '<span class="mission-text" contenteditable="true" data-idx="'+i+'">'+escapeHtml(text)+'</span>'
-        + '<button type="button" class="rm" data-action="rm-mission" data-idx="'+i+'" title="Remove">✕</button>'
+        + '<button type="button" class="rm" data-action="rm-mission" data-idx="'+i+'" title="Remove" aria-label="Remove">'+icon('close')+'</button>'
         + '</div>';
     }).join('');
     return '<div class="compass-section">'
@@ -3076,7 +3697,7 @@
       if(!list.length) return '';
       var cat = GOAL_CATEGORIES[key];
       return '<div class="dream-group">'
-        + '<div class="dream-group-header" style="border-color:'+cat.color+'"><span>'+cat.icon+'</span><span>'+escapeHtml(cat.label)+'</span></div>'
+        + '<div class="dream-group-header" style="border-color:'+cat.color+'"><span style="color:'+cat.color+';display:flex;">'+icon(cat.icon)+'</span><span>'+escapeHtml(cat.label)+'</span></div>'
         + '<div class="dream-cards">'+list.map(function(g){ return goalCardHtml(g, mode); }).join('')+'</div>'
         + '</div>';
     }).join('');
@@ -3263,14 +3884,14 @@
     function renderGoalForm(){
       var catButtons = GOAL_CATEGORY_ORDER.map(function(key){
         var c = GOAL_CATEGORIES[key];
-        return '<button type="button" class="cat-btn'+(draft.category===key?' selected':'')+'" data-cat="'+key+'">'+c.icon+' '+c.label+'</button>';
+        return '<button type="button" class="cat-btn'+(draft.category===key?' selected':'')+'" data-cat="'+key+'"><span style="color:'+c.color+'">'+icon(c.icon)+'</span> '+c.label+'</button>';
       }).join('');
 
       var stepsHtml = (draft.steps||[]).map(function(s){
         return '<div class="subtask-row" data-id="'+s.id+'">'
           + '<input type="checkbox" '+(s.done?'checked':'')+' data-action="st-toggle">'
           + '<span class="st-text'+(s.done?' done':'')+'">'+escapeHtml(s.text)+'</span>'
-          + '<button class="rm" data-action="st-remove">✕</button></div>';
+          + '<button class="rm" data-action="st-remove" aria-label="Remove">'+icon('close')+'</button></div>';
       }).join('');
 
       var html = ''
@@ -3281,7 +3902,7 @@
         + '<div class="field-label">Target date (optional)</div><input type="date" id="gl-target" value="'+(draft.targetDate||'')+'">'
         + '<div class="field-label">Steps to get there (optional)</div><div id="gl-steps">'+stepsHtml+'</div>'
         + '<input class="dashed-input" id="gl-step-input" placeholder="Add a step, press Enter">'
-        + '<div class="field-label">Status</div><button type="button" class="status-toggle'+(draft.achieved?' complete':'')+'" id="gl-achieved">'+(draft.achieved?'🎉 Achieved!':'☐ Not yet achieved')+'</button>'
+        + '<div class="field-label">Status</div><button type="button" class="status-toggle'+(draft.achieved?' complete':'')+'" id="gl-achieved">'+(draft.achieved?icon('trophy')+' Achieved!':icon('circle')+' Not yet achieved')+'</button>'
         + '<div class="modal-footer">'
         + (isNew ? '<span></span>' : '<button class="btn-delete" id="gl-delete">Delete goal</button>')
         + '<div style="display:flex;gap:10px;">'
@@ -3632,7 +4253,7 @@
         + '<div style="font-size:11px;color:'+(s.syncStatus==='err'?'var(--overdue)':'var(--ink-muted)')+';margin-top:2px;">'+status+'</div>'
         + '</div>'
         + '<button type="button" class="btn-sm" data-action="sync-sub" data-sub="'+s.id+'">Sync now</button>'
-        + '<button type="button" class="rm" data-action="rm-sub" data-sub="'+s.id+'" title="Remove">✕</button>'
+        + '<button type="button" class="rm" data-action="rm-sub" data-sub="'+s.id+'" title="Remove" aria-label="Remove">'+icon('close')+'</button>'
         + '</div>';
     }).join('') : '<div class="list-empty">No calendars imported yet.</div>';
     document.getElementById('my-cal-list').innerHTML = html;
@@ -3678,7 +4299,7 @@
       + '<div class="settings-field"><label>Name</label><input class="text-input" id="mc-name" placeholder="e.g. Lincoln Elementary"></div>'
       + '<div class="settings-field"><label>Calendar URL (.ics or webcal://)</label><input class="text-input" id="mc-url" placeholder="https://school.example.edu/calendar.ics"></div>'
       + '<div class="settings-field"><label>Default category</label><select class="text-input" id="mc-category">'
-      + Object.keys(EVENT_CATEGORIES).map(function(k){ return '<option value="'+k+'">'+EVENT_CATEGORIES[k].icon+' '+EVENT_CATEGORIES[k].label+'</option>'; }).join('')
+      + Object.keys(EVENT_CATEGORIES).map(function(k){ return '<option value="'+k+'">'+EVENT_CATEGORIES[k].label+'</option>'; }).join('')
       + '</select></div>'
       + '<div class="settings-actions">'
       + '<button class="btn-primary" id="mc-add">Add & Sync</button>'
@@ -3819,7 +4440,7 @@
           + '<button type="button" data-role="kid" class="'+(m.role==='kid'?'active':'')+'">Kid</button>'
           + '</div>'
           + '<select class="text-input fam-timezone" data-idx="'+i+'" title="Their timezone">'+tzOptionsHtml(m.timezone || homeTzDraft)+'</select>'
-          + '<button type="button" class="rm fam-remove" data-idx="'+i+'" title="Remove">✕</button>'
+          + '<button type="button" class="rm fam-remove" data-idx="'+i+'" title="Remove" aria-label="Remove">'+icon('close')+'</button>'
           + '</div>';
       }).join('');
       document.getElementById('family-list').innerHTML = rows || '<div class="list-empty">No family members yet — add one below.</div>';
@@ -3876,6 +4497,190 @@
     });
   }
 
+  /* ================= MOBILE CHROME =================
+     Bottom tab bar, floating add button, and the day sheet. These only exist on
+     phone-width screens; on desktop the original header switcher stays in charge. */
+
+  var NAV_ITEMS = [
+    { view:'matrix',   label:'Matrix',   icon:'matrix'   },
+    { view:'calendar', label:'Calendar', icon:'calendar' },
+    { view:'compass',  label:'Compass',  icon:'compass'  },
+    { view:'list',     label:'List',     icon:'list'     },
+    { view:'archive',  label:'Archive',  icon:'archive'  }
+  ];
+
+  function setView(view){
+    state.view = view;
+    document.querySelectorAll('#view-switcher button[data-view]').forEach(function(b){
+      b.classList.toggle('active', b.dataset.view === view);
+    });
+    window.scrollTo({ top:0, behavior:'auto' });
+    render();
+  }
+
+  var VIEW_ICONS = { matrix:'matrix', calendar:'calendar', compass:'compass', list:'list', archive:'archive', dreams:'star' };
+  function decorateViewSwitcher(){
+    document.querySelectorAll('#view-switcher button[data-view]').forEach(function(b){
+      if(b.querySelector('svg')) return;
+      b.innerHTML = icon(VIEW_ICONS[b.dataset.view] || 'pin') + '<span>' + b.textContent.trim() + '</span>';
+    });
+  }
+
+  function buildMobileNav(){
+    var inner = document.getElementById('mobile-nav-inner');
+    if(!inner) return;
+    inner.innerHTML = NAV_ITEMS.map(function(it){
+      return '<button type="button" data-view="'+it.view+'" aria-label="'+it.label+'">'
+        + icon(it.icon) + '<span class="nav-label">'+it.label+'</span></button>';
+    }).join('');
+    inner.addEventListener('click', function(e){
+      var btn = e.target.closest('button[data-view]');
+      if(btn) setView(btn.dataset.view);
+    });
+  }
+
+  // What the ⊕ button does depends on where you are, so the primary action for the
+  // current tab is always one thumb-reach away instead of buried in a toolbar.
+  function fabAction(){
+    if(state.view === 'calendar') return { label:'New event', run:function(){ openAddEventModal(state.calAnchor); } };
+    if(state.view === 'compass')  return { label:'New goal',  run:openAddGoalModal };
+    if(state.view === 'dreams')   return { label:'New dream', run:openAddDreamModal };
+    if(state.view === 'archive')  return null;
+    return { label:'New task', run:openAddTaskModal };
+  }
+
+  function syncMobileChrome(){
+    var fabEl = document.getElementById('fab');
+    if(fabEl && !fabEl.querySelector('svg')) fabEl.innerHTML = icon('plus');
+    document.querySelectorAll('#mobile-nav-inner button[data-view]').forEach(function(b){
+      b.classList.toggle('active', b.dataset.view === state.view);
+    });
+    var fab = document.getElementById('fab');
+    if(!fab) return;
+    var act = fabAction();
+    fab.classList.toggle('hidden', !act);
+    if(act) fab.setAttribute('aria-label', act.label);
+  }
+
+  function openDaySheet(dateStr){
+    var eventOccs = expandOccurrences(dateStr, dateStr).map(function(o){ o.kind = 'event'; return o; });
+    var taskOccs = taskOccurrencesInRange(dateStr, dateStr);
+    var list = eventOccs.concat(taskOccs).filter(eventMatchesFilter).sort(function(a,b){
+      if(a.kind === 'task' && b.kind !== 'task') return 1;
+      if(a.kind !== 'task' && b.kind === 'task') return -1;
+      return (a.time||'').localeCompare(b.time||'');
+    });
+    var dt = new Date(dateStr+'T00:00:00');
+    var body = list.length
+      ? list.map(agendaCardHtml).join('')
+      : '<div class="agenda-empty">Nothing on this day yet.</div>';
+
+    document.getElementById('modal-root').innerHTML =
+      '<div class="scrim" id="scrim"><div class="modal" style="max-width:520px;">'
+      + '<div class="day-sheet-title"><h3>'+dt.toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'})+'</h3>'
+      + '<span class="dst-sub">'+(dateStr===todayStr()?'Today':'')+'</span></div>'
+      + '<div class="day-sheet-list">'+body+'</div>'
+      + '<div class="modal-footer"><button class="btn-close" id="ds-add">'+icon('plus')+' Add event</button>'
+      + '<button class="btn-sm" id="ds-close">Close</button></div>'
+      + '</div></div>';
+
+    function close(){ document.getElementById('modal-root').innerHTML = ''; }
+    document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id==='scrim') close(); });
+    document.getElementById('ds-close').addEventListener('click', close);
+    document.getElementById('ds-add').addEventListener('click', function(){ close(); openAddEventModal(dateStr); });
+    document.querySelectorAll('.day-sheet-list [data-occ]').forEach(function(el){
+      el.addEventListener('click', function(){
+        var occ = occFromOccurrenceId(el.dataset.occ);
+        if(occ){ close(); openEventModal(occ); }
+      });
+    });
+    document.querySelectorAll('.day-sheet-list [data-task]').forEach(function(el){
+      el.addEventListener('click', function(){ var id = el.dataset.task; close(); openTaskModal(id); });
+    });
+  }
+
+  /* ---- Touch drag between quadrants ----
+     HTML5 drag-and-drop simply does not fire on touch screens, so on a phone the
+     matrix was read-only unless you opened each task. Long-press a card and it
+     follows your finger; release it over a quadrant to re-file it. */
+  function attachTouchDrag(){
+    var card = null, ghost = null, holdTimer = null, startX = 0, startY = 0, dragging = false, lastTarget = null;
+
+    function cleanup(){
+      clearTimeout(holdTimer);
+      if(ghost && ghost.parentNode) ghost.parentNode.removeChild(ghost);
+      if(card) card.classList.remove('dragging');
+      if(lastTarget) lastTarget.classList.remove('drag-over');
+      card = null; ghost = null; dragging = false; lastTarget = null;
+      document.body.style.overflow = '';
+    }
+
+    function onStart(e){
+      var t = e.target.closest('.task-card');
+      if(!t || e.touches.length !== 1) return;
+      if(e.target.closest('[data-action="toggle"]')) return;
+      card = t;
+      startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+      holdTimer = setTimeout(function(){
+        dragging = true;
+        if(navigator.vibrate) navigator.vibrate(12);
+        var r = card.getBoundingClientRect();
+        ghost = card.cloneNode(true);
+        ghost.style.cssText = 'position:fixed;left:'+r.left+'px;top:'+r.top+'px;width:'+r.width+'px;'
+          + 'pointer-events:none;z-index:300;opacity:.95;transform:scale(1.03);box-shadow:var(--shadow-lg);margin:0;';
+        document.body.appendChild(ghost);
+        card.classList.add('dragging');
+        document.body.style.overflow = 'hidden';
+      }, 260);
+    }
+
+    function onMove(e){
+      if(!card) return;
+      var x = e.touches[0].clientX, y = e.touches[0].clientY;
+      if(!dragging){
+        // Moved before the long-press landed: that's a scroll, not a drag.
+        if(Math.abs(x-startX) > 8 || Math.abs(y-startY) > 8) cleanup();
+        return;
+      }
+      e.preventDefault();
+      ghost.style.left = (x - ghost.offsetWidth/2) + 'px';
+      ghost.style.top  = (y - 28) + 'px';
+      var under = document.elementFromPoint(x, y);
+      var body = under && under.closest('.q-body');
+      if(body !== lastTarget){
+        if(lastTarget) lastTarget.classList.remove('drag-over');
+        if(body) body.classList.add('drag-over');
+        lastTarget = body;
+      }
+    }
+
+    function onEnd(){
+      if(dragging && lastTarget && card){
+        var qkey = lastTarget.dataset.quadrant;
+        var id = card.dataset.id;
+        if(qkey && id) { cleanup(); moveToQuadrant(id, qkey); return; }
+      }
+      cleanup();
+    }
+
+    var root = document.getElementById('view-root');
+    root.addEventListener('touchstart', onStart, {passive:true});
+    root.addEventListener('touchmove', onMove, {passive:false});
+    root.addEventListener('touchend', onEnd);
+    root.addEventListener('touchcancel', cleanup);
+  }
+
+  decorateViewSwitcher();
+  buildMobileNav();
+  attachTouchDrag();
+  // A rotation or a resize across the phone/desktop boundary changes which layout the
+  // calendar should be drawing, so re-render when we cross it.
+  var wasPhone = isPhone();
+  window.addEventListener('resize', debounce(function(){
+    var now = isPhone();
+    if(now !== wasPhone){ wasPhone = now; render(); }
+  }, 180));
+
   /* ================= EVENT WIRING (static header controls) ================= */
   document.getElementById('sync-status').addEventListener('click', function(){
     var cfg = getConfig();
@@ -3883,11 +4688,25 @@
   });
   document.getElementById('view-switcher').addEventListener('click', function(e){
     var btn = e.target.closest('button[data-view]');
-    if(!btn) return;
-    state.view = btn.dataset.view;
-    document.querySelectorAll('#view-switcher button').forEach(function(b){ b.classList.toggle('active', b===btn); });
-    render();
+    if(btn) setView(btn.dataset.view);
   });
+  document.getElementById('fab').addEventListener('click', function(){
+    var act = fabAction();
+    if(act) act.run();
+  });
+  function wireSearchToggle(btnId, toolbarId, inputId){
+    var btn = document.getElementById(btnId);
+    if(!btn) return;
+    btn.addEventListener('click', function(){
+      var bar = document.getElementById(toolbarId);
+      var open = bar.classList.toggle('search-open');
+      btn.classList.toggle('active', open);
+      if(open) setTimeout(function(){ document.getElementById(inputId).focus(); }, 30);
+    });
+  }
+  wireSearchToggle('toggle-search', 'task-toolbar', 'search-input');
+  wireSearchToggle('cal-toggle-search', 'calendar-toolbar', 'cal-search-input');
+
   document.getElementById('search-input').addEventListener('input', function(e){
     state.search = e.target.value;
     render();
