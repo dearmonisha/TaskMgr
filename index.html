@@ -890,6 +890,67 @@
     .month-cell.compact .mc-num{font-size:12px;}
   }
 
+  /* ==========================================================================
+     DESKTOP  (>=1025px)
+     The old layout was a 1240px column of fixed-height panels, so on a wide screen
+     it read as a small card floating in a field of paper. Here the shell fills the
+     window: wider measure, tighter header rhythm, and work areas that grow into the
+     space below the fold instead of stopping short of it.
+     ========================================================================== */
+  @media (min-width:1025px){
+    .wrap{max-width:1640px;padding:22px 32px 28px;}
+
+    /* Tighter vertical rhythm up top — that header was spending ~90px on air. */
+    header.app-header{margin-bottom:12px;}
+    .header-row2{margin-top:12px;}
+    .stats-row{margin-top:12px;}
+    .sync-banner{margin-top:8px;}
+    .brand h1{font-size:29px;}
+    .brand p{margin-top:1px;}
+
+    /* --- matrix fills the viewport, each quadrant scrolls its own overflow --- */
+    .matrix-outer{margin-top:16px;}
+    /* min-height is set by applyFillHeights() from the element's real offset — a CSS
+       calc() can't know how tall the toolbars and countdown strip ended up. */
+    .quadrant{height:100%;min-height:0;}
+    .q-body{flex:1 1 auto;min-height:0;max-height:none;padding:14px;}
+    .matrix-cross.matrix-empty{min-height:0;}
+    .matrix-cross.matrix-empty .q-body{min-height:170px;}
+    .q-empty{
+      margin:auto;width:100%;max-width:360px;padding:26px 20px;
+      border:1.5px dashed var(--hairline-strong);border-radius:var(--radius-card);
+      font-style:normal;color:var(--ink-faint);
+    }
+
+    /* --- list view: two columns rather than one narrow ribbon --- */
+    .list-view{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start;}
+
+    /* --- calendar --- */
+    .month-grid{grid-template-rows:auto repeat(6, minmax(92px, 1fr));}
+    .month-cell{min-height:0;}
+    /* Agenda cards at 1600px would be one absurdly long line each, so the rail flows
+       into columns — same reading width, no empty half-page. (display:block matters:
+       CSS columns are ignored inside a flex container.) */
+    .agenda-rail{display:block;column-gap:30px;}
+    .agenda-day{break-inside:avoid;}
+    .agenda-day + .agenda-day{margin-top:22px;}
+    .archive-view,.compass-wrap{max-width:1200px;}
+    .compass-vision-text{max-width:900px;}
+  }
+  @media (min-width:1360px){
+    .agenda-rail{column-count:2;}
+    .agenda-day{margin-bottom:24px;}
+    .agenda-day + .agenda-day{margin-top:0;}
+  }
+  /* Very wide: a task card stretched across half a 1920px screen is mostly empty, so the
+     cards inside each quadrant flow into their own responsive grid instead. */
+  @media (min-width:1560px){
+    .q-body{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));align-content:start;}
+    .q-body.is-empty{display:flex;align-items:center;justify-content:center;}
+    .agenda-rail{column-count:3;}
+    .list-row .tc-title{font-size:14px;}
+  }
+
   /* Tablet: two-up matrix, keep the desktop switcher */
   @media (min-width:761px) and (max-width:1024px){
     .wrap{padding:20px 18px 48px;}
@@ -942,8 +1003,8 @@
 <div class="wrap">
 
   <div id="setup-banner" class="banner hidden">
-    <span>GitHub sync isn't set up yet — tasks are only saved on this device. Connect it so you and Monisha see the same list.</span>
-    <button id="setup-banner-connect">Set up sync</button>
+    <span>Nothing here yet. If your tasks are still in the old GitHub store, copy them across once and everyone will see them.</span>
+    <button id="setup-banner-connect">Open sync settings</button>
     <button id="setup-banner-dismiss" class="dismiss">Dismiss</button>
   </div>
 
@@ -1060,7 +1121,7 @@
   var LS_CALENDAR = 'eisenhower_calendar_local_v1';
   var LS_DREAMS = 'eisenhower_dreams_local_v1';
   var LS_COMPASS = 'eisenhower_compass_local_v1';
-  var LS_CONFIG = 'eisenhower_gh_config_v1';
+  var LS_MIGRATION = 'tm_migration_hint_v1'; // owner/repo of the old GitHub store, for the one-off import form
   var LS_META = 'eisenhower_meta_v1'; // title/subtitle
 
   /* ================= UTIL ================= */
@@ -1163,49 +1224,6 @@
       clearTimeout(t);
       t = setTimeout(function(){ fn.apply(ctx,args); }, ms);
     };
-  }
-  // Builds a debounced "save this file to GitHub" function that also serializes writes to that
-  // one file. Without this, two saves triggered close together (e.g. an ICS background sync
-  // finishing its own save just as the user saves an edit in a modal) could both read the same
-  // starting sha and PUT concurrently; the second request then races the first, and the
-  // save-then-retry-on-409 dance for both at once occasionally surfaces as a raw "Failed to
-  // fetch" instead of a clean retry. Here, if a save is already in flight when another is
-  // requested, we just remember that and immediately re-run once the in-flight one settles,
-  // using whatever the current state is at that point - so nothing is ever sent twice at once.
-  function makeGithubSaver(opts){
-    // opts: { getPath(cfg), getSha(), setSha(sha), buildPayload(), message, cacheLocal }
-    var saving = false, pending = false;
-    function run(){
-      var cfg = getConfig();
-      if(!cfg || !cfg.owner || !cfg.repo || !cfg.token){
-        opts.cacheLocal();
-        updateSyncStatus('local');
-        return;
-      }
-      if(saving){ pending = true; return; }
-      saving = true;
-      updateSyncStatus('busy');
-      var path = opts.getPath(cfg);
-      saveGithubFile(cfg, path, opts.getSha(), opts.buildPayload(), opts.message)
-        .then(function(sha){
-          opts.setSha(sha);
-          opts.cacheLocal();
-          updateSyncStatus('ok');
-        }).catch(function(err){
-          console.error(err);
-          opts.cacheLocal();
-          updateSyncStatus('err');
-        }).then(function(){
-          saving = false;
-          if(pending){ pending = false; run(); }
-        });
-    }
-    return debounce(run, 1200);
-  }
-  function b64EncodeUnicode(str){
-    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(_,p1){
-      return String.fromCharCode('0x'+p1);
-    }));
   }
   function b64DecodeUnicode(str){
     return decodeURIComponent(atob(str.replace(/\n/g,'')).split('').map(function(c){
@@ -1423,213 +1441,76 @@
     }
   }
 
-  /* ================= CONFIG / GITHUB ================= */
-  function getConfig(){
-    try{ return JSON.parse(localStorage.getItem(LS_CONFIG) || 'null'); }catch(e){ return null; }
+  /* ================= SYNC =================
+     Replaces the old "each browser PUTs whole JSON files to GitHub with its own
+     token" design. That model had three fatal properties for a household of six:
+     a conflict retry that force-overwrote whoever wrote first, no re-read after
+     page load (so a tab open since breakfast wrote breakfast's data back over
+     dinner's), and a write-scoped token sitting in localStorage on every device.
+
+     This talks to /api on the same origin instead:
+       * per-item writes, so two people editing different things never collide;
+       * a monotonic cursor, so every device polls only what changed;
+       * an op ledger, so a retried write can't re-apply an old edit;
+       * no credentials anywhere on the device — Cloudflare Access already knows
+         who you are, and the Worker reads that identity server-side.
+
+     The rest of the app is untouched: it still mutates state.tasks / state.events
+     and calls persist(). What changed is that persist() now diffs state against a
+     shadow copy of what the server last confirmed, and emits ops only for the
+     items that actually changed. */
+
+  var LS_CURSOR = 'tm_sync_cursor_v1';
+  var LS_QUEUE  = 'tm_sync_queue_v1';
+
+  // kind -> where it lives in state, and how to identify one
+  var SYNC_KINDS = {
+    task:         { get: function(){ return state.tasks; },              set: function(v){ state.tasks = v; },              idOf: function(o){ return o.id; } },
+    event:        { get: function(){ return state.events; },             set: function(v){ state.events = v; },             idOf: function(o){ return o.id; } },
+    subscription: { get: function(){ return state.calendarSubscriptions;},set: function(v){ state.calendarSubscriptions = v;},idOf: function(o){ return o.id; } },
+    member:       { get: function(){ return state.family; },             set: function(v){ state.family = v; },             idOf: function(o){ return o.id; } },
+    dream:        { get: function(){ return state.dreams; },             set: function(v){ state.dreams = v; },             idOf: function(o){ return o.id; } },
+    goal:         { get: function(){ return state.compassGoals; },       set: function(v){ state.compassGoals = v; },       idOf: function(o){ return o.id; } },
+    priority:     { get: function(){ return state.compassPriorities; },  set: function(v){ state.compassPriorities = v; },  idOf: function(o){ return o.id; } },
+    // Compass profiles are keyed by the kid they belong to, not by an id field.
+    profile:      { get: function(){ return state.compassProfiles; },    set: function(v){ state.compassProfiles = v; },    idOf: function(o){ return 'profile:' + o.ownerId; } }
+  };
+
+  var sync = {
+    cursor: 0,
+    queue: [],            // ops waiting to reach the server
+    shadow: {},           // id -> JSON string the server last confirmed
+    inFlight: false,
+    pollTimer: null,
+    backoff: 0,
+    lastError: null,
+    started: false,
+    deferred: null,       // remote items held back while a modal is open
+    online: true
+  };
+
+  function loadSyncLocal(){
+    try{ sync.cursor = parseInt(localStorage.getItem(LS_CURSOR) || '0', 10) || 0; }catch(e){ sync.cursor = 0; }
+    try{ sync.queue = JSON.parse(localStorage.getItem(LS_QUEUE) || '[]') || []; }catch(e){ sync.queue = []; }
   }
-  function setConfig(cfg){
-    localStorage.setItem(LS_CONFIG, JSON.stringify(cfg));
-  }
-  function clearConfig(){
-    localStorage.removeItem(LS_CONFIG);
-  }
-  function ghContentsUrl(cfg, path){
-    return 'https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+'/contents/'+encodeURIComponent(path);
-  }
-  function ghGetUrl(cfg, path){
-    return ghContentsUrl(cfg, path)+'?ref='+encodeURIComponent(cfg.branch||'main');
-  }
-  function ghHeaders(cfg){
-    return {
-      'Authorization': 'token '+cfg.token,
-      'Accept': 'application/vnd.github+json'
-    };
-  }
-  function ghBlobUrl(cfg, sha){
-    return 'https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+'/git/blobs/'+sha;
-  }
-  // Wraps fetch() with one retry after a short delay when the request fails at the network
-  // level (TypeError: Failed to fetch - dropped connection, brief offline blip, etc.). Does NOT
-  // retry on a real HTTP response (4xx/5xx), only on the fetch itself never completing, since
-  // those are the transient failures a second attempt can plausibly recover from.
-  function fetchWithRetry(url, opts){
-    return fetch(url, opts).catch(function(err){
-      return new Promise(function(resolve){ setTimeout(resolve, 800); }).then(function(){
-        return fetch(url, opts);
-      });
-    });
-  }
-  // Generic single-file fetch: resolves {notFound:true} | {data:<github contents api response>}
-  // GitHub's Contents API only inlines file content for files under 1MB; above that it returns
-  // content:"" / encoding:"none" with no error. If that happens, fall back to the Git Blobs API
-  // (via the sha we do get back) which has no such inline-size restriction, so large files
-  // (e.g. a calendar with a lot of synced events) don't silently look empty to the app.
-  function loadGithubFile(cfg, path){
-    return fetchWithRetry(ghGetUrl(cfg, path), { headers: ghHeaders(cfg) }).then(function(res){
-      if(res.status === 404) return { notFound:true };
-      if(!res.ok) throw new Error('GitHub error '+res.status);
-      return res.json().then(function(data){
-        if((!data.content || data.encoding === 'none') && data.sha){
-          return fetchWithRetry(ghBlobUrl(cfg, data.sha), { headers: ghHeaders(cfg) }).then(function(blobRes){
-            if(!blobRes.ok) throw new Error('GitHub blob error '+blobRes.status);
-            return blobRes.json().then(function(blob){
-              data.content = blob.content;
-              data.encoding = blob.encoding;
-              return { data: data };
-            });
-          });
-        }
-        return { data: data };
-      });
-    });
-  }
-  // Generic single-file save with one 409-conflict retry. Resolves the new sha.
-  function saveGithubFile(cfg, path, sha, contentObj, message){
-    var body = {
-      message: message,
-      content: b64EncodeUnicode(JSON.stringify(contentObj, null, 2)),
-      branch: cfg.branch || 'main'
-    };
-    if(sha) body.sha = sha;
-    function put(b){
-      return fetchWithRetry(ghContentsUrl(cfg, path), {
-        method: 'PUT',
-        headers: Object.assign({'Content-Type':'application/json'}, ghHeaders(cfg)),
-        body: JSON.stringify(b)
-      });
-    }
-    return put(body).then(function(res){
-      if(res.status === 409){
-        return loadGithubFile(cfg, path).then(function(r){
-          var newSha = r.data ? r.data.sha : null;
-          body.sha = newSha;
-          return put(body);
-        });
-      }
-      return res;
-    }).then(function(res){
-      if(!res.ok) throw new Error('GitHub save error '+res.status);
-      return res.json();
-    }).then(function(data){
-      return data && data.content ? data.content.sha : null;
-    });
+  function saveSyncLocal(){
+    try{
+      localStorage.setItem(LS_CURSOR, String(sync.cursor));
+      localStorage.setItem(LS_QUEUE, JSON.stringify(sync.queue));
+    }catch(e){ /* private mode / quota — the server is still the source of truth */ }
   }
 
-  /* ---- Tasks file ---- */
-  function loadFromGitHub(){
-    var cfg = getConfig();
-    if(!cfg || !cfg.owner || !cfg.repo || !cfg.token){
-      loadLocal();
-      updateSyncStatus('local');
-      showSetupBanner(true);
-      render();
-      return;
-    }
-    updateSyncStatus('busy');
-    loadGithubFile(cfg, cfg.path)
-      .then(function(r){
-        if(r.notFound){
-          state.ghSha = null;
-          state.tasks = migrateTasks(loadLocalTasksOnly());
-          updateSyncStatus('ok');
-          showSetupBanner(false);
-          render();
-          saveToGitHub();
-          return;
-        }
-        state.ghSha = r.data.sha;
-        var parsed;
-        try{ parsed = JSON.parse(b64DecodeUnicode(r.data.content)); }catch(e){ parsed = {tasks:[]}; }
-        state.tasks = migrateTasks(parsed.tasks || []);
-        cacheLocal();
-        updateSyncStatus('ok');
-        showSetupBanner(false);
-        render();
-      })
-      .catch(function(err){
-        console.error(err);
-        loadLocal();
-        updateSyncStatus('err');
-        render();
-      });
-  }
-
-  var saveToGitHub = makeGithubSaver({
-    getPath: function(cfg){ return cfg.path; },
-    getSha: function(){ return state.ghSha; },
-    setSha: function(sha){ state.ghSha = sha; },
-    buildPayload: function(){ return {version:1, tasks: state.tasks}; },
-    message: 'Update tasks.json via Task Manager app',
-    cacheLocal: cacheLocal
-  });
-
+  /* ---- local cache (instant paint, and the app still works offline) ---- */
   function loadLocalTasksOnly(){
     try{
       var raw = JSON.parse(localStorage.getItem(LS_TASKS) || 'null');
       return (raw && raw.tasks) || [];
     }catch(e){ return []; }
   }
-  function loadLocal(){
-    state.tasks = migrateTasks(loadLocalTasksOnly());
-  }
+  function loadLocal(){ state.tasks = migrateTasks(loadLocalTasksOnly()); }
   function cacheLocal(){
-    localStorage.setItem(LS_TASKS, JSON.stringify({tasks: state.tasks}));
+    try{ localStorage.setItem(LS_TASKS, JSON.stringify({tasks: state.tasks})); }catch(e){}
   }
-  function persist(){
-    saveToGitHub();
-  }
-
-  /* ---- Family calendar file ---- */
-  function loadCalendarFromGitHub(){
-    var cfg = getConfig();
-    if(!cfg || !cfg.owner || !cfg.repo || !cfg.token){
-      loadCalendarLocal();
-      resolveCurrentFamilyMember();
-      render(); // family/identity affects task views too now, not just calendar
-      return;
-    }
-    var path = cfg.calendarPath || 'family-calendar.json';
-    loadGithubFile(cfg, path)
-      .then(function(r){
-        if(r.notFound){
-          state.calSha = null;
-          var localCal = loadCalendarLocalOnly();
-          state.family = localCal.family; state.events = localCal.events; state.calendarSubscriptions = localCal.calendarSubscriptions; state.homeTimezone = localCal.homeTimezone;
-          resolveCurrentFamilyMember();
-          render();
-          saveCalendarToGitHub();
-          syncAllSubscriptions();
-          return;
-        }
-        state.calSha = r.data.sha;
-        var parsed;
-        try{ parsed = JSON.parse(b64DecodeUnicode(r.data.content)); }catch(e){ parsed = {family:[], events:[], calendarSubscriptions:[], homeTimezone: DEFAULT_TIMEZONE}; }
-        state.family = parsed.family || [];
-        state.events = parsed.events || [];
-        state.calendarSubscriptions = parsed.calendarSubscriptions || [];
-        state.homeTimezone = parsed.homeTimezone || DEFAULT_TIMEZONE;
-        cacheCalendarLocal();
-        resolveCurrentFamilyMember();
-        render();
-        syncAllSubscriptions();
-      })
-      .catch(function(err){
-        console.error(err);
-        loadCalendarLocal();
-        resolveCurrentFamilyMember();
-        render();
-      });
-  }
-
-  var saveCalendarToGitHub = makeGithubSaver({
-    getPath: function(cfg){ return cfg.calendarPath || 'family-calendar.json'; },
-    getSha: function(){ return state.calSha; },
-    setSha: function(sha){ state.calSha = sha; },
-    buildPayload: function(){ return {version:1, family: state.family, events: state.events, calendarSubscriptions: state.calendarSubscriptions, homeTimezone: state.homeTimezone}; },
-    message: 'Update family-calendar.json via Task Manager app',
-    cacheLocal: cacheCalendarLocal
-  });
-
   function loadCalendarLocalOnly(){
     try{
       var raw = JSON.parse(localStorage.getItem(LS_CALENDAR) || 'null');
@@ -1641,53 +1522,8 @@
     state.family = c.family; state.events = c.events; state.calendarSubscriptions = c.calendarSubscriptions; state.homeTimezone = c.homeTimezone;
   }
   function cacheCalendarLocal(){
-    localStorage.setItem(LS_CALENDAR, JSON.stringify({family: state.family, events: state.events, calendarSubscriptions: state.calendarSubscriptions, homeTimezone: state.homeTimezone}));
+    try{ localStorage.setItem(LS_CALENDAR, JSON.stringify({family: state.family, events: state.events, calendarSubscriptions: state.calendarSubscriptions, homeTimezone: state.homeTimezone})); }catch(e){}
   }
-  function persistCalendar(){
-    saveCalendarToGitHub();
-  }
-
-  /* ---- Vision board file ---- */
-  function loadDreamsFromGitHub(){
-    var cfg = getConfig();
-    if(!cfg || !cfg.owner || !cfg.repo || !cfg.token){
-      loadDreamsLocal();
-      render();
-      return;
-    }
-    var path = cfg.dreamsPath || 'vision-board.json';
-    loadGithubFile(cfg, path)
-      .then(function(r){
-        if(r.notFound){
-          state.dreamSha = null;
-          state.dreams = loadDreamsLocalOnly();
-          render();
-          saveDreamsToGitHub();
-          return;
-        }
-        state.dreamSha = r.data.sha;
-        var parsed;
-        try{ parsed = JSON.parse(b64DecodeUnicode(r.data.content)); }catch(e){ parsed = {dreams:[]}; }
-        state.dreams = parsed.dreams || [];
-        cacheDreamsLocal();
-        render();
-      })
-      .catch(function(err){
-        console.error(err);
-        loadDreamsLocal();
-        render();
-      });
-  }
-
-  var saveDreamsToGitHub = makeGithubSaver({
-    getPath: function(cfg){ return cfg.dreamsPath || 'vision-board.json'; },
-    getSha: function(){ return state.dreamSha; },
-    setSha: function(sha){ state.dreamSha = sha; },
-    buildPayload: function(){ return {version:1, dreams: state.dreams}; },
-    message: 'Update vision-board.json via Task Manager app',
-    cacheLocal: cacheDreamsLocal
-  });
-
   function loadDreamsLocalOnly(){
     try{
       var raw = JSON.parse(localStorage.getItem(LS_DREAMS) || 'null');
@@ -1696,56 +1532,8 @@
   }
   function loadDreamsLocal(){ state.dreams = loadDreamsLocalOnly(); }
   function cacheDreamsLocal(){
-    localStorage.setItem(LS_DREAMS, JSON.stringify({dreams: state.dreams}));
+    try{ localStorage.setItem(LS_DREAMS, JSON.stringify({dreams: state.dreams})); }catch(e){}
   }
-  function persistDreams(){
-    saveDreamsToGitHub();
-  }
-
-  /* ---- Compass file ---- */
-  function loadCompassFromGitHub(){
-    var cfg = getConfig();
-    if(!cfg || !cfg.owner || !cfg.repo || !cfg.token){
-      loadCompassLocal();
-      render();
-      return;
-    }
-    var path = cfg.compassPath || 'compass.json';
-    loadGithubFile(cfg, path)
-      .then(function(r){
-        if(r.notFound){
-          state.compassSha = null;
-          var local = loadCompassLocalOnly();
-          state.compassProfiles = local.profiles; state.compassGoals = local.goals; state.compassPriorities = local.priorities;
-          render();
-          saveCompassToGitHub();
-          return;
-        }
-        state.compassSha = r.data.sha;
-        var parsed;
-        try{ parsed = JSON.parse(b64DecodeUnicode(r.data.content)); }catch(e){ parsed = {profiles:[], goals:[], priorities:[]}; }
-        state.compassProfiles = parsed.profiles || [];
-        state.compassGoals = parsed.goals || [];
-        state.compassPriorities = parsed.priorities || [];
-        cacheCompassLocal();
-        render();
-      })
-      .catch(function(err){
-        console.error(err);
-        loadCompassLocal();
-        render();
-      });
-  }
-
-  var saveCompassToGitHub = makeGithubSaver({
-    getPath: function(cfg){ return cfg.compassPath || 'compass.json'; },
-    getSha: function(){ return state.compassSha; },
-    setSha: function(sha){ state.compassSha = sha; },
-    buildPayload: function(){ return {version:1, profiles: state.compassProfiles, goals: state.compassGoals, priorities: state.compassPriorities}; },
-    message: 'Update compass.json via Task Manager app',
-    cacheLocal: cacheCompassLocal
-  });
-
   function loadCompassLocalOnly(){
     try{
       var raw = JSON.parse(localStorage.getItem(LS_COMPASS) || 'null');
@@ -1757,25 +1545,385 @@
     state.compassProfiles = c.profiles; state.compassGoals = c.goals; state.compassPriorities = c.priorities;
   }
   function cacheCompassLocal(){
-    localStorage.setItem(LS_COMPASS, JSON.stringify({profiles: state.compassProfiles, goals: state.compassGoals, priorities: state.compassPriorities}));
+    try{ localStorage.setItem(LS_COMPASS, JSON.stringify({profiles: state.compassProfiles, goals: state.compassGoals, priorities: state.compassPriorities})); }catch(e){}
   }
-  function persistCompass(){
-    saveCompassToGitHub();
+  function cacheAllLocal(){ cacheLocal(); cacheCalendarLocal(); cacheDreamsLocal(); cacheCompassLocal(); }
+
+  /* ---- shadow bookkeeping ----
+     The shadow is what the server last told us each item looks like. Diffing
+     against it is what lets the whole app keep calling a blunt persist() while
+     the wire protocol stays per-item. */
+  function shadowKey(kind, id){ return kind + ':' + id; }
+  function rebuildShadow(){
+    sync.shadow = {};
+    Object.keys(SYNC_KINDS).forEach(function(kind){
+      var k = SYNC_KINDS[kind];
+      (k.get() || []).forEach(function(item){
+        sync.shadow[shadowKey(kind, k.idOf(item))] = JSON.stringify(item);
+      });
+    });
+  }
+
+  /** Compare state to the shadow and queue an op for everything that moved. */
+  function collectOps(){
+    var ops = [];
+    var seenKeys = {};
+    Object.keys(SYNC_KINDS).forEach(function(kind){
+      var k = SYNC_KINDS[kind];
+      (k.get() || []).forEach(function(item){
+        var id = k.idOf(item);
+        if(!id) return;
+        var key = shadowKey(kind, id);
+        seenKeys[key] = true;
+        var now = JSON.stringify(item);
+        if(sync.shadow[key] !== now){
+          sync.shadow[key] = now;
+          ops.push({ opId: uid(), kind: kind, id: id, data: item });
+        }
+      });
+    });
+    // Anything the shadow knows about that state no longer holds was hard-deleted.
+    // (A task sent to the archive is NOT this — it stays in the array with
+    // deleted:true, so it syncs as an ordinary update.)
+    Object.keys(sync.shadow).forEach(function(key){
+      if(seenKeys[key]) return;
+      var sep = key.indexOf(':');
+      var kind = key.slice(0, sep), id = key.slice(sep + 1);
+      delete sync.shadow[key];
+      ops.push({ opId: uid(), kind: kind, id: id, gone: true });
+    });
+    return ops;
+  }
+
+  var META_SHADOW = {};
+  function collectMetaOps(){
+    var ops = [];
+    var current = {
+      homeTimezone: state.homeTimezone,
+      appTitle: (document.getElementById('app-title') || {}).textContent,
+      appSubtitle: (document.getElementById('app-subtitle') || {}).textContent
+    };
+    Object.keys(current).forEach(function(key){
+      if(current[key] === undefined) return;
+      var now = JSON.stringify(current[key]);
+      if(META_SHADOW[key] !== now){
+        META_SHADOW[key] = now;
+        ops.push({ opId: uid(), meta: key, value: current[key] });
+      }
+    });
+    return ops;
+  }
+
+  /* ---- the four persist() entry points the rest of the app already calls ----
+     They all funnel into the same diff now; which module changed doesn't matter
+     because the diff finds it either way. */
+  function persist(){ queueChanges(); }
+  function persistCalendar(){ queueChanges(); }
+  function persistDreams(){ queueChanges(); }
+  function persistCompass(){ queueChanges(); }
+
+  var flushSoon = debounce(function(){ flushQueue(); }, 600);
+
+  function queueChanges(){
+    var ops = collectOps().concat(collectMetaOps());
+    cacheAllLocal();
+    if(!ops.length) return;
+    sync.queue = sync.queue.concat(ops);
+    saveSyncLocal();
+    updateSyncStatus(sync.online ? 'busy' : 'offline');
+    flushSoon();
+  }
+
+  function apiFetch(path, opts){
+    var o = Object.assign({ credentials: 'same-origin', cache: 'no-store' }, opts || {});
+    o.headers = Object.assign({ 'accept': 'application/json' }, o.headers || {});
+    return fetch(path, o).then(function(res){
+      return res.text().then(function(text){
+        var body = null;
+        try{ body = text ? JSON.parse(text) : null; }catch(e){ body = null; }
+        if(!res.ok){
+          var err = new Error((body && body.error) || ('Sync error ' + res.status));
+          err.status = res.status;
+          err.code = body && body.code;
+          throw err;
+        }
+        return body;
+      });
+    });
+  }
+
+  function flushQueue(){
+    if(sync.inFlight || !sync.queue.length) return Promise.resolve();
+    sync.inFlight = true;
+    updateSyncStatus('busy');
+    // Send at most a batch at a time so one enormous first push (a migration, say)
+    // doesn't hit the request ceiling.
+    var batch = sync.queue.slice(0, 200);
+    return apiFetch('/api/mutate', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ ops: batch })
+    }).then(function(res){
+      var done = {};
+      (res.applied || []).forEach(function(id){ done[id] = true; });
+      (res.skipped || []).forEach(function(id){ done[id] = true; });
+      sync.queue = sync.queue.filter(function(op){ return !done[op.opId]; });
+      sync.backoff = 0;
+      sync.lastError = null;
+      sync.online = true;
+      saveSyncLocal();
+      sync.inFlight = false;
+      // Pull straight away: our own write bumped the cursor, and anyone else's
+      // changes since the last poll are sitting there too.
+      return pull().then(function(){
+        if(sync.queue.length) return flushQueue();
+      });
+    }).catch(function(err){
+      sync.inFlight = false;
+      handleSyncError(err, function(){ flushQueue(); });
+    });
+  }
+
+  function pull(){
+    return apiFetch('/api/state?since=' + sync.cursor).then(function(res){
+      applyRemote(res);
+      sync.backoff = 0;
+      sync.lastError = null;
+      sync.online = true;
+      updateSyncStatus(sync.queue.length ? 'busy' : 'ok');
+      // A truncated first page means there is more history to walk through.
+      if(res && res.caughtUp === false) return pull();
+    }).catch(function(err){
+      handleSyncError(err, function(){ pull(); });
+    });
+  }
+
+  function applyRemote(res){
+    if(!res) return;
+    var items = res.items || [];
+    var meta = res.meta || {};
+    var changed = false;
+
+    // Never let a remote copy overwrite an item we have unsent edits for — ours
+    // is newer by definition and is about to be pushed.
+    var pending = {};
+    sync.queue.forEach(function(op){ if(op.id) pending[shadowKey(op.kind, op.id)] = true; });
+
+    // While a modal is open the user is editing a draft of one of these; applying
+    // underneath them is how you get a save that silently reverts. Hold and apply
+    // on close instead.
+    if(items.length && document.getElementById('modal-root').innerHTML !== ''){
+      sync.deferred = (sync.deferred || []).concat(items);
+      if(res.seq) { sync.cursor = res.seq; saveSyncLocal(); }
+      return;
+    }
+
+    items.forEach(function(item){
+      var k = SYNC_KINDS[item.kind];
+      if(!k) return;
+      var key = shadowKey(item.kind, item.id);
+      if(pending[key]) return;
+      var list = k.get() || [];
+      var idx = -1;
+      for(var i=0;i<list.length;i++){ if(k.idOf(list[i]) === item.id){ idx = i; break; } }
+      if(item.gone){
+        if(idx !== -1){ list.splice(idx, 1); changed = true; }
+        delete sync.shadow[key];
+      } else {
+        var incoming = item.data;
+        if(idx === -1){ list.push(incoming); changed = true; }
+        else if(JSON.stringify(list[idx]) !== JSON.stringify(incoming)){ list[idx] = incoming; changed = true; }
+        sync.shadow[key] = JSON.stringify(incoming);
+      }
+      k.set(list);
+    });
+
+    Object.keys(meta).forEach(function(key){
+      var value = meta[key];
+      META_SHADOW[key] = JSON.stringify(value);
+      if(key === 'homeTimezone' && value && value !== state.homeTimezone){ state.homeTimezone = value; changed = true; }
+      if(key === 'appTitle' && value){ var t = document.getElementById('app-title'); if(t && t.textContent !== value) t.textContent = value; }
+      if(key === 'appSubtitle' && value){ var s2 = document.getElementById('app-subtitle'); if(s2 && s2.textContent !== value) s2.textContent = value; }
+    });
+
+    if(res.seq){ sync.cursor = res.seq; }
+    saveSyncLocal();
+
+    if(changed){
+      state.tasks = migrateTasks(state.tasks);
+      rebuildShadowForTasks();
+      resolveCurrentFamilyMember();
+      cacheAllLocal();
+      render();
+    }
+  }
+
+  // migrateTasks() can add default fields, which would otherwise look like a local
+  // edit on the very next diff and cause a pointless write loop.
+  function rebuildShadowForTasks(){
+    (state.tasks || []).forEach(function(t){
+      sync.shadow[shadowKey('task', t.id)] = JSON.stringify(t);
+    });
+  }
+
+  function applyDeferred(){
+    if(!sync.deferred || !sync.deferred.length) return;
+    var items = sync.deferred;
+    sync.deferred = null;
+    applyRemote({ items: items, meta: {}, seq: sync.cursor });
+  }
+
+  function handleSyncError(err, retry){
+    sync.lastError = err;
+    var offline = (typeof navigator !== 'undefined' && navigator.onLine === false) || err.status === undefined;
+    sync.online = !offline;
+    updateSyncStatus(offline ? 'offline' : (err.code === 'no_db' || err.code === 'no_schema' ? 'setup' : 'err'));
+    // Exponential backoff, capped — a flaky café wifi shouldn't hammer the API.
+    sync.backoff = Math.min(sync.backoff ? sync.backoff * 2 : 5000, 60000);
+    setTimeout(function(){ if(retry) retry(); }, sync.backoff);
+  }
+
+  function startSync(){
+    if(sync.started) return;
+    sync.started = true;
+    if(sync.pollTimer) clearInterval(sync.pollTimer);
+    // 30s is frequent enough that "Mum already did that one" shows up before you
+    // duplicate it, and cheap enough to leave running on six devices all day.
+    sync.pollTimer = setInterval(function(){
+      if(document.hidden) return;
+      if(sync.queue.length) flushQueue(); else pull();
+    }, 30000);
+
+    document.addEventListener('visibilitychange', function(){
+      if(!document.hidden){ if(sync.queue.length) flushQueue(); else pull(); }
+    });
+    window.addEventListener('focus', function(){ if(sync.queue.length) flushQueue(); else pull(); });
+    window.addEventListener('online', function(){ sync.online = true; sync.backoff = 0; flushQueue(); pull(); });
+    window.addEventListener('offline', function(){ sync.online = false; updateSyncStatus('offline'); });
+    // Last-ditch: warn if someone closes the tab with unsent edits.
+    window.addEventListener('beforeunload', function(e){
+      if(sync.queue.length){ e.preventDefault(); e.returnValue = ''; return ''; }
+    });
+  }
+
+  function bootSync(){
+    loadSyncLocal();
+    // Paint from cache first so the app is usable before the network answers.
+    loadLocal(); loadCalendarLocal(); loadDreamsLocal(); loadCompassLocal();
+    rebuildShadow();
+    META_SHADOW = {
+      homeTimezone: JSON.stringify(state.homeTimezone),
+      appTitle: JSON.stringify((document.getElementById('app-title')||{}).textContent),
+      appSubtitle: JSON.stringify((document.getElementById('app-subtitle')||{}).textContent)
+    };
+    resolveCurrentFamilyMember();
+    render();
+    updateSyncStatus('busy');
+
+    return apiFetch('/api/health').then(function(h){
+      if(h && h.ok === false) throw Object.assign(new Error(h.message), { code: h.code, status: 503 });
+      // A store with nothing in it and no cursor means this device has never
+      // synced and nobody has migrated yet — say so rather than looking "synced".
+      var empty = h && h.seq === 0;
+      return pull().then(function(){
+        startSync();
+        if(sync.queue.length) flushQueue();
+        showSetupBanner(empty && !state.tasks.length && !state.events.length);
+      });
+    }).catch(function(err){
+      handleSyncError(err, function(){ bootSync(); });
+      startSync();
+    });
   }
 
   function updateSyncStatus(s){
     state.syncStatus = s;
     var el = document.getElementById('sync-status');
     if(!el) return;
-    el.className = 'sync-status ' + (s==='ok'?'ok':s==='err'?'err':s==='busy'?'busy':'');
-    var label = {idle:'Idle', busy:'Syncing…', ok:'Synced with GitHub', err:'Sync error — click to retry', local:'Local only — click to connect GitHub'}[s] || s;
-    el.innerHTML = '<span class="dot"></span>'+label;
+    var cls = (s === 'ok') ? 'ok' : (s === 'busy') ? 'busy' : (s === 'err' || s === 'setup') ? 'err' : (s === 'offline') ? 'busy' : '';
+    el.className = 'sync-status ' + cls;
+    var queued = sync.queue.length;
+    var label;
+    if(s === 'ok')            label = 'All changes saved';
+    else if(s === 'busy')     label = queued ? ('Saving ' + queued + ' change' + (queued===1?'':'s') + '…') : 'Syncing…';
+    else if(s === 'offline')  label = queued ? ('Offline — ' + queued + ' change' + (queued===1?'':'s') + ' waiting') : 'Offline — will sync when you reconnect';
+    else if(s === 'setup')    label = 'Sync not set up yet — open settings';
+    else if(s === 'err')      label = 'Sync problem — click to retry' + (sync.lastError && sync.lastError.message ? ' (' + sync.lastError.message + ')' : '');
+    else                      label = s;
+    el.innerHTML = '<span class="dot"></span>' + escapeHtml(label);
   }
 
   function showSetupBanner(show){
     var b = document.getElementById('setup-banner');
-    if(!getConfig() && show){ b.classList.remove('hidden'); }
-    else { b.classList.add('hidden'); }
+    if(!b) return;
+    if(show) b.classList.remove('hidden'); else b.classList.add('hidden');
+  }
+
+  // Small diagnostic handle. When someone says "it's not saving", this answers
+  // the only three questions that matter without a debugger: what's the status,
+  // how much is queued, and what did the server last complain about.
+  window.taskManagerSync = {
+    get status(){ return state.syncStatus; },
+    get queued(){ return sync.queue.length; },
+    get cursor(){ return sync.cursor; },
+    get lastError(){ return sync.lastError ? String(sync.lastError.message) : null; },
+    pull: function(){ return pull(); },
+    flush: function(){ return flushQueue(); },
+    now: function(){ retrySyncNow(); }
+  };
+
+  function retrySyncNow(){
+    sync.backoff = 0;
+    if(sync.queue.length) flushQueue(); else pull();
+  }
+
+  /* ---- one-time migration off GitHub ----
+     Read-only: it fetches the four old JSON files and hands them to /api/import.
+     Nothing is ever written back to GitHub, and the token is used for this call
+     only — it is not stored for ongoing sync any more. */
+  function fetchGithubJson(cfg, path){
+    var url = 'https://api.github.com/repos/'+cfg.owner+'/'+cfg.repo+'/contents/'+encodeURIComponent(path)+'?ref='+encodeURIComponent(cfg.branch||'main');
+    var headers = { 'Accept':'application/vnd.github+json' };
+    if(cfg.token) headers['Authorization'] = 'token ' + cfg.token;
+    return fetch(url, { headers: headers }).then(function(res){
+      if(res.status === 404) return null;
+      if(!res.ok) throw new Error('GitHub said ' + res.status + ' for ' + path);
+      return res.json().then(function(data){
+        if(!data.content) return null;
+        try{ return JSON.parse(b64DecodeUnicode(data.content)); }catch(e){ throw new Error('Could not parse ' + path); }
+      });
+    });
+  }
+
+  function importFromGithub(cfg, force){
+    return Promise.all([
+      fetchGithubJson(cfg, cfg.path || 'tasks.json'),
+      fetchGithubJson(cfg, cfg.calendarPath || 'family-calendar.json'),
+      fetchGithubJson(cfg, cfg.dreamsPath || 'vision-board.json'),
+      fetchGithubJson(cfg, cfg.compassPath || 'compass.json')
+    ]).then(function(files){
+      return importPayload({
+        tasks: (files[0] && files[0].tasks) || [],
+        calendar: files[1] || {},
+        dreams: (files[2] && files[2].dreams) || [],
+        compass: files[3] || {}
+      }, force);
+    });
+  }
+
+  function importPayload(payload, force){
+    return apiFetch('/api/import' + (force ? '?force=1' : ''), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function(res){
+      // Start clean: take the imported store as the new truth on this device.
+      sync.cursor = 0;
+      sync.queue = [];
+      sync.shadow = {};
+      saveSyncLocal();
+      return pull().then(function(){ return res; });
+    });
   }
 
   /* ================= RENDER: HEADER ================= */
@@ -1901,17 +2049,21 @@
       var body = list.length
         ? list.map(taskCardHtml).join('')
         : '<div class="q-empty">Nothing here — drag a task over, or add one above.</div>';
+      // is-empty opts the body out of the card grid so the placeholder can centre itself.
       return '<div class="quadrant '+q.cls+'">'
         + '<div class="q-header">'
         + '<span class="dot" style="background:'+q.accent+'"></span>'
         + '<div class="q-header-text"><div class="q-title">'+q.title+'</div><div class="q-subtitle">'+q.subtitle+'</div></div>'
         + '<span class="q-count">'+list.length+'</span>'
         + '</div>'
-        + '<div class="q-body" data-quadrant="'+qkey+'">'+body+'</div>'
+        + '<div class="q-body'+(list.length?'':' is-empty')+'" data-quadrant="'+qkey+'">'+body+'</div>'
         + '</div>';
     }
 
-    var html = '<div class="matrix-outer"><div class="matrix-cross">'
+    // A board with nothing on it shouldn't stretch to fill a 1080px-tall window — that just
+    // makes four large voids. It stays compact until there's something to show.
+    var boardEmpty = !tasks.length;
+    var html = '<div class="matrix-outer"><div class="matrix-cross'+(boardEmpty?' matrix-empty':'')+'">'
       + '<span></span>'
       + '<span class="axis-top urgent">Urgent</span>'
       + '<span class="axis-top not-urgent">Not Urgent</span>'
@@ -2424,24 +2576,55 @@
     syncMobileChrome();
   }
 
+  // The toolbars change height per view (and per family size), so the "fill the rest of
+  // the window" layouts below need the measured height rather than a guessed constant.
+  function syncChromeHeight(){
+    var h = document.querySelector('header.app-header');
+    if(!h) return;
+    document.documentElement.style.setProperty('--chrome-h', Math.round(h.getBoundingClientRect().bottom) + 'px');
+  }
+
+  // Grow the main work area to the bottom of the window (desktop only). Measuring the
+  // element's own top beats any calc(100vh - guess): toolbars wrap, the countdown strip
+  // comes and goes, and the family roster changes the header height.
+  function applyFillHeights(){
+    var targets = document.querySelectorAll('.matrix-cross, .month-grid');
+    targets.forEach(function(el){ el.style.minHeight = ''; });
+    if(window.innerWidth < 1025) return;
+    targets.forEach(function(el){
+      if(el.classList.contains('matrix-empty')) return;
+      var top = el.getBoundingClientRect().top + window.scrollY;
+      var h = window.innerHeight - top - 34;
+      if(h > 340) el.style.minHeight = Math.round(h) + 'px';
+    });
+  }
+
   function render(){
     toggleToolbars();
     if(state.view === 'calendar'){
       renderCalendar();
+      syncChromeHeight();
+    applyFillHeights();
       return;
     }
     if(state.view === 'dreams'){
       renderDreams();
+      syncChromeHeight();
+    applyFillHeights();
       return;
     }
     if(state.view === 'compass'){
       renderCompass();
+      syncChromeHeight();
+    applyFillHeights();
       return;
     }
     renderStats();
     if(state.view === 'matrix') renderMatrix();
     else if(state.view === 'list') renderList();
     else renderArchive();
+    syncChromeHeight();
+    applyFillHeights();
   }
 
   /* ================= CARD INTERACTIONS ================= */
@@ -4332,65 +4515,114 @@
     });
   }
 
-  /* ================= SETTINGS MODAL ================= */
+  /* ================= SETTINGS / SYNC MODAL ================= */
   function openSettingsModal(){
-    var cfg = getConfig() || {owner:'',repo:'',path:'tasks.json',calendarPath:'family-calendar.json',dreamsPath:'vision-board.json',compassPath:'compass.json',branch:'main',token:''};
+    var cfg = getMigrationConfig();
     var html = ''
       + '<div class="scrim" id="scrim">'
       + '<div class="modal">'
-      + '<div class="field-label" style="margin-top:0;">GitHub Sync Settings</div>'
-      + '<div class="settings-field"><label>Repo owner</label><input class="text-input" id="s-owner" value="'+escapeHtml(cfg.owner)+'" placeholder="e.g. your-github-username"></div>'
-      + '<div class="settings-field"><label>Repo name</label><input class="text-input" id="s-repo" value="'+escapeHtml(cfg.repo)+'" placeholder="e.g. task-manager"></div>'
+      + '<div class="field-label" style="margin-top:0;">Sync</div>'
+      + '<div id="s-health" class="settings-help" style="margin-top:0;">Checking…</div>'
+      + '<div class="settings-actions"><button class="btn-primary" id="s-refresh">Sync now</button></div>'
+
+      + '<div class="field-label">Move data from the old GitHub sync</div>'
+      + '<div class="settings-help" style="margin-top:0;">A one-off copy of your four JSON files into the new store. Read-only — nothing is written back to GitHub, and the token is used for this copy alone and never saved.</div>'
+      + '<div class="settings-field"><label>Repo owner</label><input class="text-input" id="s-owner" value="'+escapeHtml(cfg.owner||'')+'" placeholder="your-github-username"></div>'
+      + '<div class="settings-field"><label>Repo name</label><input class="text-input" id="s-repo" value="'+escapeHtml(cfg.repo||'')+'" placeholder="task-manager"></div>'
       + '<div class="settings-field"><label>Branch</label><input class="text-input" id="s-branch" value="'+escapeHtml(cfg.branch||'main')+'"></div>'
-      + '<div class="row-2">'
-      + '<div class="settings-field"><label>Tasks file path</label><input class="text-input" id="s-path" value="'+escapeHtml(cfg.path||'tasks.json')+'"></div>'
-      + '<div class="settings-field"><label>Calendar file path</label><input class="text-input" id="s-cal-path" value="'+escapeHtml(cfg.calendarPath||'family-calendar.json')+'"></div>'
-      + '</div>'
-      + '<div class="settings-field"><label>Vision board file path</label><input class="text-input" id="s-dreams-path" value="'+escapeHtml(cfg.dreamsPath||'vision-board.json')+'"></div>'
-      + '<div class="settings-field"><label>Compass file path</label><input class="text-input" id="s-compass-path" value="'+escapeHtml(cfg.compassPath||'compass.json')+'"></div>'
-      + '<div class="settings-field"><label>Personal access token</label><input class="text-input" type="password" id="s-token" value="'+escapeHtml(cfg.token)+'" placeholder="fine-grained PAT, Contents: read & write"></div>'
-      + '<div class="settings-help">Create a fine-grained token at github.com → Settings → Developer settings → Personal access tokens, scoped to just this repo with <strong>Contents: Read and write</strong> permission. It is stored only in this browser, never committed to the repo. Everyone in the family needs to enter their own token here on their own device.</div>'
-      + '<div class="settings-actions">'
-      + '<button class="btn-primary" id="s-save">Save & Connect</button>'
-      + '<button class="btn-sm" id="s-disconnect">Disconnect</button>'
-      + '<button class="btn-sm" id="s-cancel">Cancel</button>'
-      + '</div>'
-      + '<div id="s-error" style="color:var(--overdue);font-size:12px;margin-top:10px;"></div>'
+      + '<div class="settings-field"><label>Access token (read-only is enough)</label><input class="text-input" type="password" id="s-token" value="" placeholder="leave blank for a public repo"></div>'
+      + '<div class="settings-actions"><button class="btn-primary" id="s-import">Copy from GitHub</button></div>'
+
+      + '<div class="settings-help" style="margin-top:18px;">No longer have a working token? Pick the four files off disk instead:</div>'
+      + '<div class="settings-field"><input type="file" id="s-files" multiple accept=".json,application/json"></div>'
+      + '<div class="settings-actions"><button class="btn-sm" id="s-import-files">Import selected files</button></div>'
+
+      + '<div class="settings-actions" style="margin-top:20px;"><button class="btn-sm" id="s-cancel">Close</button></div>'
+      + '<div id="s-error" style="font-size:12px;margin-top:10px;"></div>'
       + '</div></div>';
     document.getElementById('modal-root').innerHTML = html;
 
-    function close(){ document.getElementById('modal-root').innerHTML = ''; }
+    function close(){ document.getElementById('modal-root').innerHTML = ''; applyDeferred(); }
+    function say(msg, bad){
+      var el = document.getElementById('s-error');
+      if(!el) return;
+      el.style.color = bad ? 'var(--overdue)' : 'var(--eliminate)';
+      el.textContent = msg;
+    }
     document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id==='scrim') close(); });
     document.getElementById('s-cancel').addEventListener('click', close);
-    document.getElementById('s-disconnect').addEventListener('click', function(){
-      clearConfig();
-      close();
-      showSetupBanner(true);
-      updateSyncStatus('local');
-    });
-    document.getElementById('s-save').addEventListener('click', function(){
-      var newCfg = {
+    document.getElementById('s-refresh').addEventListener('click', function(){ retrySyncNow(); refreshHealth(); });
+
+    function refreshHealth(){
+      var el = document.getElementById('s-health');
+      if(!el) return;
+      apiFetch('/api/health').then(function(h){
+        if(!document.getElementById('s-health')) return;
+        var counts = Object.keys(h.items||{}).map(function(k){ return (h.items[k]) + ' ' + k + (h.items[k]===1?'':'s'); }).join(', ');
+        document.getElementById('s-health').innerHTML = h.ok
+          ? ('Connected as <strong>'+escapeHtml((h.identity && h.identity.email) || 'this device')+'</strong>.<br>Store holds '+escapeHtml(counts || 'nothing yet')+'.'
+             + (sync.queue.length ? '<br>'+sync.queue.length+' change(s) still to send.' : '<br>Everything on this device is saved.'))
+          : ('<span style="color:var(--overdue)">'+escapeHtml(h.message||'Not reachable')+'</span>');
+      }).catch(function(err){
+        if(!document.getElementById('s-health')) return;
+        document.getElementById('s-health').innerHTML = '<span style="color:var(--overdue)">'+escapeHtml(err.message||'Could not reach the sync service')+'</span>';
+      });
+    }
+    refreshHealth();
+
+    document.getElementById('s-import').addEventListener('click', function(){
+      var c = {
         owner: document.getElementById('s-owner').value.trim(),
         repo: document.getElementById('s-repo').value.trim(),
         branch: document.getElementById('s-branch').value.trim() || 'main',
-        path: document.getElementById('s-path').value.trim() || 'tasks.json',
-        calendarPath: document.getElementById('s-cal-path').value.trim() || 'family-calendar.json',
-        dreamsPath: document.getElementById('s-dreams-path').value.trim() || 'vision-board.json',
-        compassPath: document.getElementById('s-compass-path').value.trim() || 'compass.json',
         token: document.getElementById('s-token').value.trim()
       };
-      if(!newCfg.owner || !newCfg.repo || !newCfg.token){
-        document.getElementById('s-error').textContent = 'Owner, repo, and token are required.';
-        return;
-      }
-      setConfig(newCfg);
-      close();
-      loadFromGitHub();
-      loadCalendarFromGitHub();
-      loadDreamsFromGitHub();
-      loadCompassFromGitHub();
+      if(!c.owner || !c.repo){ say('Owner and repo are required.', true); return; }
+      saveMigrationConfig({owner:c.owner, repo:c.repo, branch:c.branch});
+      say('Copying…');
+      importFromGithub(c, false).then(function(res){
+        say('Copied ' + res.imported + ' items. Everyone else will pick them up within 30 seconds.');
+        refreshHealth();
+      }).catch(function(err){
+        if(err.code === 'not_empty' && confirm('The store already has data in it. Merge this export over the top?')){
+          return importFromGithub(c, true).then(function(res){ say('Merged ' + res.imported + ' items.'); refreshHealth(); });
+        }
+        say(err.message || 'Import failed.', true);
+      });
+    });
+
+    document.getElementById('s-import-files').addEventListener('click', function(){
+      var files = document.getElementById('s-files').files;
+      if(!files || !files.length){ say('Choose the .json files first.', true); return; }
+      say('Reading…');
+      Promise.all(Array.prototype.map.call(files, function(f){
+        return f.text().then(function(t){ return { name: f.name.toLowerCase(), json: JSON.parse(t) }; });
+      })).then(function(parsed){
+        var payload = { tasks: [], calendar: {}, dreams: [], compass: {} };
+        parsed.forEach(function(p){
+          // Match on shape rather than filename, so it works whatever they were renamed to.
+          if(p.json.tasks) payload.tasks = p.json.tasks;
+          else if(p.json.dreams) payload.dreams = p.json.dreams;
+          else if(p.json.profiles || p.json.goals || p.json.priorities) payload.compass = p.json;
+          else if(p.json.events || p.json.family) payload.calendar = p.json;
+        });
+        return importPayload(payload, true);
+      }).then(function(res){
+        say('Imported ' + res.imported + ' items.');
+        refreshHealth();
+      }).catch(function(err){ say(err.message || 'Could not read those files.', true); });
     });
   }
+
+  // Only the non-secret half of the old config is remembered, purely so the
+  // migration form is pre-filled. The token is never persisted any more.
+  function getMigrationConfig(){
+    try{ return JSON.parse(localStorage.getItem(LS_MIGRATION) || 'null') || {}; }catch(e){ return {}; }
+  }
+  function saveMigrationConfig(c){
+    try{ localStorage.setItem(LS_MIGRATION, JSON.stringify(c)); }catch(e){}
+  }
+
 
   /* ================= FAMILY SETTINGS MODAL ================= */
   function openFamilySettingsModal(){
@@ -4679,12 +4911,14 @@
   window.addEventListener('resize', debounce(function(){
     var now = isPhone();
     if(now !== wasPhone){ wasPhone = now; render(); }
+    else { syncChromeHeight(); applyFillHeights(); }
   }, 180));
+  syncChromeHeight();
 
   /* ================= EVENT WIRING (static header controls) ================= */
   document.getElementById('sync-status').addEventListener('click', function(){
-    var cfg = getConfig();
-    if(!cfg){ openSettingsModal(); } else { loadFromGitHub(); loadCalendarFromGitHub(); }
+    if(state.syncStatus === 'setup') openSettingsModal();
+    else retrySyncNow();
   });
   document.getElementById('view-switcher').addEventListener('click', function(e){
     var btn = e.target.closest('button[data-view]');
@@ -4779,14 +5013,14 @@
 
   /* ================= INIT ================= */
   loadMeta();
+  // Identity first: which family member you are decides what the first paint even
+  // shows (kid mode, locked person filter), so resolve it before the data lands.
   loadIdentity().then(function(){
-    resolveCurrentFamilyMember();
-    render();
+    return bootSync();
+  }).catch(function(){
+    // Identity is a nice-to-have; never let it stop the app from starting.
+    return bootSync();
   });
-  loadFromGitHub();
-  loadCalendarFromGitHub();
-  loadDreamsFromGitHub();
-  loadCompassFromGitHub();
 
 })();
 </script>
