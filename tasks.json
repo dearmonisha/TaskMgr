@@ -236,15 +236,26 @@
       "importance": true,
       "urgency": false,
       "assignees": [
-        "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6"
+        "ebbf1674-7863-4d0f-b34d-f2017b9dc367"
       ],
-      "due": null,
+      "due": "2026-08-24",
       "tags": [],
       "subtasks": [],
       "completed": false,
       "completedAt": null,
       "quadrantEnteredAt": "2026-08-22T17:01:10.240Z",
-      "activity": []
+      "activity": [
+        {
+          "id": "134e0b4f-c44d-4fee-accb-d217380268fa",
+          "text": "Reassigned to Tanvi",
+          "ts": "2026-08-22T17:01:18.647Z"
+        },
+        {
+          "id": "dc518bad-cf78-4f40-819d-0cf32844f3b5",
+          "text": "Reassigned to Shiva, Tanvi",
+          "ts": "2026-08-22T17:01:17.829Z"
+        }
+      ]
     }
   ]
 }
