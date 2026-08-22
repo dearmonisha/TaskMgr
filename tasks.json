@@ -230,6 +230,8 @@
       "activity": []
     },
     {
+      "deleted": false,
+      "deletedAt": null,
       "id": "b8fa4802-d35c-40d3-8033-10e3b66fddb6",
       "title": "Make Santander paperless",
       "notes": "",
@@ -241,8 +243,8 @@
       "due": "2026-08-24",
       "tags": [],
       "subtasks": [],
-      "completed": false,
-      "completedAt": null,
+      "completed": true,
+      "completedAt": "2026-08-22T17:02:17.682Z",
       "quadrantEnteredAt": "2026-08-22T17:01:10.240Z",
       "activity": [
         {
