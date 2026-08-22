@@ -215,7 +215,7 @@
       "title": "Call Appa",
       "notes": "",
       "importance": true,
-      "urgency": false,
+      "urgency": true,
       "assignees": [
         "64dab313-2ef8-4a3f-ac84-b313d9b3d9d6"
       ],
@@ -224,7 +224,7 @@
       "subtasks": [],
       "completed": false,
       "completedAt": null,
-      "quadrantEnteredAt": "2026-08-22T16:46:35.108Z",
+      "quadrantEnteredAt": "2026-08-22T16:46:39.043Z",
       "activity": []
     }
   ]
