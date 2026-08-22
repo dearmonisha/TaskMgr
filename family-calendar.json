@@ -11737,6 +11737,17 @@
       "lastSyncedAt": "2026-08-22T16:55:44.326Z",
       "lastError": null,
       "syncStatus": "ok"
+    },
+    {
+      "id": "8b5b17c7-afea-444e-a423-c3acee3c3f4f",
+      "ownerFamilyMemberId": "ebbf1674-7863-4d0f-b34d-f2017b9dc367",
+      "name": "UNT",
+      "url": "8QzHQcM7MDq85Go8ff6bE9E74IVakoOBFEKUqlTt",
+      "category": "homework",
+      "enabled": true,
+      "lastSyncedAt": null,
+      "lastError": "That is not a valid URL.",
+      "syncStatus": "err"
     }
   ],
   "homeTimezone": "America/Chicago"
