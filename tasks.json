@@ -222,8 +222,8 @@
       "due": null,
       "tags": [],
       "subtasks": [],
-      "completed": false,
-      "completedAt": null,
+      "completed": true,
+      "completedAt": "2026-08-22T16:49:19.425Z",
       "quadrantEnteredAt": "2026-08-22T16:46:40.311Z",
       "activity": []
     }
