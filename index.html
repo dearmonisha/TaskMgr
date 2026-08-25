@@ -4797,11 +4797,21 @@
     return mapped;
   }
 
+  function readICSFile(file){
+    return file.text().then(function(text){
+      if(!/BEGIN:VCALENDAR/i.test(text)){
+        throw new Error('That file doesn\'t look like a calendar (.ics) export.');
+      }
+      return text;
+    });
+  }
+
   function findSubscription(id){
     return (state.calendarSubscriptions||[]).find(function(s){ return s.id === id; });
   }
 
   function syncSubscription(sub){
+    if(sub.kind === 'file') return Promise.resolve();   // re-import the file instead
     sub.syncStatus = 'busy';
     renderMyCalendarsPanelIfOpen();
     var target = (sub.url||'').trim().replace(/^webcal:\/\//i, 'https://');
@@ -4815,15 +4825,7 @@
         return res.text();
       })
       .then(function(text){
-        var icsEvents = parseICSText(text);
-        var newOnes = icsEventsToOurs(icsEvents, sub);
-        state.events = state.events.filter(function(e){ return e.subscriptionId !== sub.id; }).concat(newOnes);
-        sub.lastSyncedAt = nowISO();
-        sub.lastError = null;
-        sub.syncStatus = 'ok';
-        persistCalendar();
-        renderMyCalendarsPanelIfOpen();
-        if(state.view === 'calendar') render();
+        ingestICSText(sub, text);
       })
       .catch(function(err){
         sub.lastError = String((err && err.message) || err);
@@ -4832,8 +4834,26 @@
       });
   }
 
+  // Turn raw .ics text into this source's events, REPLACING whatever it contributed before.
+  // Replacing rather than appending is what makes a repeat import safe: a rescheduled meeting
+  // moves, a cancelled one disappears, and nothing is duplicated.
+  function ingestICSText(sub, text){
+    var icsEvents = parseICSText(text);
+    var newOnes = icsEventsToOurs(icsEvents, sub);
+    state.events = state.events.filter(function(e){ return e.subscriptionId !== sub.id; }).concat(newOnes);
+    sub.lastSyncedAt = nowISO();
+    sub.lastError = null;
+    sub.syncStatus = 'ok';
+    persistCalendar();
+    renderMyCalendarsPanelIfOpen();
+    if(state.view === 'calendar') render();
+    return newOnes.length;
+  }
+
   function syncAllSubscriptions(){
-    (state.calendarSubscriptions||[]).filter(function(s){ return s.enabled !== false; }).forEach(syncSubscription);
+    (state.calendarSubscriptions||[])
+      .filter(function(s){ return s.enabled !== false && s.kind !== 'file'; })  // file imports have nothing to fetch
+      .forEach(syncSubscription);
   }
 
   /* ---- "My Calendars" subscription manager (scoped to the logged-in family member) ---- */
@@ -4846,14 +4866,22 @@
     var me = state.currentFamilyMember;
     var mine = (state.calendarSubscriptions||[]).filter(function(s){ return s.ownerFamilyMemberId === me.id; });
     var html = mine.length ? mine.map(function(s){
-      var status = s.syncStatus==='busy' ? 'Syncing…' : s.syncStatus==='err' ? ('Error: '+escapeHtml(s.lastError||'')) : (s.lastSyncedAt ? 'Synced '+fmtRelative(s.lastSyncedAt) : 'Not synced yet');
+      var isFile = s.kind === 'file';
+      var status = s.syncStatus==='busy' ? 'Syncing…'
+        : s.syncStatus==='err' ? ('Error: '+escapeHtml(s.lastError||''))
+        : (s.lastSyncedAt ? (isFile ? 'Imported ' : 'Synced ') + fmtRelative(s.lastSyncedAt) : 'Not synced yet');
+      var source = isFile
+        ? 'From a file' + (s.lastFileName ? ' · ' + escapeHtml(s.lastFileName) : '')
+        : escapeHtml(s.url);
       return '<div class="family-row" data-sub="'+s.id+'" style="align-items:flex-start;">'
         + '<div style="flex:1;min-width:0;">'
         + '<div style="font-weight:700;font-size:13px;">'+escapeHtml(s.name||'Untitled calendar')+'</div>'
-        + '<div style="font-size:11px;color:var(--ink-muted);word-break:break-all;">'+escapeHtml(s.url)+'</div>'
+        + '<div style="font-size:11px;color:var(--ink-muted);word-break:break-all;">'+source+'</div>'
         + '<div style="font-size:11px;color:'+(s.syncStatus==='err'?'var(--overdue)':'var(--ink-muted)')+';margin-top:2px;">'+status+'</div>'
         + '</div>'
-        + '<button type="button" class="btn-sm" data-action="sync-sub" data-sub="'+s.id+'">Sync now</button>'
+        + (isFile
+            ? '<label class="btn-sm" style="cursor:pointer;">Re-import…<input type="file" accept=".ics,text/calendar" data-reimport="'+s.id+'" style="display:none;"></label>'
+            : '<button type="button" class="btn-sm" data-action="sync-sub" data-sub="'+s.id+'">Sync now</button>')
         + '<button type="button" class="rm" data-action="rm-sub" data-sub="'+s.id+'" title="Remove" aria-label="Remove">'+icon('close')+'</button>'
         + '</div>';
     }).join('') : '<div class="list-empty">No calendars imported yet.</div>';
@@ -4863,6 +4891,23 @@
       btn.addEventListener('click', function(){
         var s = findSubscription(btn.dataset.sub);
         if(s) syncSubscription(s);
+      });
+    });
+    document.querySelectorAll('[data-reimport]').forEach(function(input){
+      input.addEventListener('change', function(){
+        var sub = findSubscription(input.dataset.reimport);
+        var file = input.files && input.files[0];
+        if(!sub || !file) return;
+        readICSFile(file).then(function(text){
+          sub.lastFileName = file.name;
+          var n = ingestICSText(sub, text);
+          showToast('Re-imported ' + n + ' event' + (n===1?'':'s') + ' from ' + file.name, false, 3000);
+        }).catch(function(err){
+          sub.syncStatus = 'err';
+          sub.lastError = err.message || 'Could not read that file.';
+          renderMyCalendarsPanelIfOpen();
+        });
+        input.value = '';
       });
     });
     document.querySelectorAll('[data-action="rm-sub"]').forEach(function(btn){
@@ -4904,6 +4949,17 @@
       + '</select></div>'
       + '<div class="settings-actions">'
       + '<button class="btn-primary" id="mc-add">Add & Sync</button>'
+      + '</div>'
+
+      + '<div class="field-label">Or import from a file</div>'
+      + '<div class="settings-help" style="margin-top:0;">For a calendar that won\'t give you a link — export it to an .ics file and bring it in here. Importing the same calendar again later replaces what came from it last time, so nothing is duplicated and cancelled events drop off.</div>'
+      + '<div class="settings-field"><label>Name</label><input class="text-input" id="mc-file-name" placeholder="e.g. Tanvi school"></div>'
+      + '<div class="settings-field"><label>Default category</label><select class="text-input" id="mc-file-category">'
+      + Object.keys(EVENT_CATEGORIES).map(function(k){ return '<option value="'+k+'">'+EVENT_CATEGORIES[k].label+'</option>'; }).join('')
+      + '</select></div>'
+      + '<div class="settings-field"><input type="file" id="mc-file" accept=".ics,text/calendar"></div>'
+      + '<div class="settings-actions">'
+      + '<button class="btn-primary" id="mc-file-add">Import file</button>'
       + '<button class="btn-sm" id="mc-close">Close</button>'
       + '</div>'
       + '<div id="mc-error" style="color:var(--overdue);font-size:12px;margin-top:10px;"></div>'
@@ -4913,6 +4969,34 @@
 
     document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id==='scrim') document.getElementById('modal-root').innerHTML=''; });
     document.getElementById('mc-close').addEventListener('click', function(){ document.getElementById('modal-root').innerHTML=''; });
+    document.getElementById('mc-file-add').addEventListener('click', function(){
+      var name = document.getElementById('mc-file-name').value.trim();
+      var input = document.getElementById('mc-file');
+      var file = input.files && input.files[0];
+      var err = document.getElementById('mc-error');
+      if(!name || !file){
+        err.textContent = 'Give it a name and choose an .ics file.';
+        return;
+      }
+      err.textContent = '';
+      readICSFile(file).then(function(text){
+        var sub = {
+          id: uid(), ownerFamilyMemberId: me.id, name: name, kind: 'file', url: '',
+          lastFileName: file.name, category: document.getElementById('mc-file-category').value,
+          enabled: true, lastSyncedAt: null, lastError: null, syncStatus: 'idle'
+        };
+        state.calendarSubscriptions = state.calendarSubscriptions || [];
+        state.calendarSubscriptions.push(sub);
+        var n = ingestICSText(sub, text);
+        document.getElementById('mc-file-name').value = '';
+        input.value = '';
+        renderMyCalendarsList();
+        showToast('Imported ' + n + ' event' + (n===1?'':'s') + ' from ' + file.name, false, 3000);
+      }).catch(function(e){
+        err.textContent = e.message || 'Could not read that file.';
+      });
+    });
+
     document.getElementById('mc-add').addEventListener('click', function(){
       var name = document.getElementById('mc-name').value.trim();
       var url = document.getElementById('mc-url').value.trim();
