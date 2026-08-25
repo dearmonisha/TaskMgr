@@ -413,6 +413,25 @@
   #ev-time-hour,#ev-time-minute{width:60px;}
   #ev-time-ampm{width:66px;}
   .time-colon{font-weight:700;color:var(--ink-muted);}
+  .color-pop{
+    flex:1 1 100%;display:flex;flex-wrap:wrap;gap:7px;align-items:center;
+    margin-top:10px;padding:10px;border-radius:var(--radius-card);
+    background:var(--surface-2);border:1px solid var(--line);
+  }
+  .color-chip{
+    width:26px;height:26px;border-radius:50%;border:2px solid transparent;
+    box-shadow:0 0 0 1.5px var(--hairline);cursor:pointer;padding:0;flex:none;
+  }
+  .color-chip.on{border-color:var(--surface);box-shadow:0 0 0 2.5px var(--ink);}
+  .color-reset{
+    border:1px solid var(--hairline);background:var(--surface);color:var(--ink-muted);
+    border-radius:var(--radius-pill);padding:5px 12px;font-size:11.5px;font-weight:600;cursor:pointer;
+  }
+  .color-reset:hover{color:var(--ink);}
+  .meta-pill.repeats{background:var(--accent-soft, rgba(0,143,160,0.1));color:var(--accent, #0b6b78);}
+  .event-chip.future,.agenda-card.future{opacity:.62;}
+  .src-dot{width:7px;height:7px;border-radius:50%;flex:none;display:inline-block;margin-right:6px;vertical-align:1px;}
+  #cal-source-tabs button{display:inline-flex;align-items:center;}
   .repeat-summary{
     margin-top:12px;padding:9px 12px;border-radius:8px;
     background:var(--accent-soft, rgba(0,143,160,0.08));
@@ -1144,6 +1163,7 @@
           <button class="settings-gear only-phone" id="cal-toggle-search" title="Search events" aria-label="Search events"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5L16.7 16.7"/></svg></button>
         </div>
         <div class="pill-tabs" id="cal-family-tabs"></div>
+        <div class="pill-tabs" id="cal-source-tabs"></div>
       </div>
       <div class="quick-add">
         <input type="text" id="cal-search-input" placeholder="Search events">
@@ -1204,6 +1224,7 @@
   var LS_CALENDAR = 'eisenhower_calendar_local_v1';
   var LS_DREAMS = 'eisenhower_dreams_local_v1';
   var LS_COMPASS = 'eisenhower_compass_local_v1';
+  var LS_CAL_SOURCES = 'tm_cal_sources_v1';   // per-device calendar visibility
   var LS_MIGRATION = 'tm_migration_hint_v1'; // owner/repo of the old GitHub store, for the one-off import form
   var LS_META = 'eisenhower_meta_v1'; // title/subtitle
 
@@ -1340,6 +1361,10 @@
     dayNowTimer: null,    // interval that walks the "now" line down the day grid
     calAnchor: todayStr(),// reference date for month/week/agenda navigation
     calFilter: 'all',     // 'all' or a family member id
+    // Which calendars to show. null/empty = everything. Otherwise a list of source keys:
+    // 'manual', 'tasks', or a subscription id. Deliberately NOT part of the synced model --
+    // it's a per-device view preference, not shared family data.
+    calSources: null,
     calSearch: '',
     currentFamilyMember: null, // resolved from currentUserEmail against state.family
 
@@ -1442,6 +1467,11 @@
     other:       { label:'Other',       icon:'pin',       color:'#462c19' }
   };
   var FAMILY_COLOR_PALETTE = ['#13808a','#955c82','#bc5460','#008fa0','#8765be','#3e8f44','#c9922f','#a8372e'];
+  // Chip backgrounds carry white text, so every one of these is dark enough to stay legible.
+  var CALENDAR_COLOR_PALETTE = [
+    '#3b6ea5','#0e7c86','#3e8f44','#6d8b3a','#c9922f','#d9822b',
+    '#bc5460','#a8372e','#b0507e','#8765be','#5c7a89','#6d6059'
+  ];
 
   /*
     DREAM SCHEMA (vision board -- one board per kid, private to them; adults can view any kid's board):
@@ -1892,6 +1922,7 @@
   }
 
   function bootSync(){
+    loadCalSources();
     loadSyncLocal();
     // Paint from cache first so the app is usable before the network answers.
     loadLocal(); loadCalendarLocal(); loadDreamsLocal(); loadCompassLocal();
@@ -2107,6 +2138,9 @@
       var isDoFirst = quadrantOf(t) === 'doFirst';
       pills += '<span class="meta-pill aging'+(isDoFirst?' alert':'')+'">'+icon('clock')+days+'d here</span>';
     }
+    if(t.recurrence && t.recurrence.freq){
+      pills += '<span class="meta-pill repeats" title="'+escapeHtml(describeRecurrence(t.recurrence))+'">'+icon('refresh')+shortRecurrence(t.recurrence)+'</span>';
+    }
     if(t.subtasks && t.subtasks.length){
       var done = t.subtasks.filter(function(s){return s.done;}).length;
       pills += '<span class="meta-pill">'+icon('checksq')+done+'/'+t.subtasks.length+'</span>';
@@ -2231,6 +2265,17 @@
   function familyMember(id){ return state.family.find(function(m){ return m.id===id; }); }
   function categoryOf(occ){ return EVENT_CATEGORIES[occ.category] || EVENT_CATEGORIES.other; }
 
+  /* The colour an occurrence is drawn in. A calendar the user has given its own colour wins;
+     otherwise it falls back to the colour of its category, which is what everything used
+     before this existed. */
+  function occColor(occ){
+    if(occ && occ.subscriptionId){
+      var sub = findSubscription(occ.subscriptionId);
+      if(sub && sub.color) return sub.color;
+    }
+    return categoryOf(occ).color;
+  }
+
   function occFromOccurrenceId(occId){
     var sep = occId.indexOf('::');
     if(sep === -1){
@@ -2249,7 +2294,14 @@
     });
   }
 
+  // Which "calendar" an occurrence belongs to, for the source pills.
+  function occSourceKey(occ){
+    if(occ.kind === 'task') return 'tasks';
+    return occ.subscriptionId || 'manual';
+  }
+
   function eventMatchesFilter(occ){
+    if(state.calSources && state.calSources.length && state.calSources.indexOf(occSourceKey(occ)) === -1) return false;
     if(state.calFilter !== 'all'){
       if(occ.kind === 'task'){
         var as = occ.attendees || [];
@@ -2292,7 +2344,7 @@
   function eventChipHtml(occ){
     var cat = categoryOf(occ);
     var importedMark = occ.source === 'ics' ? icon('download')+' ' : '';
-    return '<div class="event-chip" style="background:'+cat.color+'" data-occ="'+occ.occurrenceId+'" title="'+escapeHtml((occ.source==='ics'?'Imported · ':'')+occ.title)+'">'
+    return '<div class="event-chip" style="background:'+occColor(occ)+'" data-occ="'+occ.occurrenceId+'" title="'+escapeHtml((occ.source==='ics'?'Imported · ':'')+occ.title)+'">'
       + '<span class="ec-icon">'+icon(cat.icon)+'</span><span class="ec-title">'+importedMark+escapeHtml(occ.title)+'</span></div>';
   }
 
@@ -2300,20 +2352,38 @@
   // Tasks stay a separate data model from Events (per design), but any task with a due date is
   // projected into a lightweight pseudo-occurrence so it can slot into the same day cells / agenda
   // rows as events. Clicking one opens the real Task modal, not the Event modal.
-  function taskAsCalOccurrence(t){
+  function taskAsCalOccurrence(t, dateStr, isFuture){
     return {
       kind:'task',
-      occurrenceId: 'task::'+t.id,
+      occurrenceId: 'task::'+t.id+'::'+dateStr,
       taskId: t.id,
-      occurrenceDate: t.due,
+      occurrenceDate: dateStr,
       title: t.title,
       attendees: (t.assignees || []).slice(),
-      completed: !!t.completed,
+      completed: !isFuture && !!t.completed,   // a future repeat is never already done
+      future: !!isFuture,
       quadrant: quadrantOf(t)
     };
   }
   function taskOccurrencesInRange(rangeStart, rangeEnd){
-    return state.tasks.filter(function(t){ return t.due && !t.deleted && t.due >= rangeStart && t.due <= rangeEnd; }).map(taskAsCalOccurrence);
+    var out = [];
+    (state.tasks || []).forEach(function(t){
+      if(!t.due || t.deleted) return;
+      if(!t.recurrence){
+        if(t.due >= rangeStart && t.due <= rangeEnd) out.push(taskAsCalOccurrence(t, t.due, false));
+        return;
+      }
+      // Draw the upcoming ones too, so the calendar shows the bins go out every Tuesday
+      // rather than only the very next time.
+      var n = 0;
+      walkRecurrence(t.due, t.recurrence, rangeEnd, function(d){
+        n++;
+        if(t.recurrence.count && (t.recurrenceDone || 0) + n > t.recurrence.count) return false;
+        if(d >= rangeStart && d <= rangeEnd) out.push(taskAsCalOccurrence(t, d, d !== t.due));
+        return true;
+      });
+    });
+    return out;
   }
   function taskAssigneeAvatarsHtml(occ){
     var members = (occ.attendees||[]).map(familyMember).filter(Boolean);
@@ -2326,7 +2396,7 @@
     var style = occ.completed
       ? 'background:transparent;border:1.5px dashed var(--hairline);color:var(--ink-muted);'
       : 'background:'+q.accent+';';
-    return '<div class="event-chip task-chip" style="'+style+'" data-task="'+occ.taskId+'" title="'+escapeHtml('Task · '+occ.title)+'">'
+    return '<div class="event-chip task-chip'+(occ.future?' future':'')+'" style="'+style+'" data-task="'+occ.taskId+'" title="'+escapeHtml('Task · '+occ.title)+'">'
       + '<span class="ec-icon">'+icon(occ.completed?'checkcirc':'circle')+'</span><span class="ec-title'+(occ.completed?' done':'')+'">'+escapeHtml(occ.title)+'</span></div>';
   }
   function chipHtml(occ){ return occ.kind === 'task' ? taskChipHtml(occ) : eventChipHtml(occ); }
@@ -2334,7 +2404,7 @@
   function agendaCardHtml(occ){
     if(occ.kind === 'task'){
       var q = QUADRANTS[occ.quadrant];
-      return '<div class="agenda-card task-agenda-card'+(occ.completed?' done':'')+'" style="border-left-color:'+(occ.completed?'var(--hairline)':q.accent)+'" data-task="'+occ.taskId+'">'
+      return '<div class="agenda-card task-agenda-card'+(occ.completed?' done':'')+(occ.future?' future':'')+'" style="border-left-color:'+(occ.completed?'var(--hairline)':q.accent)+'" data-task="'+occ.taskId+'">'
         + '<span class="ac-icon" style="background:'+(occ.completed?'var(--ink-faint)':q.accent)+'">'+icon(occ.completed?'checkcirc':'circle')+'</span>'
         + '<div class="ac-body"><div class="ac-title'+(occ.completed?' done':'')+'">'+escapeHtml(occ.title)+'</div><div class="ac-meta">Task · '+escapeHtml(q.title)+'</div></div>'
         + '<span class="ac-avatars">'+taskAssigneeAvatarsHtml(occ)+'</span>'
@@ -2344,8 +2414,9 @@
     var timeLabel = displayEventTime(occ);
     var loc = occ.location ? ' · '+escapeHtml(occ.location) : '';
     var importedMark = occ.source === 'ics' ? icon('download')+' ' : '';
-    return '<div class="agenda-card" style="border-left-color:'+cat.color+'" data-occ="'+occ.occurrenceId+'">'
-      + '<span class="ac-icon" style="background:'+cat.color+'">'+icon(cat.icon)+'</span>'
+    var accent = occColor(occ);
+    return '<div class="agenda-card" style="border-left-color:'+accent+'" data-occ="'+occ.occurrenceId+'">'
+      + '<span class="ac-icon" style="background:'+accent+'">'+icon(cat.icon)+'</span>'
       + '<div class="ac-body"><div class="ac-title">'+importedMark+escapeHtml(occ.title)+'</div><div class="ac-meta">'+timeLabel+loc+'</div></div>'
       + '<span class="ac-avatars">'+attendeeAvatarsHtml(occ)+'</span>'
       + '</div>';
@@ -2433,7 +2504,7 @@
     var cat = categoryOf(occ);
     var timeLabel = minutesToLabel(it.start) + (it.hasRealEnd ? ' – ' + minutesToLabel(it.end) : '');
     var attr = occ.kind === 'task' ? 'data-task="'+occ.taskId+'"' : 'data-occ="'+occ.occurrenceId+'"';
-    var accent = occ.kind === 'task' ? QUADRANTS[occ.quadrant].accent : cat.color;
+    var accent = occ.kind === 'task' ? QUADRANTS[occ.quadrant].accent : occColor(occ);
     var compact = height < 44;
     return '<div class="day-block'+(compact?' compact':'')+'" '+attr
       + ' style="top:'+top+'px;height:'+height+'px;left:calc('+leftPct+'% + 2px);width:calc('+widthPct+'% - 4px);'
@@ -2522,6 +2593,7 @@
   function renderCountdownStrip(){
     var today = todayStr();
     var occ = expandOccurrences(today, dateAdd(today,7)).filter(function(o){
+      if(state.calSources && state.calSources.length && state.calSources.indexOf(occSourceKey(o)) === -1) return false;
       if(state.calFilter !== 'all'){
         var att = o.attendees || ['all'];
         if(att.indexOf('all') === -1 && att.indexOf(state.calFilter) === -1) return false;
@@ -2534,7 +2606,7 @@
       var when = days===0 ? 'Today' : days===1 ? 'Tomorrow' : 'in '+days+' days';
       var cat = categoryOf(o);
       return '<div class="countdown-card" data-occ="'+o.occurrenceId+'">'
-        + '<div class="cc-icon" style="background:'+cat.color+'">'+icon(cat.icon)+'</div>'
+        + '<div class="cc-icon" style="background:'+occColor(o)+'">'+icon(cat.icon)+'</div>'
         + '<div class="cc-title">'+escapeHtml(o.title)+'</div>'
         + '<div class="cc-when'+(days===0?' today':'')+'">'+when+' · '+fmtDate(o.occurrenceDate)+'</div>'
         + '</div>';
@@ -2545,7 +2617,7 @@
   // Colour that represents an occurrence in compact (dot) form.
   function occDotColor(occ){
     if(occ.kind === 'task') return occ.completed ? '' : QUADRANTS[occ.quadrant].accent;
-    return categoryOf(occ).color;
+    return occColor(occ);
   }
 
   function renderMonthGrid(rangeStart, rangeEnd, occurrences){
@@ -2711,10 +2783,95 @@
       + '</div></div>';
   }
 
+  function loadCalSources(){
+    try{
+      var raw = JSON.parse(localStorage.getItem(LS_CAL_SOURCES) || 'null');
+      state.calSources = (raw && raw.length) ? raw : null;
+    }catch(e){ state.calSources = null; }
+  }
+  function saveCalSources(){
+    try{
+      if(state.calSources && state.calSources.length) localStorage.setItem(LS_CAL_SOURCES, JSON.stringify(state.calSources));
+      else localStorage.removeItem(LS_CAL_SOURCES);
+    }catch(e){}
+  }
+
+  // Everything the calendar can draw from: hand-added events, dated tasks, and each
+  // imported calendar. Only rendered when there's actually something to choose between.
+  function calSourceList(){
+    var subs = (state.calendarSubscriptions || []).slice().sort(function(a,b){
+      return (a.name||'').localeCompare(b.name||'');
+    });
+    var list = [{ key:'manual', label:'Added by hand', color:'var(--ink-muted)' }];
+    if((state.tasks||[]).some(function(t){ return t.due && !t.deleted; })){
+      list.push({ key:'tasks', label:'Tasks', color:'var(--schedule)' });
+    }
+    subs.forEach(function(sub){
+      var owner = familyMember(sub.ownerFamilyMemberId);
+      var cat = EVENT_CATEGORIES[sub.category] || EVENT_CATEGORIES.other;
+      list.push({
+        key: sub.id,
+        label: sub.name || 'Untitled calendar',
+        color: sub.color || cat.color,
+        owner: owner ? owner.name : null
+      });
+    });
+    return list;
+  }
+
+  function renderCalSourceTabs(){
+    var box = document.getElementById('cal-source-tabs');
+    if(!box) return;
+    var sources = calSourceList();
+    // Nothing imported yet: a filter with one real option is just clutter.
+    if((state.calendarSubscriptions || []).length === 0){
+      box.innerHTML = '';
+      box.classList.add('hidden');
+      return;
+    }
+    box.classList.remove('hidden');
+
+    // Drop any source that no longer exists (a calendar was removed while filtered to it).
+    if(state.calSources){
+      var valid = sources.map(function(s){ return s.key; });
+      var pruned = state.calSources.filter(function(k){ return valid.indexOf(k) !== -1; });
+      if(pruned.length !== state.calSources.length){
+        state.calSources = pruned.length ? pruned : null;
+        saveCalSources();
+      }
+    }
+
+    var showingAll = !state.calSources || !state.calSources.length;
+    box.innerHTML = '<button data-source="__all" class="'+(showingAll?'active':'')+'">All calendars</button>'
+      + sources.map(function(s){
+          var on = !showingAll && state.calSources.indexOf(s.key) !== -1;
+          var title = s.owner ? s.label + ' · ' + s.owner : s.label;
+          return '<button data-source="'+escapeHtml(s.key)+'" class="'+(on?'active':'')+'" title="'+escapeHtml(title)+'" aria-pressed="'+on+'">'
+            + '<span class="src-dot" style="background:'+s.color+'"></span>'+escapeHtml(s.label)+'</button>';
+        }).join('');
+
+    box.querySelectorAll('button').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var key = btn.dataset.source;
+        if(key === '__all'){
+          state.calSources = null;
+        } else {
+          var cur = (state.calSources || []).slice();
+          var i = cur.indexOf(key);
+          if(i === -1) cur.push(key); else cur.splice(i, 1);
+          state.calSources = cur.length ? cur : null;   // nothing ticked means show everything
+        }
+        saveCalSources();
+        render();
+      });
+    });
+  }
+
   function renderCalToolbar(){
     document.querySelectorAll('#cal-subview-tabs button').forEach(function(b){
       b.classList.toggle('active', b.dataset.subview === state.calSubView);
     });
+    renderCalSourceTabs();   // before the kid-mode early return: filtering by calendar is for everyone
     var famTabs = document.getElementById('cal-family-tabs');
     var locked = lockedPersonId();
     if(locked){
@@ -2987,9 +3144,50 @@
     task.activity.unshift({ id: uid(), text: text, ts: nowISO() });
   }
 
+  /* The next date a repeating task is due after its current one, or null when the series has
+     run out. Returning null is what lets the last occurrence complete normally and archive. */
+  function nextTaskDue(task){
+    if(!task || !task.recurrence || !task.due) return null;
+    var rule = task.recurrence;
+    // A "3 times" rule means three completions; this one is the last if two are already done.
+    if(rule.count && (task.recurrenceDone || 0) + 1 >= rule.count) return null;
+    var next = null;
+    walkRecurrence(task.due, rule, dateAdd(task.due, 800), function(d){
+      if(d <= task.due) return true;
+      next = d;
+      return false;
+    });
+    return next;
+  }
+
   function toggleComplete(id){
     var t = findTask(id);
     if(!t) return;
+
+    /* Ticking a repeating task rolls it to its next due date instead of archiving it, so the
+       board keeps one live "Take the bins out" rather than one card per week. */
+    if(!t.completed && t.recurrence && t.due){
+      var next = nextTaskDue(t);
+      if(next){
+        var wasDue = t.due, wasDone = t.recurrenceDone || 0;
+        t.recurrenceDone = wasDone + 1;
+        t.lastCompletedFor = wasDue;
+        t.due = next;
+        t.quadrantEnteredAt = nowISO();   // the aging counter is about this cycle, not the series
+        logActivity(t, 'Completed for ' + fmtDate(wasDue) + ' - next ' + fmtDate(next));
+        persist(); render();
+        showToast('Done for ' + fmtDate(wasDue) + ' - next ' + fmtDate(next), function(){
+          t.due = wasDue;
+          t.recurrenceDone = wasDone;
+          t.lastCompletedFor = null;
+          logActivity(t, 'Undid the completion for ' + fmtDate(wasDue));
+          persist(); render();
+        }, 6000);
+        return;
+      }
+      logActivity(t, 'Completed the final one in the series');
+    }
+
     t.completed = !t.completed;
     t.completedAt = t.completed ? nowISO() : null;
     if(isSharedTask(t)) logActivity(t, t.completed ? 'Marked complete' : 'Marked incomplete');
@@ -3092,7 +3290,9 @@
     el.innerHTML = escapeHtml(message) + (withUndo ? ' <button id="toast-undo">Undo</button>' : '');
     el.classList.add('show');
     if(withUndo){
-      document.getElementById('toast-undo').addEventListener('click', undoDelete);
+      // `true` keeps the original delete-undo behaviour; a function lets any action supply its own.
+      var onUndo = (typeof withUndo === 'function') ? withUndo : undoDelete;
+      document.getElementById('toast-undo').addEventListener('click', function(){ hideToast(); onUndo(); });
     }
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function(){
@@ -3164,6 +3364,58 @@
           + '</div>';
       }
 
+      /* Repeats. A repeating task needs a date to repeat from, so the control only appears
+         once a due date is set -- otherwise "every Tuesday" has nothing to anchor to. */
+      var tFreq = draft.recurrence ? draft.recurrence.freq : '';
+      var tFreqSel = tFreq;
+      if(tFreq === 'weekly' && draft.recurrence.byWeekday && draft.recurrence.byWeekday.length > 1) tFreqSel = 'custom';
+      var repeatHtml = '';
+      if(!draft.due){
+        repeatHtml = '<div class="field-label">Repeats</div>'
+          + '<div class="settings-help" style="margin-top:0;">Set a due date first, and you can make this task repeat from it.</div>';
+      } else {
+        var tWeekPicker = '';
+        if(tFreq === 'weekly'){
+          if(!(draft.recurrence.byWeekday && draft.recurrence.byWeekday.length)){
+            draft.recurrence.byWeekday = [new Date(draft.due+'T00:00:00').getDay()];
+          }
+          var tDays = draft.recurrence.byWeekday;
+          tWeekPicker = '<div class="field-label">Repeat on</div><div class="weekday-picker" id="t-weekdays">'
+            + WEEKDAY_LABELS.map(function(lbl,i){
+                return '<button type="button" data-dow="'+i+'" data-full="'+WEEKDAY_FULL[i]+'" aria-pressed="'+(tDays.indexOf(i)!==-1)+'" class="'+(tDays.indexOf(i)!==-1?'selected':'')+'">'+lbl+'</button>';
+              }).join('')
+            + '</div>';
+        }
+        var tDetail = '';
+        if(tFreq){
+          var tEnds = draft.recurrence.until ? 'until' : (draft.recurrence.count ? 'count' : 'never');
+          tDetail = '<div class="row-2" style="margin-top:10px;">'
+            + '<div><div class="field-label" style="margin-top:0;">Every</div><input type="number" min="1" class="text-input" id="t-interval" value="'+(draft.recurrence.interval||1)+'"></div>'
+            + '<div><div class="field-label" style="margin-top:0;">&nbsp;</div><div style="padding:9px 0;font-size:12.5px;color:var(--ink-muted);">'+({daily:'day(s)',weekly:'week(s)',monthly:'month(s)',yearly:'year(s)'}[tFreq])+'</div></div>'
+            + '</div>'
+            + tWeekPicker
+            + '<div class="field-label">Ends</div>'
+            + '<div class="ends-row">'
+            + '<label class="ends-option"><input type="radio" name="t-ends" value="never" '+(tEnds==='never'?'checked':'')+'> Never</label>'
+            + '<label class="ends-option"><input type="radio" name="t-ends" value="until" '+(tEnds==='until'?'checked':'')+'> On date <input type="date" id="t-until" value="'+(draft.recurrence.until||'')+'" '+(tEnds!=='until'?'disabled':'')+'></label>'
+            + '<label class="ends-option"><input type="radio" name="t-ends" value="count" '+(tEnds==='count'?'checked':'')+'> After <input type="number" min="1" id="t-count" value="'+(draft.recurrence.count||5)+'" '+(tEnds!=='count'?'disabled':'')+'> times</label>'
+            + '</div>'
+            + '<div class="repeat-summary">'+escapeHtml(describeRecurrence(draft.recurrence))
+            + (draft.recurrenceDone ? ' Done ' + draft.recurrenceDone + ' time' + (draft.recurrenceDone===1?'':'s') + ' so far.' : '')
+            + '</div>';
+        }
+        repeatHtml = '<div class="field-label">Repeats</div>'
+          + '<select class="text-input" id="t-repeat-freq">'
+          + '<option value=""'+(tFreqSel===''?' selected':'')+'>Does not repeat</option>'
+          + '<option value="daily"'+(tFreqSel==='daily'?' selected':'')+'>Daily</option>'
+          + '<option value="weekly"'+(tFreqSel==='weekly'?' selected':'')+'>Weekly</option>'
+          + '<option value="custom"'+(tFreqSel==='custom'?' selected':'')+'>Custom - pick days of the week</option>'
+          + '<option value="monthly"'+(tFreqSel==='monthly'?' selected':'')+'>Monthly</option>'
+          + '<option value="yearly"'+(tFreqSel==='yearly'?' selected':'')+'>Yearly</option>'
+          + '</select>'
+          + tDetail;
+      }
+
       var html = ''
         + '<div class="scrim" id="scrim">'
         + '<div class="modal">'
@@ -3174,6 +3426,7 @@
         + '<div><div class="field-label" style="margin-top:0;">Due date</div><input type="date" id="m-due" value="'+(draft.due||'')+'"></div>'
         + '<div><div class="field-label" style="margin-top:0;">Status</div><button class="status-toggle'+(draft.completed?' complete':'')+'" id="m-status">'+(draft.completed?icon('refresh')+' Mark incomplete':icon('check')+' Mark complete')+'</button></div>'
         + '</div>'
+        + repeatHtml
         + '<div class="field-label">Tags</div><div class="tag-list" id="m-tags">'+tagsHtml+'</div>'
         + '<input class="dashed-input" id="m-tag-input" placeholder="Add a tag, press Enter">'
         + '<div class="field-label">Subtasks</div><div id="m-subtasks">'+subtasksHtml+'</div>'
@@ -3227,7 +3480,54 @@
         });
       });
 
-      document.getElementById('m-due').addEventListener('change', function(e){ draft.due = e.target.value || null; });
+      document.getElementById('m-due').addEventListener('change', function(e){
+        draft.due = e.target.value || null;
+        if(!draft.due) draft.recurrence = null;   // nothing left to repeat from
+        renderTaskForm();
+      });
+
+      var tFreqEl = document.getElementById('t-repeat-freq');
+      if(tFreqEl) tFreqEl.addEventListener('change', function(e){
+        var picked = e.target.value;
+        if(!picked){ draft.recurrence = null; }
+        else {
+          var realFreq = picked === 'custom' ? 'weekly' : picked;
+          var keep = (draft.recurrence && draft.recurrence.byWeekday && draft.recurrence.byWeekday.length)
+            ? draft.recurrence.byWeekday.slice() : null;
+          draft.recurrence = {
+            freq: realFreq, interval: 1,
+            byWeekday: realFreq === 'weekly' ? (keep || [new Date(draft.due+'T00:00:00').getDay()]) : null,
+            until: null, count: null
+          };
+        }
+        renderTaskForm();
+      });
+      var tInt = document.getElementById('t-interval');
+      if(tInt) tInt.addEventListener('input', function(e){ draft.recurrence.interval = Math.max(1, parseInt(e.target.value,10)||1); });
+      document.querySelectorAll('#t-weekdays button').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var dow = parseInt(btn.dataset.dow,10);
+          var list = (draft.recurrence.byWeekday || []).slice();
+          var i = list.indexOf(dow);
+          if(i === -1) list.push(dow);
+          else if(list.length > 1) list.splice(i, 1);
+          list.sort(function(a,b){ return a-b; });
+          draft.recurrence.byWeekday = list;
+          renderTaskForm();
+        });
+      });
+      document.querySelectorAll('input[name="t-ends"]').forEach(function(radio){
+        radio.addEventListener('change', function(){
+          if(radio.value === 'never'){ draft.recurrence.until = null; draft.recurrence.count = null; }
+          else if(radio.value === 'until'){ draft.recurrence.until = draft.recurrence.until || dateAdd(draft.due, 90); draft.recurrence.count = null; }
+          else { draft.recurrence.count = draft.recurrence.count || 5; draft.recurrence.until = null; }
+          renderTaskForm();
+        });
+      });
+      var tUntil = document.getElementById('t-until');
+      if(tUntil) tUntil.addEventListener('change', function(e){ draft.recurrence.until = e.target.value || null; });
+      var tCount = document.getElementById('t-count');
+      if(tCount) tCount.addEventListener('input', function(e){ draft.recurrence.count = Math.max(1, parseInt(e.target.value,10)||1); });
 
       document.getElementById('m-status').addEventListener('click', function(){
         draft.completed = !draft.completed;
@@ -3322,6 +3622,13 @@
         subtasks: (draft.subtasks||[]).map(function(s){ return Object.assign({}, s); }),
         completed: draft.completed, completedAt: draft.completedAt,
         quadrantEnteredAt: draft.quadrantEnteredAt,
+        // Copied, not referenced, so the discarded draft can't keep a live handle on the
+        // saved task's weekday array.
+        recurrence: draft.recurrence
+          ? Object.assign({}, draft.recurrence, { byWeekday: (draft.recurrence.byWeekday||[]).slice() })
+          : null,
+        recurrenceDone: draft.recurrenceDone || 0,
+        lastCompletedFor: draft.lastCompletedFor || null,
         notes: draft.notes || '',
         activity: (draft.activity||[]).slice()
       };
@@ -3394,6 +3701,50 @@
     return state.events.find(function(e){ return e.id === id; });
   }
   // Expands all events into concrete occurrences intersecting [rangeStart, rangeEnd] (inclusive, 'YYYY-MM-DD').
+  /* Produces the dates a recurrence rule generates, from startDate up to limitDate.
+     visit(dateStr) returns false to stop early (how callers apply a "count" limit).
+     Shared by calendar events and repeating tasks so there is exactly one implementation
+     of "every 2 weeks on Mon and Wed" to get right. */
+  function walkRecurrence(startDate, rule, limitDate, visit){
+    if(!rule || !rule.freq) return;
+    var interval = Math.max(1, rule.interval || 1);
+    var weekdayMode = rule.freq === 'weekly' && rule.byWeekday && rule.byWeekday.length;
+
+    if(weekdayMode){
+      // Walk whole weeks, visiting the chosen days within each. Stepping one day at a time
+      // (the original approach) ignored the interval entirely and burned the iteration budget
+      // seven times faster, so long-running series stopped generating after about 13 months.
+      var days = rule.byWeekday.slice().sort(function(a,b){ return a-b; });
+      var weekStart = startOfWeek(startDate);
+      var done = false;
+      for(var w = 0; w < MAX_RECUR_ITERATIONS && !done; w++){
+        var blockStart = dateAdd(weekStart, w * 7 * interval);
+        if(blockStart > limitDate) break;
+        if(rule.until && blockStart > rule.until) break;
+        for(var di = 0; di < days.length; di++){
+          var cand = dateAdd(blockStart, days[di]);
+          if(cand < startDate) continue;                 // before the series starts
+          if(rule.until && cand > rule.until){ done = true; break; }
+          if(cand > limitDate){ done = true; break; }
+          if(visit(cand) === false){ done = true; break; }
+        }
+      }
+      return;
+    }
+
+    var cursor = startDate;
+    for(var i = 0; i < MAX_RECUR_ITERATIONS; i++){
+      if(rule.until && cursor > rule.until) break;
+      if(cursor > limitDate) break;
+      if(visit(cursor) === false) break;
+      if(rule.freq === 'daily') cursor = dateAdd(cursor, interval);
+      else if(rule.freq === 'weekly') cursor = dateAdd(cursor, 7*interval);
+      else if(rule.freq === 'monthly') cursor = addMonths(cursor, interval);
+      else if(rule.freq === 'yearly') cursor = addYears(cursor, interval);
+      else break;
+    }
+  }
+
   function expandOccurrences(rangeStart, rangeEnd){
     var out = [];
     var safetyLimit = dateAdd(rangeEnd, 3);
@@ -3428,40 +3779,7 @@
         return true;
       }
 
-      if(weekdayMode){
-        // Walk whole weeks, emitting the chosen days within each. The previous version stepped
-        // one day at a time and simply tested the weekday, which had two consequences: "every
-        // 2 weeks on Mon and Wed" silently repeated every week (the interval was never applied),
-        // and the 400-step budget ran out roughly 13 months after a series began, so long-running
-        // series quietly stopped appearing.
-        var days = rule.byWeekday.slice().sort(function(a,b){ return a-b; });
-        var weekStart = startOfWeek(ev.date);
-        var done = false;
-        for(var w = 0; w < MAX_RECUR_ITERATIONS && !done; w++){
-          var blockStart = dateAdd(weekStart, w * 7 * interval);
-          if(blockStart > safetyLimit) break;
-          if(rule.until && blockStart > rule.until) break;
-          for(var di = 0; di < days.length; di++){
-            var cand = dateAdd(blockStart, days[di]);
-            if(cand < ev.date) continue;               // before the series starts
-            if(rule.until && cand > rule.until){ done = true; break; }
-            if(cand > safetyLimit){ done = true; break; }
-            if(!emit(cand)){ done = true; break; }
-          }
-        }
-      } else {
-        var cursor = ev.date;
-        for(var i = 0; i < MAX_RECUR_ITERATIONS; i++){
-          if(rule.until && cursor > rule.until) break;
-          if(cursor > safetyLimit) break;
-          if(!emit(cursor)) break;
-          if(rule.freq === 'daily') cursor = dateAdd(cursor, interval);
-          else if(rule.freq === 'weekly') cursor = dateAdd(cursor, 7*interval);
-          else if(rule.freq === 'monthly') cursor = addMonths(cursor, interval);
-          else if(rule.freq === 'yearly') cursor = addYears(cursor, interval);
-          else break;
-        }
-      }
+      walkRecurrence(ev.date, rule, safetyLimit, emit);
     });
 
     out.sort(function(a,b){ return (a.occurrenceDate+(a.time||'')).localeCompare(b.occurrenceDate+(b.time||'')); });
@@ -3516,6 +3834,19 @@
 
   // Plain-English read-back of a repeat rule, so you can see what you've set without
   // decoding "every 2 / weekly / Mon,Wed".
+  // Two or three words for a task card, where the full sentence would not fit.
+  function shortRecurrence(rule){
+    if(!rule || !rule.freq) return '';
+    var n = Math.max(1, rule.interval || 1);
+    if(rule.freq === 'weekly' && rule.byWeekday && rule.byWeekday.length > 1){
+      return rule.byWeekday.slice().sort(function(a,b){ return a-b; })
+        .map(function(d){ return WEEKDAY_FULL[d].slice(0,3); }).join(' ');
+    }
+    if(n === 1) return { daily:'Daily', weekly:'Weekly', monthly:'Monthly', yearly:'Yearly' }[rule.freq] || rule.freq;
+    var unit = { daily:'day', weekly:'week', monthly:'month', yearly:'year' }[rule.freq] || rule.freq;
+    return 'Every ' + n + ' ' + unit + 's';
+  }
+
   function describeRecurrence(rule){
     if(!rule || !rule.freq) return 'Does not repeat.';
     var n = Math.max(1, rule.interval || 1);
@@ -4797,6 +5128,15 @@
     return mapped;
   }
 
+  // Give each new calendar a colour of its own rather than three feeds all arriving grey.
+  function nextCalendarColor(){
+    var used = (state.calendarSubscriptions || []).map(function(s){ return s.color; }).filter(Boolean);
+    for(var i = 0; i < CALENDAR_COLOR_PALETTE.length; i++){
+      if(used.indexOf(CALENDAR_COLOR_PALETTE[i]) === -1) return CALENDAR_COLOR_PALETTE[i];
+    }
+    return CALENDAR_COLOR_PALETTE[used.length % CALENDAR_COLOR_PALETTE.length];
+  }
+
   function readICSFile(file){
     return file.text().then(function(text){
       if(!/BEGIN:VCALENDAR/i.test(text)){
@@ -4873,7 +5213,16 @@
       var source = isFile
         ? 'From a file' + (s.lastFileName ? ' · ' + escapeHtml(s.lastFileName) : '')
         : escapeHtml(s.url);
-      return '<div class="family-row" data-sub="'+s.id+'" style="align-items:flex-start;">'
+      var cat = EVENT_CATEGORIES[s.category] || EVENT_CATEGORIES.other;
+      var swatchColor = s.color || cat.color;
+      var palette = '<div class="color-pop hidden" data-pop="'+s.id+'">'
+        + CALENDAR_COLOR_PALETTE.map(function(c){
+            return '<button type="button" class="color-chip'+(s.color===c?' on':'')+'" data-set-color="'+s.id+'" data-color="'+c+'" style="background:'+c+'" aria-label="Use this colour"></button>';
+          }).join('')
+        + '<button type="button" class="color-reset" data-set-color="'+s.id+'" data-color="">Match the category</button>'
+        + '</div>';
+      return '<div class="family-row" data-sub="'+s.id+'" style="align-items:flex-start;flex-wrap:wrap;">'
+        + '<button type="button" class="color-swatch" data-open-pop="'+s.id+'" style="background:'+swatchColor+'" title="Change this calendar\'s colour"></button>'
         + '<div style="flex:1;min-width:0;">'
         + '<div style="font-weight:700;font-size:13px;">'+escapeHtml(s.name||'Untitled calendar')+'</div>'
         + '<div style="font-size:11px;color:var(--ink-muted);word-break:break-all;">'+source+'</div>'
@@ -4883,10 +5232,30 @@
             ? '<label class="btn-sm" style="cursor:pointer;">Re-import…<input type="file" accept=".ics,text/calendar" data-reimport="'+s.id+'" style="display:none;"></label>'
             : '<button type="button" class="btn-sm" data-action="sync-sub" data-sub="'+s.id+'">Sync now</button>')
         + '<button type="button" class="rm" data-action="rm-sub" data-sub="'+s.id+'" title="Remove" aria-label="Remove">'+icon('close')+'</button>'
+        + palette
         + '</div>';
     }).join('') : '<div class="list-empty">No calendars imported yet.</div>';
     document.getElementById('my-cal-list').innerHTML = html;
 
+    document.querySelectorAll('[data-open-pop]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var pop = document.querySelector('[data-pop="'+btn.dataset.openPop+'"]');
+        if(!pop) return;
+        var opening = pop.classList.contains('hidden');
+        document.querySelectorAll('.color-pop').forEach(function(el){ el.classList.add('hidden'); });
+        if(opening) pop.classList.remove('hidden');
+      });
+    });
+    document.querySelectorAll('[data-set-color]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var sub = findSubscription(btn.dataset.setColor);
+        if(!sub) return;
+        sub.color = btn.dataset.color || null;   // empty means "go back to the category colour"
+        persistCalendar();
+        renderMyCalendarsList();
+        if(state.view === 'calendar') render();
+      });
+    });
     document.querySelectorAll('[data-action="sync-sub"]').forEach(function(btn){
       btn.addEventListener('click', function(){
         var s = findSubscription(btn.dataset.sub);
@@ -4983,6 +5352,7 @@
         var sub = {
           id: uid(), ownerFamilyMemberId: me.id, name: name, kind: 'file', url: '',
           lastFileName: file.name, category: document.getElementById('mc-file-category').value,
+          color: nextCalendarColor(),
           enabled: true, lastSyncedAt: null, lastError: null, syncStatus: 'idle'
         };
         state.calendarSubscriptions = state.calendarSubscriptions || [];
@@ -5005,7 +5375,8 @@
         document.getElementById('mc-error').textContent = 'Name and URL are both required.';
         return;
       }
-      var sub = { id: uid(), ownerFamilyMemberId: me.id, name: name, url: url, category: category, enabled: true, lastSyncedAt: null, lastError: null, syncStatus: 'idle' };
+      var sub = { id: uid(), ownerFamilyMemberId: me.id, name: name, url: url, category: category,
+                  color: nextCalendarColor(), enabled: true, lastSyncedAt: null, lastError: null, syncStatus: 'idle' };
       state.calendarSubscriptions = state.calendarSubscriptions || [];
       state.calendarSubscriptions.push(sub);
       persistCalendar();
