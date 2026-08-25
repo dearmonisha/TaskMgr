@@ -413,6 +413,11 @@
   #ev-time-hour,#ev-time-minute{width:60px;}
   #ev-time-ampm{width:66px;}
   .time-colon{font-weight:700;color:var(--ink-muted);}
+  .repeat-summary{
+    margin-top:12px;padding:9px 12px;border-radius:8px;
+    background:var(--accent-soft, rgba(0,143,160,0.08));
+    color:var(--accent, #0b6b78);font-size:12.5px;font-weight:600;
+  }
   .weekday-picker{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap;}
   .weekday-picker button{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--hairline);background:var(--surface);font-size:12px;font-weight:700;color:var(--ink-muted);flex:none;}
   .weekday-picker button.selected{background:var(--primary-btn);color:#fff;border-color:var(--primary-btn);}
@@ -691,6 +696,76 @@
   .wk-row{display:flex;align-items:center;gap:9px;}
   .wk-row .event-chip{flex:1;min-width:0;}
 
+  /* ---------- 4b. Day grid (Outlook-style) ----------
+     A 24-hour column of 30-minute slots. Lines are drawn as a repeating gradient rather than
+     48 divs, and blocks are absolutely positioned from their start minute, so the grid stays
+     cheap to render even on a day with a lot on it. */
+  .day-wrap{display:flex;flex-direction:column;min-height:0;}
+
+  .day-allday{
+    display:flex;gap:12px;align-items:flex-start;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-panel);
+    padding:10px 14px;margin-bottom:12px;box-shadow:var(--shadow-sm);
+  }
+  .day-allday-label{
+    flex:none;width:62px;font-family:var(--font-mono, var(--font-sans));
+    font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--ink-faint);padding-top:5px;
+  }
+  .day-allday-items{flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:6px;}
+  .day-allday-empty{font-size:12.5px;color:var(--ink-faint);font-style:italic;padding-top:3px;}
+
+  .day-empty{
+    text-align:center;font-size:13px;color:var(--ink-faint);font-style:italic;
+    padding:10px 0 14px;
+  }
+
+  .day-scroll{
+    overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-panel);
+    box-shadow:var(--shadow-sm);
+  }
+  .day-grid{position:relative;display:flex;}
+
+  .day-gutter{
+    position:relative;flex:none;width:66px;
+    border-right:1px solid var(--line);background:var(--surface-2);
+  }
+  .day-hour{
+    position:absolute;right:9px;transform:translateY(-50%);
+    font-size:11px;font-weight:600;color:var(--ink-faint);white-space:nowrap;
+    font-variant-numeric:tabular-nums;
+  }
+  .day-hour:first-child{transform:none;}
+
+  .day-canvas{
+    position:relative;flex:1;min-width:0;cursor:copy;
+    /* hairline every 30 min, stronger every hour */
+    background-image:
+      repeating-linear-gradient(to bottom, var(--line) 0 1px, transparent 1px calc(var(--slot) * 2)),
+      repeating-linear-gradient(to bottom, color-mix(in srgb, var(--line) 78%, transparent) 0 1px, transparent 1px var(--slot));
+  }
+
+  .day-block{
+    position:absolute;overflow:hidden;border-radius:7px;padding:4px 8px;
+    color:#fff;cursor:pointer;box-shadow:var(--shadow-sm);
+    border-left:3px solid rgba(0,0,0,.22);
+    transition:filter .12s ease;
+  }
+  .day-block:hover{filter:brightness(1.07);}
+  .day-block .db-title{font-size:12.5px;font-weight:700;line-height:1.25;}
+  .day-block .db-meta{font-size:11px;opacity:.9;line-height:1.3;margin-top:1px;}
+  /* Too short to stack two lines — put them side by side and let the title win. */
+  .day-block.compact{display:flex;align-items:baseline;gap:7px;padding:2px 8px;}
+  .day-block.compact .db-title{font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .day-block.compact .db-meta{font-size:10.5px;margin-top:0;white-space:nowrap;flex:none;}
+
+  .day-now{position:absolute;left:0;right:0;height:0;border-top:2px solid var(--overdue);z-index:3;pointer-events:none;}
+  .day-now-dot{
+    position:absolute;left:-5px;top:-5px;width:9px;height:9px;border-radius:50%;
+    background:var(--overdue);
+  }
+
   /* ---------- 5. Modals → bottom sheets on phones ---------- */
   .scrim{background:rgba(20,16,12,0.45);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
   .modal{border-radius:20px;box-shadow:var(--shadow-lg);}
@@ -828,6 +903,12 @@
 
     .month-grid{gap:4px;}
     .month-weekday{font-size:10px;padding-bottom:4px;}
+    .day-gutter{width:52px;}
+    .day-hour{right:6px;font-size:10.5px;}
+    .day-allday{padding:9px 12px;gap:9px;}
+    .day-allday-label{width:auto;font-size:10px;}
+    .day-block .db-title{font-size:12px;}
+    .day-block .db-meta{font-size:10.5px;}
     .agenda-rail{gap:18px;}
     .agenda-card{padding:14px;gap:11px;}
     .agenda-card .ac-title{font-size:15px;}
@@ -928,6 +1009,7 @@
     /* --- calendar --- */
     .month-grid{grid-template-rows:auto repeat(6, minmax(92px, 1fr));}
     .month-cell{min-height:0;}
+    .day-scroll{max-height:none;}
     /* Agenda cards at 1600px would be one absurdly long line each, so the rail flows
        into columns — same reading width, no empty half-page. (display:block matters:
        CSS columns are ignored inside a flex container.) */
@@ -1050,6 +1132,7 @@
       <div class="filters-search">
         <div class="pill-tabs" id="cal-subview-tabs">
           <button data-subview="agenda" class="active">Agenda</button>
+          <button data-subview="day">Day</button>
           <button data-subview="week">Week</button>
           <button data-subview="month">Month</button>
         </div>
@@ -1253,7 +1336,8 @@
     // about "whose clock" a typed time means.
     homeTimezone: DEFAULT_TIMEZONE,
     calSha: null,
-    calSubView: 'agenda', // 'agenda' | 'month' | 'week'
+    calSubView: 'agenda', // 'agenda' | 'day' | 'week' | 'month'
+    dayNowTimer: null,    // interval that walks the "now" line down the day grid
     calAnchor: todayStr(),// reference date for month/week/agenda navigation
     calFilter: 'all',     // 'all' or a family member id
     calSearch: '',
@@ -1280,7 +1364,8 @@
       id, title, category: 'band'|'homework'|'concert'|'projects'|'test'|'gym'|'birthday'|'appointment'|'trip'|'chore'|'other',
       attendees: ['all'] | [familyMemberId, ...],
       date: 'YYYY-MM-DD', endDate: null|'YYYY-MM-DD' (inclusive, for multi-day events),
-      allDay: true|false, time: null|'HH:MM',
+      allDay: true|false, time: null|'HH:MM', endTime: null|'HH:MM' (optional; when absent a
+      timed event is treated as DEFAULT_EVENT_MINUTES long in the day grid),
       location: '', notes: '',
       recurrence: null | { freq:'daily'|'weekly'|'monthly'|'yearly', interval:1, byWeekday:null|[0-6], until:null|'YYYY-MM-DD', count:null|number },
       exceptionDates: [],           // dates skipped from this series (only meaningful when recurrence is set)
@@ -1869,7 +1954,11 @@
     get lastError(){ return sync.lastError ? String(sync.lastError.message) : null; },
     pull: function(){ return pull(); },
     flush: function(){ return flushQueue(); },
-    now: function(){ retrySyncNow(); }
+    now: function(){ retrySyncNow(); },
+    // Inspection handles: what this device currently holds, and a way to ask the recurrence
+    // engine what it would produce for a date range without reading it off the screen.
+    get data(){ return state; },
+    expand: function(from, to){ return expandOccurrences(from, to); }
   };
 
   function retrySyncNow(){
@@ -2262,6 +2351,174 @@
       + '</div>';
   }
 
+  /* ---- Day grid (Outlook-style 30-minute slots) ---- */
+  var DAY_SLOT_MINUTES = 30;
+  var DEFAULT_EVENT_MINUTES = 30;   // what a timed event with no end time is drawn as
+  var MIN_BLOCK_PX = 22;            // so a 15-minute item still has a readable label
+
+  function daySlotPx(){ return isPhone() ? 30 : 26; }
+
+  function minutesOf(timeStr){
+    if(!timeStr) return null;
+    var p = String(timeStr).split(':');
+    var h = parseInt(p[0],10), m = parseInt(p[1],10);
+    if(isNaN(h) || isNaN(m)) return null;
+    return h*60 + m;
+  }
+  function addMinutesToTime(timeStr, add){
+    var base = minutesOf(timeStr);
+    if(base === null) return null;
+    var total = Math.min(base + add, 24*60 - 1);
+    return pad2(Math.floor(total/60)) + ':' + pad2(total % 60);
+  }
+  function minutesToLabel(mins){
+    var h = Math.floor(mins/60) % 24, m = mins % 60;
+    return formatTime12(pad2(h)+':'+pad2(m));
+  }
+
+  // Start/end in minutes from midnight, in the CURRENT VIEWER's timezone -- same conversion
+  // the agenda's time label uses, so a block never disagrees with the text next to it.
+  function occDisplayRange(occ){
+    if(occ.allDay || !occ.time) return null;
+    var startStr = occ.time, endStr = occ.endTime || null;
+    if(occ.source !== 'ics'){
+      var home = state.homeTimezone || DEFAULT_TIMEZONE;
+      var viewerZone = (state.currentFamilyMember && state.currentFamilyMember.timezone) || home;
+      if(viewerZone !== home){
+        startStr = convertWallClockZone(occ.occurrenceDate, occ.time, home, viewerZone).time;
+        if(endStr) endStr = convertWallClockZone(occ.occurrenceDate, occ.endTime, home, viewerZone).time;
+      }
+    }
+    var start = minutesOf(startStr);
+    if(start === null) return null;
+    var end = minutesOf(endStr);
+    // An end at or before the start means the event runs past midnight; clip at the day's edge
+    // rather than drawing a negative-height block.
+    if(end === null || end <= start) end = start + DEFAULT_EVENT_MINUTES;
+    if(end > 24*60) end = 24*60;
+    return { start: start, end: end, startStr: startStr, endStr: endStr };
+  }
+
+  // Side-by-side columns for anything that overlaps, the way a real calendar does it.
+  function layoutDayBlocks(items){
+    items.sort(function(a,b){ return a.start - b.start || a.end - b.end; });
+    var cluster = [], clusterEnd = -1, clusters = [];
+    items.forEach(function(it){
+      if(cluster.length && it.start >= clusterEnd){ clusters.push(cluster); cluster = []; clusterEnd = -1; }
+      cluster.push(it);
+      clusterEnd = Math.max(clusterEnd, it.end);
+    });
+    if(cluster.length) clusters.push(cluster);
+    clusters.forEach(function(group){
+      var colEnds = [];
+      group.forEach(function(it){
+        var placed = false;
+        for(var c = 0; c < colEnds.length; c++){
+          if(it.start >= colEnds[c]){ it.col = c; colEnds[c] = it.end; placed = true; break; }
+        }
+        if(!placed){ it.col = colEnds.length; colEnds.push(it.end); }
+      });
+      group.forEach(function(it){ it.cols = colEnds.length; });
+    });
+    return items;
+  }
+
+  function dayBlockHtml(it){
+    var occ = it.occ;
+    var slot = daySlotPx();
+    var top = (it.start / DAY_SLOT_MINUTES) * slot;
+    var height = Math.max(MIN_BLOCK_PX, ((it.end - it.start) / DAY_SLOT_MINUTES) * slot - 2);
+    var widthPct = 100 / it.cols;
+    var leftPct = it.col * widthPct;
+    var cat = categoryOf(occ);
+    var timeLabel = minutesToLabel(it.start) + (it.hasRealEnd ? ' – ' + minutesToLabel(it.end) : '');
+    var attr = occ.kind === 'task' ? 'data-task="'+occ.taskId+'"' : 'data-occ="'+occ.occurrenceId+'"';
+    var accent = occ.kind === 'task' ? QUADRANTS[occ.quadrant].accent : cat.color;
+    var compact = height < 44;
+    return '<div class="day-block'+(compact?' compact':'')+'" '+attr
+      + ' style="top:'+top+'px;height:'+height+'px;left:calc('+leftPct+'% + 2px);width:calc('+widthPct+'% - 4px);'
+      + 'background:'+accent+';border-left-color:'+accent+';"'
+      + ' title="'+escapeHtml(timeLabel+' · '+occ.title)+'">'
+      + '<div class="db-title">'+escapeHtml(occ.title)+'</div>'
+      + '<div class="db-meta">'+escapeHtml(timeLabel + (occ.location ? ' · '+occ.location : ''))+'</div>'
+      + '</div>';
+  }
+
+  function renderDayGrid(dateStr, occurrences){
+    var slot = daySlotPx();
+    var gridHeight = 48 * slot;
+    var today = todayStr();
+
+    var timed = [], allDay = [];
+    occurrences.forEach(function(o){
+      var range = occDisplayRange(o);
+      if(range) timed.push({ occ:o, start:range.start, end:range.end, hasRealEnd: !!o.endTime });
+      else allDay.push(o);
+    });
+    layoutDayBlocks(timed);
+
+    var hourLabels = '';
+    for(var h = 0; h < 24; h++){
+      hourLabels += '<div class="day-hour" style="top:'+(h*2*slot)+'px">'+minutesToLabel(h*60)+'</div>';
+    }
+
+    var allDayHtml = allDay.length
+      ? allDay.map(chipHtml).join('')
+      : '<span class="day-allday-empty">Nothing all day</span>';
+
+    var nowHtml = '';
+    if(dateStr === today){
+      var n = new Date();
+      var nowMin = n.getHours()*60 + n.getMinutes();
+      nowHtml = '<div class="day-now" id="day-now" style="top:'+((nowMin/DAY_SLOT_MINUTES)*slot)+'px"><span class="day-now-dot"></span></div>';
+    }
+
+    var empty = (!timed.length && !allDay.length)
+      ? '<div class="day-empty">Nothing scheduled — tap a slot to add something.</div>' : '';
+
+    return '<div class="day-wrap" data-date="'+dateStr+'">'
+      + '<div class="day-allday"><div class="day-allday-label">All day</div>'
+      + '<div class="day-allday-items">'+allDayHtml+'</div></div>'
+      + empty
+      + '<div class="day-scroll" id="day-scroll"><div class="day-grid" id="day-grid" style="height:'+gridHeight+'px;--slot:'+slot+'px">'
+      + '<div class="day-gutter">'+hourLabels+'</div>'
+      + '<div class="day-canvas" id="day-canvas">'
+      + timed.map(dayBlockHtml).join('')
+      + nowHtml
+      + '</div></div></div></div>';
+  }
+
+  // Opening on a 24-hour grid at midnight is useless; land where the day actually starts.
+  function scrollDayIntoView(dateStr, occurrences){
+    var scroller = document.getElementById('day-scroll');
+    if(!scroller) return;
+    var slot = daySlotPx();
+    var target;
+    if(dateStr === todayStr()){
+      var n = new Date();
+      target = n.getHours()*60 + n.getMinutes() - 60;
+    } else {
+      var earliest = null;
+      occurrences.forEach(function(o){
+        var r = occDisplayRange(o);
+        if(r && (earliest === null || r.start < earliest)) earliest = r.start;
+      });
+      target = (earliest === null ? 8*60 : earliest - 30);
+    }
+    scroller.scrollTop = Math.max(0, (target / DAY_SLOT_MINUTES) * slot);
+  }
+
+  function startDayNowTimer(){
+    if(state.dayNowTimer){ clearInterval(state.dayNowTimer); state.dayNowTimer = null; }
+    if(state.calSubView !== 'day' || state.calAnchor !== todayStr()) return;
+    state.dayNowTimer = setInterval(function(){
+      var el = document.getElementById('day-now');
+      if(!el){ clearInterval(state.dayNowTimer); state.dayNowTimer = null; return; }
+      var n = new Date();
+      el.style.top = (((n.getHours()*60 + n.getMinutes()) / DAY_SLOT_MINUTES) * daySlotPx()) + 'px';
+    }, 60000);
+  }
+
   function renderCountdownStrip(){
     var today = todayStr();
     var occ = expandOccurrences(today, dateAdd(today,7)).filter(function(o){
@@ -2482,11 +2739,20 @@
     if(!el) return;
     if(state.calSubView === 'month') el.textContent = fmtMonthYear(state.calAnchor);
     else if(state.calSubView === 'week') el.textContent = fmtDate(rangeStart)+' – '+fmtDate(rangeEnd);
+    else if(state.calSubView === 'day'){
+      // The long form crowds the nav row off a phone screen; the now-line and the Today
+      // button already say whether you're looking at today.
+      var dt = new Date(state.calAnchor+'T00:00:00');
+      el.textContent = isPhone()
+        ? dt.toLocaleDateString(undefined,{weekday:'short', month:'short', day:'numeric'})
+        : fmtLong(state.calAnchor) + (state.calAnchor === todayStr() ? ' · Today' : '');
+    }
     else el.textContent = 'Next 3 weeks';
   }
 
   function calNavStep(dir){
     if(state.calSubView === 'month') state.calAnchor = addMonths(state.calAnchor, dir);
+    else if(state.calSubView === 'day') state.calAnchor = dateAdd(state.calAnchor, dir);
     else state.calAnchor = dateAdd(state.calAnchor, dir*7);
     render();
   }
@@ -2496,7 +2762,10 @@
 
     var today = todayStr();
     var rangeStart, rangeEnd;
-    if(state.calSubView === 'month'){
+    if(state.calSubView === 'day'){
+      rangeStart = state.calAnchor;
+      rangeEnd = state.calAnchor;
+    } else if(state.calSubView === 'month'){
       rangeStart = startOfWeek(startOfMonth(state.calAnchor));
       rangeEnd = dateAdd(rangeStart, 41);
     } else if(state.calSubView === 'week'){
@@ -2513,9 +2782,12 @@
 
     // The countdown strip is a lovely at-a-glance rail, but on a phone it pushes the month
     // grid below the fold — so there it rides along with the agenda only.
-    var showStrip = !isPhone() || state.calSubView === 'agenda';
+    // The day grid wants every vertical pixel it can get, on any screen.
+    var showStrip = state.calSubView !== 'day' && (!isPhone() || state.calSubView === 'agenda');
     var html = '<div class="cal-wrap">' + (showStrip ? renderCountdownStrip() : '');
-    if(state.calSubView === 'month'){
+    if(state.calSubView === 'day'){
+      html += renderDayGrid(rangeStart, occurrences);
+    } else if(state.calSubView === 'month'){
       html += renderMonthGrid(rangeStart, rangeEnd, occurrences);
       // The phone grid is only dots, so today's actual plan goes right underneath it
       // instead of leaving dead space — no tap required to see what's on now.
@@ -2544,7 +2816,7 @@
       el.addEventListener('click', function(e){
         e.stopPropagation();
         state.calAnchor = el.dataset.jump;
-        state.calSubView = 'agenda';
+        state.calSubView = 'day';
         render();
       });
     });
@@ -2557,6 +2829,26 @@
         else openAddEventModal(cell.dataset.date);
       });
     });
+
+    // Clicking empty space on the day grid creates an event at that half-hour.
+    var canvas = document.getElementById('day-canvas');
+    if(canvas){
+      canvas.addEventListener('click', function(e){
+        if(e.target.closest('.day-block')) return;
+        var rect = canvas.getBoundingClientRect();
+        var slotIndex = Math.floor((e.clientY - rect.top) / daySlotPx());
+        if(slotIndex < 0) slotIndex = 0;
+        if(slotIndex > 47) slotIndex = 47;
+        var mins = slotIndex * DAY_SLOT_MINUTES;
+        openAddEventModal(rangeStart, pad2(Math.floor(mins/60)) + ':' + pad2(mins % 60));
+      });
+      applyFillHeights();
+      scrollDayIntoView(rangeStart, occurrences);
+      startDayNowTimer();
+    } else if(state.dayNowTimer){
+      clearInterval(state.dayNowTimer);
+      state.dayNowTimer = null;
+    }
 
     updateCalPeriodLabel(rangeStart, rangeEnd);
   }
@@ -2588,6 +2880,22 @@
   // element's own top beats any calc(100vh - guess): toolbars wrap, the countdown strip
   // comes and goes, and the family roster changes the header height.
   function applyFillHeights(){
+    // The day grid is a scroller, so it needs a real height on every screen size — otherwise
+    // it grows to its full 24-hour length and the page scrolls instead of the grid.
+    var day = document.querySelector('.day-scroll');
+    if(day){
+      // Clearing the height briefly makes the scroller taller than its content, which the
+      // browser answers by clamping scrollTop to 0 — that was silently throwing the day grid
+      // back to midnight on every render and every resize. Save and put it back.
+      var keepScroll = day.scrollTop;
+      day.style.height = '';
+      var dayTop = day.getBoundingClientRect().top;
+      var reserve = isPhone() ? 96 : 34;   // phone: clear the bottom tab bar
+      var dayH = window.innerHeight - dayTop - reserve;
+      if(dayH > 240) day.style.height = Math.round(dayH) + 'px';
+      if(keepScroll) day.scrollTop = keepScroll;
+    }
+
     var targets = document.querySelectorAll('.matrix-cross, .month-grid');
     targets.forEach(function(el){ el.style.minHeight = ''; });
     if(window.innerWidth < 1025) return;
@@ -3069,6 +3377,7 @@
     return d.toLocaleDateString(undefined, {month:'long', year:'numeric'});
   }
   var WEEKDAY_LABELS = ['S','M','T','W','T','F','S'];
+  var WEEKDAY_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
   /* ================= CALENDAR: RECURRENCE ENGINE ================= */
   var MAX_RECUR_ITERATIONS = 400;
@@ -3102,38 +3411,56 @@
 
       // recurring master
       var rule = ev.recurrence;
-      var cursor = ev.date;
+      var interval = Math.max(1, rule.interval || 1);
       var weekdayMode = rule.freq === 'weekly' && rule.byWeekday && rule.byWeekday.length;
-      var iterations = 0, matched = 0;
+      var matched = 0;
 
-      while(iterations < MAX_RECUR_ITERATIONS){
-        iterations++;
-        if(rule.until && cursor > rule.until) break;
-        if(cursor > safetyLimit) break;
-
-        var include = true;
-        if(weekdayMode){
-          var dow = new Date(cursor+'T00:00:00').getDay();
-          include = rule.byWeekday.indexOf(dow) !== -1;
+      function emit(dateStr){
+        matched++;
+        if(rule.count && matched > rule.count) return false;   // series is finished
+        if((ev.exceptionDates||[]).indexOf(dateStr) === -1 && occurrenceInRange(dateStr, span, rangeStart, rangeEnd)){
+          out.push(Object.assign({}, ev, {
+            occurrenceId: ev.id+'::'+dateStr, occurrenceDate: dateStr, date: dateStr,
+            endDate: span ? dateAdd(dateStr, span) : ev.endDate,
+            isOverride:false, isVirtual:true, masterId: ev.id
+          }));
         }
-        if(include){
-          matched++;
-          if(rule.count && matched > rule.count) break;
-          if((ev.exceptionDates||[]).indexOf(cursor) === -1 && occurrenceInRange(cursor, span, rangeStart, rangeEnd)){
-            out.push(Object.assign({}, ev, {
-              occurrenceId: ev.id+'::'+cursor, occurrenceDate: cursor, date: cursor,
-              endDate: span ? dateAdd(cursor, span) : ev.endDate,
-              isOverride:false, isVirtual:true, masterId: ev.id
-            }));
+        return true;
+      }
+
+      if(weekdayMode){
+        // Walk whole weeks, emitting the chosen days within each. The previous version stepped
+        // one day at a time and simply tested the weekday, which had two consequences: "every
+        // 2 weeks on Mon and Wed" silently repeated every week (the interval was never applied),
+        // and the 400-step budget ran out roughly 13 months after a series began, so long-running
+        // series quietly stopped appearing.
+        var days = rule.byWeekday.slice().sort(function(a,b){ return a-b; });
+        var weekStart = startOfWeek(ev.date);
+        var done = false;
+        for(var w = 0; w < MAX_RECUR_ITERATIONS && !done; w++){
+          var blockStart = dateAdd(weekStart, w * 7 * interval);
+          if(blockStart > safetyLimit) break;
+          if(rule.until && blockStart > rule.until) break;
+          for(var di = 0; di < days.length; di++){
+            var cand = dateAdd(blockStart, days[di]);
+            if(cand < ev.date) continue;               // before the series starts
+            if(rule.until && cand > rule.until){ done = true; break; }
+            if(cand > safetyLimit){ done = true; break; }
+            if(!emit(cand)){ done = true; break; }
           }
         }
-
-        if(weekdayMode) cursor = dateAdd(cursor, 1);
-        else if(rule.freq === 'daily') cursor = dateAdd(cursor, rule.interval||1);
-        else if(rule.freq === 'weekly') cursor = dateAdd(cursor, 7*(rule.interval||1));
-        else if(rule.freq === 'monthly') cursor = addMonths(cursor, rule.interval||1);
-        else if(rule.freq === 'yearly') cursor = addYears(cursor, rule.interval||1);
-        else break;
+      } else {
+        var cursor = ev.date;
+        for(var i = 0; i < MAX_RECUR_ITERATIONS; i++){
+          if(rule.until && cursor > rule.until) break;
+          if(cursor > safetyLimit) break;
+          if(!emit(cursor)) break;
+          if(rule.freq === 'daily') cursor = dateAdd(cursor, interval);
+          else if(rule.freq === 'weekly') cursor = dateAdd(cursor, 7*interval);
+          else if(rule.freq === 'monthly') cursor = addMonths(cursor, interval);
+          else if(rule.freq === 'yearly') cursor = addYears(cursor, interval);
+          else break;
+        }
       }
     });
 
@@ -3187,6 +3514,26 @@
     }
   }
 
+  // Plain-English read-back of a repeat rule, so you can see what you've set without
+  // decoding "every 2 / weekly / Mon,Wed".
+  function describeRecurrence(rule){
+    if(!rule || !rule.freq) return 'Does not repeat.';
+    var n = Math.max(1, rule.interval || 1);
+    var out;
+    if(rule.freq === 'weekly' && rule.byWeekday && rule.byWeekday.length){
+      var names = rule.byWeekday.slice().sort(function(a,b){ return a-b; }).map(function(d){ return WEEKDAY_FULL[d]; });
+      var list = names.length === 1 ? names[0]
+        : names.slice(0,-1).join(', ') + ' and ' + names[names.length-1];
+      out = (n === 1 ? 'Every week on ' : 'Every ' + n + ' weeks on ') + list;
+    } else {
+      var unit = { daily:'day', weekly:'week', monthly:'month', yearly:'year' }[rule.freq] || rule.freq;
+      out = n === 1 ? 'Every ' + unit : 'Every ' + n + ' ' + unit + 's';
+    }
+    if(rule.until) out += ', until ' + fmtDate(rule.until);
+    else if(rule.count) out += ', ' + rule.count + ' time' + (rule.count === 1 ? '' : 's');
+    return out + '.';
+  }
+
   function promptScope(title, cb){
     var wrap = document.createElement('div');
     wrap.innerHTML = '<div class="scrim" id="scope-scrim"><div class="modal" style="max-width:380px;">'
@@ -3210,10 +3557,14 @@
   }
 
   /* ================= CALENDAR: EVENT MODAL ================= */
-  function openAddEventModal(defaultDate){
+  // defaultTime is passed when you tap an empty half-hour on the day grid, so the new event
+  // lands where you tapped instead of defaulting to all-day.
+  function openAddEventModal(defaultDate, defaultTime){
     var base = {
       id: uid(), title:'', category:'other', attendees:['all'],
-      date: defaultDate || state.calAnchor || todayStr(), endDate:null, allDay:true, time:null,
+      date: defaultDate || state.calAnchor || todayStr(), endDate:null,
+      allDay: !defaultTime, time: defaultTime || null,
+      endTime: defaultTime ? addMinutesToTime(defaultTime, DEFAULT_EVENT_MINUTES) : null,
       location:'', notes:'', recurrence:null, exceptionDates:[], recurrenceId:null, overrideDate:null,
       createdBy: state.currentFamilyMember ? state.currentFamilyMember.id : null, createdAt: nowISO()
     };
@@ -3289,12 +3640,24 @@
           }).join('');
 
       var freq = draft.recurrence ? draft.recurrence.freq : '';
+      // Multi-day weekly rules read back as "Custom", the way Outlook and Google label them.
+      var freqSel = freq;
+      if(freq === 'weekly' && draft.recurrence.byWeekday && draft.recurrence.byWeekday.length > 1) freqSel = 'custom';
+
       var weekdayPicker = '';
       if(freq === 'weekly'){
-        var byWeekday = (draft.recurrence.byWeekday && draft.recurrence.byWeekday.length) ? draft.recurrence.byWeekday : [new Date(draft.date+'T00:00:00').getDay()];
-        weekdayPicker = '<div class="weekday-picker" id="ev-weekdays">'
+        // Write the resolved default back into the draft rather than only drawing it. Previously
+        // an imported weekly rule with no BYDAY (which is most of them) showed its start day as
+        // selected while the draft still held null -- so clicking a second day replaced the
+        // implied one instead of adding to it, and the event silently moved.
+        if(!(draft.recurrence.byWeekday && draft.recurrence.byWeekday.length)){
+          draft.recurrence.byWeekday = [new Date(draft.date+'T00:00:00').getDay()];
+        }
+        var byWeekday = draft.recurrence.byWeekday;
+        weekdayPicker = '<div class="field-label">Repeat on</div>'
+          + '<div class="weekday-picker" id="ev-weekdays">'
           + WEEKDAY_LABELS.map(function(lbl,i){
-              return '<button type="button" data-dow="'+i+'" class="'+(byWeekday.indexOf(i)!==-1?'selected':'')+'">'+lbl+'</button>';
+              return '<button type="button" data-dow="'+i+'" data-full="'+WEEKDAY_FULL[i]+'" aria-pressed="'+(byWeekday.indexOf(i)!==-1)+'" class="'+(byWeekday.indexOf(i)!==-1?'selected':'')+'">'+lbl+'</button>';
             }).join('')
           + '</div>';
       }
@@ -3312,7 +3675,8 @@
           + '<label class="ends-option"><input type="radio" name="ev-ends" value="never" '+(endsMode==='never'?'checked':'')+'> Never</label>'
           + '<label class="ends-option"><input type="radio" name="ev-ends" value="until" '+(endsMode==='until'?'checked':'')+'> On date <input type="date" id="ev-until" value="'+(draft.recurrence.until||'')+'" '+(endsMode!=='until'?'disabled':'')+'></label>'
           + '<label class="ends-option"><input type="radio" name="ev-ends" value="count" '+(endsMode==='count'?'checked':'')+'> After <input type="number" min="1" id="ev-count" value="'+(draft.recurrence.count||5)+'" '+(endsMode!=='count'?'disabled':'')+'> occurrences</label>'
-          + '</div>';
+          + '</div>'
+          + '<div class="repeat-summary">'+escapeHtml(describeRecurrence(draft.recurrence))+'</div>';
       }
 
       var scopeNote = needsScope ? '<div class="settings-help" style="margin-top:0;margin-bottom:14px;">Editing '+fmtLong(occ.occurrenceDate)+'. You\'ll be asked whether changes apply to just this event or the whole series when you tap Save.</div>' : '';
@@ -3342,6 +3706,24 @@
         + '<select class="time-select" id="ev-time-ampm">'+ampmOptionsHtml+'</select>'
         + '</div>';
 
+      // Duration rather than a second clock: it can't be set earlier than the start, and it's
+      // the question people actually answer ("how long is it?").
+      var DURATIONS = [15,30,45,60,90,120,180,240];
+      var startMins = minutesOf(draft.time || '09:00');
+      var endMins = minutesOf(draft.endTime);
+      var curDur = (endMins !== null && startMins !== null && endMins > startMins) ? endMins - startMins : DEFAULT_EVENT_MINUTES;
+      if(DURATIONS.indexOf(curDur) === -1) DURATIONS.push(curDur);
+      DURATIONS.sort(function(a,b){ return a-b; });
+      var durLabel = function(mins){
+        if(mins < 60) return mins + ' min';
+        var h = Math.floor(mins/60), m = mins % 60;
+        return h + (h===1?' hour':' hours') + (m ? ' ' + m + ' min' : '');
+      };
+      var durationHtml = '<select class="time-select" id="ev-duration" style="width:100%;">'
+        + DURATIONS.map(function(d){ return '<option value="'+d+'"'+(d===curDur?' selected':'')+'>'+durLabel(d)+'</option>'; }).join('')
+        + '</select>'
+        + '<div class="settings-help" style="margin-top:6px;">Ends '+escapeHtml(minutesToLabel(Math.min((startMins||0)+curDur, 24*60-1)))+'</div>';
+
       var html = ''
         + '<div class="scrim" id="scrim">'
         + '<div class="modal">'
@@ -3355,16 +3737,18 @@
         + '</div>'
         + '<div class="row-2">'
         + '<div><label class="check-inline"><input type="checkbox" id="ev-allday" '+(draft.allDay?'checked':'')+'> All day</label></div>'
-        + '<div id="ev-time-wrap" style="'+(draft.allDay?'display:none;':'')+'"><div class="field-label" style="margin-top:0;">Time</div>'+timePickerHtml+'</div>'
+        + '<div id="ev-time-wrap" style="'+(draft.allDay?'display:none;':'')+'"><div class="field-label" style="margin-top:0;">Starts</div>'+timePickerHtml+'</div>'
         + '</div>'
+        + '<div id="ev-duration-wrap" style="'+(draft.allDay?'display:none;':'')+'"><div class="field-label">How long</div>'+durationHtml+'</div>'
         + '<div class="field-label">Location</div><input class="text-input" id="ev-location" placeholder="Optional" value="'+escapeHtml(draft.location||'')+'">'
         + '<div class="field-label">Repeat</div>'
         + '<select class="text-input" id="ev-repeat-freq">'
-        + '<option value=""'+(freq===''?' selected':'')+'>Does not repeat</option>'
-        + '<option value="daily"'+(freq==='daily'?' selected':'')+'>Daily</option>'
-        + '<option value="weekly"'+(freq==='weekly'?' selected':'')+'>Weekly</option>'
-        + '<option value="monthly"'+(freq==='monthly'?' selected':'')+'>Monthly</option>'
-        + '<option value="yearly"'+(freq==='yearly'?' selected':'')+'>Yearly</option>'
+        + '<option value=""'+(freqSel===''?' selected':'')+'>Does not repeat</option>'
+        + '<option value="daily"'+(freqSel==='daily'?' selected':'')+'>Daily</option>'
+        + '<option value="weekly"'+(freqSel==='weekly'?' selected':'')+'>Weekly</option>'
+        + '<option value="custom"'+(freqSel==='custom'?' selected':'')+'>Custom — pick days of the week</option>'
+        + '<option value="monthly"'+(freqSel==='monthly'?' selected':'')+'>Monthly</option>'
+        + '<option value="yearly"'+(freqSel==='yearly'?' selected':'')+'>Yearly</option>'
         + '</select>'
         + '<div id="ev-repeat-detail">'+repeatDetail+'</div>'
         + '<div class="field-label">Notes</div><textarea class="notes" id="ev-notes">'+escapeHtml(draft.notes||'')+'</textarea>'
@@ -3392,21 +3776,37 @@
       document.getElementById('ev-date').addEventListener('change', function(e){ draft.date = e.target.value; });
       document.getElementById('ev-end-date').addEventListener('change', function(e){ draft.endDate = e.target.value || null; });
 
+      function currentDurationMinutes(){
+        var sel = document.getElementById('ev-duration');
+        var v = sel ? parseInt(sel.value,10) : DEFAULT_EVENT_MINUTES;
+        return isNaN(v) ? DEFAULT_EVENT_MINUTES : v;
+      }
       function commitTimePicker(){
         var h12 = parseInt(document.getElementById('ev-time-hour').value,10);
         var m = document.getElementById('ev-time-minute').value;
         var ampm = document.getElementById('ev-time-ampm').value;
         var h24 = h12 % 12; if(ampm === 'PM') h24 += 12;
         draft.time = pad2(h24) + ':' + m;
+        // The end always trails the start by the chosen duration, so moving the start moves both.
+        draft.endTime = addMinutesToTime(draft.time, currentDurationMinutes());
+        renderEventModal();
       }
       document.getElementById('ev-time-hour').addEventListener('change', commitTimePicker);
       document.getElementById('ev-time-minute').addEventListener('change', commitTimePicker);
       document.getElementById('ev-time-ampm').addEventListener('change', commitTimePicker);
+      var durSel = document.getElementById('ev-duration');
+      if(durSel) durSel.addEventListener('change', function(){
+        draft.endTime = addMinutesToTime(draft.time || '09:00', currentDurationMinutes());
+        renderEventModal();
+      });
 
       document.getElementById('ev-allday').addEventListener('change', function(e){
         draft.allDay = e.target.checked;
-        if(draft.allDay) draft.time = null;
-        else if(!draft.time) draft.time = '09:00'; // keep draft.time in sync with what the picker will show
+        if(draft.allDay){ draft.time = null; draft.endTime = null; }
+        else {
+          if(!draft.time) draft.time = '09:00'; // keep draft.time in sync with what the picker will show
+          if(!draft.endTime) draft.endTime = addMinutesToTime(draft.time, DEFAULT_EVENT_MINUTES);
+        }
         renderEventModal();
       });
 
@@ -3429,10 +3829,19 @@
       });
 
       document.getElementById('ev-repeat-freq').addEventListener('change', function(e){
-        var freq = e.target.value;
-        if(!freq){ draft.recurrence = null; }
+        var picked = e.target.value;
+        if(!picked){ draft.recurrence = null; }
         else{
-          draft.recurrence = { freq: freq, interval:1, byWeekday: freq==='weekly' ? [new Date(draft.date+'T00:00:00').getDay()] : null, until:null, count:null };
+          // "Custom" is a weekly rule with days chosen by hand -- same engine, friendlier name.
+          var isCustom = picked === 'custom';
+          var realFreq = isCustom ? 'weekly' : picked;
+          var keepDays = (draft.recurrence && draft.recurrence.byWeekday && draft.recurrence.byWeekday.length)
+            ? draft.recurrence.byWeekday.slice() : null;
+          draft.recurrence = {
+            freq: realFreq, interval: 1,
+            byWeekday: realFreq === 'weekly' ? (keepDays || [new Date(draft.date+'T00:00:00').getDay()]) : null,
+            until: null, count: null
+          };
         }
         renderEventModal();
       });
@@ -3443,9 +3852,11 @@
       document.querySelectorAll('#ev-weekdays button').forEach(function(btn){
         btn.addEventListener('click', function(){
           var dow = parseInt(btn.dataset.dow,10);
-          var list = draft.recurrence.byWeekday || [];
+          var list = (draft.recurrence.byWeekday || []).slice();
           var i = list.indexOf(dow);
-          if(i===-1) list.push(dow); else if(list.length>1) list.splice(i,1);
+          if(i === -1) list.push(dow);
+          else if(list.length > 1) list.splice(i, 1);   // never leave a weekly rule with no days
+          list.sort(function(a,b){ return a-b; });
           draft.recurrence.byWeekday = list;
           renderEventModal();
         });
@@ -4343,13 +4754,20 @@
       if(ev.dtend && ev.dtend.date !== start.date){
         endDate = start.allDay ? dateAdd(ev.dtend.date, -1) : ev.dtend.date; // ICS all-day DTEND is exclusive
       }
+      // DTEND's time-of-day was previously parsed and then dropped on the floor. The day grid
+      // needs it to draw a block of the right height, and every school/sports feed sends it,
+      // so a subscription re-sync fills this in for events imported before this existed.
+      var endTime = null;
+      if(!start.allDay && ev.dtend && ev.dtend.time && ev.dtend.date === start.date){
+        endTime = ev.dtend.time;
+      }
       return {
         id: 'ics-'+sub.id+'-'+(ev.uid || uid())+(ev.rrule ? '' : '-'+start.date),
         title: ev.summary || 'Untitled event',
         category: sub.category || 'other',
         attendees: [sub.ownerFamilyMemberId],
         date: start.date, endDate: endDate,
-        allDay: start.allDay, time: start.allDay ? null : start.time,
+        allDay: start.allDay, time: start.allDay ? null : start.time, endTime: endTime,
         location: ev.location || '', notes: ev.description || '',
         recurrence: ev.rrule || null,
         exceptionDates: ev.exdate || [],
