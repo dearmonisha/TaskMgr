@@ -2113,6 +2113,18 @@
     if(t.tags && t.tags.some(function(tag){ return tag.toLowerCase().indexOf(q) !== -1; })) return true;
     return false;
   }
+  /* Board order: undated tasks first, then by due date with the soonest at the top.
+     Overdue items therefore rise above today's, which is what you want on a board whose
+     whole job is showing what needs attention. Dates are ISO strings, so a plain string
+     compare is already chronological. sort() is stable, so tasks that tie keep the order
+     they were added in rather than shuffling on every render. */
+  function compareByDue(a, b){
+    if(!a.due && !b.due) return 0;
+    if(!a.due) return -1;
+    if(!b.due) return 1;
+    return a.due < b.due ? -1 : (a.due > b.due ? 1 : 0);
+  }
+
   function visibleTasks(){
     return state.tasks.filter(function(t){ return !t.completed && !t.deleted && personMatch(t) && searchMatch(t); });
   }
@@ -2162,7 +2174,7 @@
   }
 
   function renderMatrix(){
-    var tasks = visibleTasks();
+    var tasks = visibleTasks().sort(compareByDue);
     var byQ = {doFirst:[],schedule:[],delegate:[],eliminate:[]};
     tasks.forEach(function(t){ byQ[quadrantOf(t)].push(t); });
 
@@ -2203,7 +2215,7 @@
   }
 
   function renderList(){
-    var tasks = visibleTasks();
+    var tasks = visibleTasks().sort(compareByDue);
     var byQ = {doFirst:[],schedule:[],delegate:[],eliminate:[]};
     tasks.forEach(function(t){ byQ[quadrantOf(t)].push(t); });
 
@@ -2796,10 +2808,17 @@
     }catch(e){}
   }
 
-  // Everything the calendar can draw from: hand-added events, dated tasks, and each
-  // imported calendar. Only rendered when there's actually something to choose between.
+  // Everything the calendar can draw from: hand-added events, dated tasks, and the calendars
+  // YOU have imported. Other people's feeds aren't listed -- with six people each importing a
+  // school and a sports calendar, a shared list would be a wall of pills that mostly aren't
+  // yours. To look at someone else's, use the person filter next to this row.
   function calSourceList(){
-    var subs = (state.calendarSubscriptions || []).slice().sort(function(a,b){
+    var me = state.currentFamilyMember;
+    var subs = (state.calendarSubscriptions || []).filter(function(sub){
+      // No resolved identity means we can't tell whose is whose; listing them all beats
+      // showing an empty control.
+      return !me || sub.ownerFamilyMemberId === me.id;
+    }).sort(function(a,b){
       return (a.name||'').localeCompare(b.name||'');
     });
     var list = [{ key:'manual', label:'Added by hand', color:'var(--ink-muted)' }];
@@ -2813,7 +2832,8 @@
         key: sub.id,
         label: sub.name || 'Untitled calendar',
         color: sub.color || cat.color,
-        owner: owner ? owner.name : null
+        // Only worth naming the owner in the no-identity fallback, where the list isn't just yours.
+        owner: (!me && owner) ? owner.name : null
       });
     });
     return list;
