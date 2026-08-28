@@ -477,6 +477,7 @@
   .family-row .fam-name{flex:1.2;min-width:110px;}
   .family-row .fam-email{flex:1.6;min-width:150px;}
   .family-row .fam-role{flex:none;width:120px;}
+  .family-row .fam-board{flex:none;width:140px;}
   .family-row .fam-timezone{flex:1.4;min-width:170px;}
   .color-swatch{width:28px;height:28px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1.5px var(--hairline);flex:none;padding:0;}
   .family-row .rm{border:none;background:transparent;color:var(--ink-muted);font-size:14px;flex:none;padding:4px;}
@@ -714,6 +715,42 @@
   .wk-empty{font-size:12.5px;color:var(--ink-faint);font-style:italic;padding:2px 2px 4px;}
   .wk-row{display:flex;align-items:center;gap:9px;}
   .wk-row .event-chip{flex:1;min-width:0;}
+
+  /* ---------- 4a. Horizon board ----------
+     Same panel language as the matrix, but laid out as a severity scale left to right,
+     with the undated column running full width underneath since it isn't part of the scale. */
+  .horizon-outer{margin-top:22px;}
+  .horizon-board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--gap);}
+  .horizon-board .span-all{grid-column:1/-1;}
+  .horizon-col .q-body{min-height:110px;max-height:none;}
+  .horizon-col .q-body.is-empty{display:flex;align-items:center;justify-content:center;}
+  .h-overdue .q-header{background:var(--overdue-bg);}
+  .h-today   .q-header{background:var(--due-today-bg);}
+  .h-week    .q-header{background:var(--schedule-tint);}
+  .h-later   .q-header{background:var(--delegate-tint);}
+  .h-none    .q-header{background:rgba(120,110,100,0.1);}
+
+  .week-load{margin-bottom:20px;}
+  .week-load h2,.subject-bar h2{
+    font-size:11px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;
+    color:var(--ink-faint);margin:0 0 9px;
+  }
+  .load-row{display:flex;gap:6px;align-items:flex-end;max-width:560px;}
+  .load-day{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;}
+  .load-bar{width:100%;border-radius:5px 5px 2px 2px;background:var(--schedule);min-height:4px;}
+  .load-day.busy .load-bar{background:var(--overdue);}
+  .load-day.empty .load-bar{background:var(--hairline-strong);}
+  .load-label{font-size:10.5px;color:var(--ink-muted);font-weight:600;white-space:nowrap;}
+  .load-n{font-size:10.5px;color:var(--ink-faint);font-variant-numeric:tabular-nums;}
+  .load-note{font-size:12.5px;color:var(--ink-muted);margin:9px 0 0;}
+  .subject-bar{margin-bottom:18px;}
+
+  @media (max-width:1024px){ .horizon-board{grid-template-columns:repeat(2,minmax(0,1fr));} }
+  @media (max-width:640px){
+    .horizon-board{grid-template-columns:1fr;}
+    .horizon-outer{margin-top:14px;}
+    .load-row{max-width:none;}
+  }
 
   /* ---------- 4b. Day grid (Outlook-style) ----------
      A 24-hour column of 30-minute slots. Lines are drawn as a repeating gradient rather than
@@ -1218,6 +1255,33 @@
     eliminate: { key:'eliminate', title:'Eliminate', subtitle:'Neither',                 accent:'var(--eliminate)',  cls:'q-eliminate',  important:false, urgent:false }
   };
   var QUADRANT_ORDER = ['doFirst','schedule','delegate','eliminate'];
+
+  /* The horizon board. Columns are worked out from the due date rather than chosen, which is
+     the whole point: a student's syllabus already decides both importance and urgency, so
+     asking them to classify each task is asking a question they don't have. */
+  var HORIZON = {
+    overdue: { key:'overdue', title:'Overdue',   subtitle:'past its date',   accent:'var(--overdue)', cls:'h-overdue' },
+    today:   { key:'today',   title:'Today',     subtitle:'due today',       accent:'var(--due-today)', cls:'h-today' },
+    week:    { key:'week',    title:'This week', subtitle:'next 7 days',     accent:'var(--schedule)', cls:'h-week' },
+    later:   { key:'later',   title:'Later',     subtitle:'beyond a week',   accent:'var(--delegate)', cls:'h-later' },
+    none:    { key:'none',    title:'No date yet', subtitle:'pick one up when there\'s a gap', accent:'var(--ink-faint)', cls:'h-none' }
+  };
+  var HORIZON_ORDER = ['overdue','today','week','later','none'];
+
+  function horizonBucket(task){
+    if(!task.due) return 'none';
+    var today = todayStr();
+    if(task.due < today) return 'overdue';
+    if(task.due === today) return 'today';
+    return task.due <= dateAdd(today, 7) ? 'week' : 'later';
+  }
+
+  // Adults keep the matrix; kids get the horizon board unless someone says otherwise.
+  function boardStyleFor(member){
+    if(member && member.board) return member.board;
+    return (member && member.role === 'kid') ? 'horizon' : 'matrix';
+  }
+  function currentBoardStyle(){ return boardStyleFor(state.currentFamilyMember); }
   var URGENT_WORDS = ['urgent','asap','today','tomorrow','deadline','!!'];
   var NOT_IMPORTANT_WORDS = ['maybe','someday','minor','low priority','junk','declutter'];
   var LS_TASKS = 'eisenhower_tasks_local_v1';
@@ -1341,6 +1405,7 @@
     view: 'matrix',
     person: 'all',
     search: '',
+    subjectFilter: null,   // horizon board: which subject tag is showing
     ghSha: null,
     syncStatus: 'idle', // idle | busy | ok | err | local
     deletedBuffer: null, // {task, index} for undo
@@ -2077,10 +2142,24 @@
       if(!t.completed) counts[quadrantOf(t)]++;
       if(t.completed && t.completedAt && t.completedAt.slice(0,10) === todayStr()) doneToday++;
     });
-    var html = QUADRANT_ORDER.map(function(k){
-      var q = QUADRANTS[k];
-      return '<span class="stat-pill"><span class="stat-dot" style="background:'+q.accent+'"></span>'+counts[k]+' '+q.title+'</span>';
-    }).join('');
+    var html;
+    if(currentBoardStyle() === 'horizon'){
+      var hCounts = { overdue:0, today:0, week:0, later:0, none:0 };
+      state.tasks.filter(personMatch).forEach(function(t){
+        if(t.deleted || t.completed) return;
+        hCounts[horizonBucket(t)]++;
+      });
+      // Only the columns that need attention earn a pill; "later" and "no date" are noise here.
+      html = ['overdue','today','week'].map(function(k){
+        var h = HORIZON[k];
+        return '<span class="stat-pill"><span class="stat-dot" style="background:'+h.accent+'"></span>'+hCounts[k]+' '+h.title+'</span>';
+      }).join('');
+    } else {
+      html = QUADRANT_ORDER.map(function(k){
+        var q = QUADRANTS[k];
+        return '<span class="stat-pill"><span class="stat-dot" style="background:'+q.accent+'"></span>'+counts[k]+' '+q.title+'</span>';
+      }).join('');
+    }
     if(doneToday > 0){
       html += '<span class="stat-pill done-today">'+icon('check')+' '+doneToday+' done today</span>';
     }
@@ -2211,6 +2290,101 @@
       + '</div></div>';
     document.getElementById('view-root').innerHTML = html;
     attachDragAndDrop();
+    attachCardHandlers();
+  }
+
+  /* Subjects come from task tags. Imported course calendars don't carry a per-course tag --
+     they carry one category for the whole feed -- so this is the tag the task itself has. */
+  function subjectsOf(tasks){
+    var seen = {}, out = [];
+    tasks.forEach(function(t){
+      (t.tags||[]).forEach(function(tag){
+        var k = tag.trim();
+        if(k && !seen[k]){ seen[k] = true; out.push(k); }
+      });
+    });
+    return out.sort(function(a,b){ return a.localeCompare(b); });
+  }
+
+  function renderWeekLoad(tasks){
+    var today = todayStr();
+    var days = [];
+    for(var i = 0; i < 7; i++){
+      var d = dateAdd(today, i);
+      days.push({ date:d, n: tasks.filter(function(t){ return t.due === d; }).length });
+    }
+    var max = Math.max.apply(null, days.map(function(x){ return x.n; }));
+    if(!max) return '';   // nothing due this week -- the strip would just be a row of zeros
+    var bars = days.map(function(x){
+      var h = 10 + Math.round((x.n / max) * 46);
+      var cls = x.n === 0 ? ' empty' : (x.n === max && max > 1 ? ' busy' : '');
+      var label = x.date === today ? 'Today' : new Date(x.date+'T00:00:00').toLocaleDateString(undefined,{weekday:'short'});
+      return '<div class="load-day'+cls+'"><span class="load-n">'+x.n+'</span>'
+        + '<div class="load-bar" style="height:'+h+'px"></div>'
+        + '<span class="load-label">'+escapeHtml(label)+'</span></div>';
+    }).join('');
+    // Every day at the peak is highlighted, so the sentence has to name all of them --
+    // flagging two bars and mentioning one reads like a bug.
+    var peaks = days.filter(function(x){ return x.n === max; });
+    var names = peaks.map(function(x){
+      return x.date === today ? 'Today' : new Date(x.date+'T00:00:00').toLocaleDateString(undefined,{weekday:'long'});
+    });
+    var note;
+    if(max < 2) note = 'A light week — nothing stacked up.';
+    else if(names.length === 1) note = names[0] + ' has ' + max + ' things due.';
+    else note = names.slice(0,-1).join(', ') + ' and ' + names[names.length-1] + ' each have ' + max + ' due.';
+    return '<section class="week-load"><h2>The week ahead</h2><div class="load-row">'+bars+'</div>'
+      + '<p class="load-note">'+escapeHtml(note)+'</p></section>';
+  }
+
+  function renderHorizon(){
+    var tasks = visibleTasks().sort(compareByDue);
+    if(state.subjectFilter){
+      tasks = tasks.filter(function(t){ return (t.tags||[]).indexOf(state.subjectFilter) !== -1; });
+    }
+    var byBucket = { overdue:[], today:[], week:[], later:[], none:[] };
+    tasks.forEach(function(t){ byBucket[horizonBucket(t)].push(t); });
+
+    // Subject pills are drawn from every visible task, not the filtered set, so choosing one
+    // doesn't make the others disappear from the control you'd use to switch back.
+    var subjects = subjectsOf(visibleTasks());
+    var subjectBar = subjects.length > 1
+      ? '<section class="subject-bar"><h2>Filter by subject</h2><div class="pill-tabs" id="subject-pills">'
+        + '<button data-subject="" class="'+(state.subjectFilter?'':'active')+'">All</button>'
+        + subjects.map(function(sub){
+            return '<button data-subject="'+escapeHtml(sub)+'" class="'+(state.subjectFilter===sub?'active':'')+'">'+escapeHtml(sub)+'</button>';
+          }).join('')
+        + '</div></section>'
+      : '';
+
+    function col(key){
+      var h = HORIZON[key];
+      var list = byBucket[key];
+      return '<section class="quadrant horizon-col '+h.cls+(key==='none'?' span-all':'')+'">'
+        + '<div class="q-header">'
+        + '<span class="dot" style="background:'+h.accent+'"></span>'
+        + '<div class="q-header-text"><div class="q-title">'+h.title+'</div><div class="q-subtitle">'+h.subtitle+'</div></div>'
+        + '<span class="q-count">'+list.length+'</span>'
+        + '</div>'
+        + '<div class="q-body'+(list.length?'':' is-empty')+'">'
+        + (list.length ? list.map(taskCardHtml).join('')
+                       : '<div class="q-empty">Nothing here.</div>')
+        + '</div></section>';
+    }
+
+    document.getElementById('view-root').innerHTML =
+      '<div class="horizon-outer">'
+      + renderWeekLoad(visibleTasks())
+      + subjectBar
+      + '<div class="horizon-board">' + HORIZON_ORDER.map(col).join('') + '</div>'
+      + '</div>';
+
+    document.querySelectorAll('#subject-pills button').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        state.subjectFilter = btn.dataset.subject || null;
+        render();
+      });
+    });
     attachCardHandlers();
   }
 
@@ -3043,6 +3217,7 @@
     document.body.classList.toggle('kid-mode', isKidMode()); // applies app-wide, not just on the calendar tab
     document.getElementById('open-family-settings').classList.toggle('hidden', isKidMode()); // roster management is adults-only
     syncMobileChrome();
+    syncBoardLabels();
   }
 
   // The toolbars change height per view (and per family size), so the "fill the rest of
@@ -3105,7 +3280,7 @@
       return;
     }
     renderStats();
-    if(state.view === 'matrix') renderMatrix();
+    if(state.view === 'matrix') (currentBoardStyle() === 'horizon' ? renderHorizon() : renderMatrix());
     else if(state.view === 'list') renderList();
     else renderArchive();
     syncChromeHeight();
@@ -5451,7 +5626,11 @@
       if(!el) return;
       apiFetch('/api/health').then(function(h){
         if(!document.getElementById('s-health')) return;
-        var counts = Object.keys(h.items||{}).map(function(k){ return (h.items[k]) + ' ' + k + (h.items[k]===1?'':'s'); }).join(', ');
+        // Adding an "s" gets "prioritys" and "familys". Name the plurals that don't follow the rule.
+        var PLURAL = { priority:'priorities', family:'families', vision:'visions', entry:'entries' };
+        var counts = Object.keys(h.items||{}).map(function(k){
+          return h.items[k] + ' ' + (h.items[k] === 1 ? k : (PLURAL[k] || k + 's'));
+        }).join(', ');
         document.getElementById('s-health').innerHTML = h.ok
           ? ('Connected as <strong>'+escapeHtml((h.identity && h.identity.email) || 'this device')+'</strong>.<br>Store holds '+escapeHtml(counts || 'nothing yet')+'.'
              + (sync.queue.length ? '<br>'+sync.queue.length+' change(s) still to send.' : '<br>Everything on this device is saved.'))
@@ -5564,6 +5743,10 @@
           + '<button type="button" data-role="adult" class="'+(m.role!=='kid'?'active':'')+'">Adult</button>'
           + '<button type="button" data-role="kid" class="'+(m.role==='kid'?'active':'')+'">Kid</button>'
           + '</div>'
+          + '<div class="seg3 fam-board" data-idx="'+i+'" title="Which task board this person sees">'
+          + '<button type="button" data-board="horizon" class="'+(boardStyleFor(m)==='horizon'?'active':'')+'">By date</button>'
+          + '<button type="button" data-board="matrix" class="'+(boardStyleFor(m)==='matrix'?'active':'')+'">Matrix</button>'
+          + '</div>'
           + '<select class="text-input fam-timezone" data-idx="'+i+'" title="Their timezone">'+tzOptionsHtml(m.timezone || homeTzDraft)+'</select>'
           + '<button type="button" class="rm fam-remove" data-idx="'+i+'" title="Remove" aria-label="Remove">'+icon('close')+'</button>'
           + '</div>';
@@ -5583,6 +5766,13 @@
       });
       document.querySelectorAll('.fam-email').forEach(function(inp){
         inp.addEventListener('input', function(){ draft[parseInt(inp.dataset.idx,10)].email = inp.value.trim().toLowerCase(); });
+      });
+      document.querySelectorAll('.fam-board button').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var i = parseInt(btn.closest('.fam-board').dataset.idx,10);
+          draft[i].board = btn.dataset.board;
+          renderFamilyList();
+        });
       });
       document.querySelectorAll('.fam-role button').forEach(function(btn){
         btn.addEventListener('click', function(){
@@ -5649,6 +5839,12 @@
       if(b.querySelector('svg')) return;
       b.innerHTML = icon(VIEW_ICONS[b.dataset.view] || 'pin') + '<span>' + b.textContent.trim() + '</span>';
     });
+  }
+  // "Matrix" is the wrong word for someone looking at a due-date board.
+  function syncBoardLabels(){
+    var label = currentBoardStyle() === 'horizon' ? 'Board' : 'Matrix';
+    document.querySelectorAll('[data-view="matrix"] span:not(.nav-label)').forEach(function(el){ el.textContent = label; });
+    document.querySelectorAll('#mobile-nav-inner [data-view="matrix"] .nav-label').forEach(function(el){ el.textContent = label; });
   }
 
   function buildMobileNav(){
