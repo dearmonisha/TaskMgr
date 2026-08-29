@@ -736,13 +736,28 @@
     color:var(--ink-faint);margin:0 0 9px;
   }
   .load-row{display:flex;gap:6px;align-items:flex-end;max-width:560px;}
-  .load-day{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;}
-  .load-bar{width:100%;border-radius:5px 5px 2px 2px;background:var(--schedule);min-height:4px;}
+  /* Each day is a button: tapping it filters the board below to that day's tasks. */
+  .load-day{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;
+    font:inherit;color:inherit;background:none;border:0;padding:4px 2px 3px;
+    border-radius:8px;cursor:pointer;transition:background .12s ease;
+  }
+  .load-day:hover{background:var(--surface-2);}
+  .load-day:focus-visible{outline:2px solid var(--schedule);outline-offset:1px;}
+  .load-bar{display:block;width:100%;border-radius:5px 5px 2px 2px;background:var(--schedule);min-height:4px;transition:background .12s ease;}
   .load-day.busy .load-bar{background:var(--overdue);}
   .load-day.empty .load-bar{background:var(--hairline-strong);}
+  /* Selection is a ring and a tint, not a recolour: the bar's own colour is carrying "this is
+     your busiest day", which is information worth keeping while you look at one. */
+  .load-day.picked{background:var(--schedule-tint);box-shadow:inset 0 0 0 1.5px var(--schedule);}
+  .load-day.picked .load-label,.load-day.picked .load-n{color:var(--ink);font-weight:700;}
   .load-label{font-size:10.5px;color:var(--ink-muted);font-weight:600;white-space:nowrap;}
   .load-n{font-size:10.5px;color:var(--ink-faint);font-variant-numeric:tabular-nums;}
   .load-note{font-size:12.5px;color:var(--ink-muted);margin:9px 0 0;}
+  .load-clear{
+    font:inherit;font-size:12.5px;background:none;border:0;padding:0;margin-left:2px;
+    color:var(--schedule);font-weight:600;text-decoration:underline;cursor:pointer;
+  }
   .subject-bar{margin-bottom:18px;}
 
   @media (max-width:1024px){ .horizon-board{grid-template-columns:repeat(2,minmax(0,1fr));} }
@@ -1176,6 +1191,10 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" id="search-input" placeholder="Search tasks or tags">
         </div>
+        <div class="seg3 hidden" id="board-style-toggle" style="width:158px;" title="How your task board is laid out">
+          <button type="button" data-board="horizon">By date</button>
+          <button type="button" data-board="matrix">Matrix</button>
+        </div>
       </div>
       <div class="quick-add">
         <input type="text" id="quick-add-input" placeholder="Quick add a task… try 'urgent' or 'tomorrow'">
@@ -1404,15 +1423,17 @@
     tasks: [],
     view: 'matrix',
     person: 'all',
+    personTouched: false,  // has anyone clicked a person tab? until then identity picks it
     search: '',
     subjectFilter: null,   // horizon board: which subject tag is showing
+    dayFilter: null,       // horizon board: 'YYYY-MM-DD' picked off the week strip, or null
     ghSha: null,
     syncStatus: 'idle', // idle | busy | ok | err | local
     deletedBuffer: null, // {task, index} for undo
     currentUserEmail: null, // filled in from Cloudflare Access identity, if available
 
     // ---- Calendar module ----
-    family: [],           // [{id,name,color,email,role:'adult'|'kid',timezone}]
+    family: [],           // [{id,name,color,email,role:'adult'|'kid',timezone,board:'horizon'|'matrix'|null}]
     events: [],           // see EVENT SCHEMA below
     calendarSubscriptions: [], // [{id,ownerFamilyMemberId,name,url,category,enabled,lastSyncedAt,lastError,syncStatus}]
     // Event times are entered/stored as a naive wall-clock anchored to this zone (e.g. "6:00 PM"
@@ -1591,6 +1612,13 @@
     state.currentFamilyMember = (state.currentUserEmail
       ? state.family.find(function(m){ return m.email && m.email.toLowerCase() === state.currentUserEmail; })
       : null) || null;
+    // Landing on "All" means every adult opens the app reading six people's tasks to find
+    // their own. Start on your own list instead -- the tabs are still there for the whole
+    // family, and once someone picks a tab we stop overriding it (identity resolves after
+    // the first paint and again on every sync pull, so this runs more than once).
+    if(!state.personTouched){
+      state.person = state.currentFamilyMember ? state.currentFamilyMember.id : 'all';
+    }
   }
   function isKidMode(){
     return !!(state.currentFamilyMember && state.currentFamilyMember.role === 'kid');
@@ -2054,7 +2082,10 @@
     // Inspection handles: what this device currently holds, and a way to ask the recurrence
     // engine what it would produce for a date range without reading it off the screen.
     get data(){ return state; },
-    expand: function(from, to){ return expandOccurrences(from, to); }
+    expand: function(from, to){ return expandOccurrences(from, to); },
+    // Re-runs the "who is this?" step the app does after Cloudflare Access answers. Handy for
+    // checking what a different family member's app looks like without logging out.
+    whoami: function(){ resolveCurrentFamilyMember(); render(); return state.currentFamilyMember; }
   };
 
   function retrySyncNow(){
@@ -2129,7 +2160,12 @@
       + '<button data-person="shared" class="'+(state.person==='shared'?'active':'')+'">Shared</button>';
     container.innerHTML = html;
     container.querySelectorAll('button').forEach(function(b){
-      b.addEventListener('click', function(){ state.person = b.dataset.person; render(); });
+      b.addEventListener('click', function(){
+        state.person = b.dataset.person;
+        state.personTouched = true;   // stop the identity default from stealing the tab back
+        state.dayFilter = null;       // a different person's week is a different week
+        render();
+      });
     });
   }
 
@@ -2314,27 +2350,53 @@
       days.push({ date:d, n: tasks.filter(function(t){ return t.due === d; }).length });
     }
     var max = Math.max.apply(null, days.map(function(x){ return x.n; }));
-    if(!max) return '';   // nothing due this week -- the strip would just be a row of zeros
+    // Nothing due this week: the strip would just be a row of zeros. But if a day is currently
+    // filtered -- say you ticked off the last thing while looking at it -- hiding the strip
+    // would take the only way back out with it, so keep it.
+    if(!max && !state.dayFilter) return '';
     var bars = days.map(function(x){
-      var h = 10 + Math.round((x.n / max) * 46);
+      var h = 10 + Math.round((x.n / (max || 1)) * 46);
       var cls = x.n === 0 ? ' empty' : (x.n === max && max > 1 ? ' busy' : '');
+      if(state.dayFilter === x.date) cls += ' picked';
       var label = x.date === today ? 'Today' : new Date(x.date+'T00:00:00').toLocaleDateString(undefined,{weekday:'short'});
-      return '<div class="load-day'+cls+'"><span class="load-n">'+x.n+'</span>'
-        + '<div class="load-bar" style="height:'+h+'px"></div>'
-        + '<span class="load-label">'+escapeHtml(label)+'</span></div>';
+      // A button, not a div: the whole point is that it's tappable, and a kid on a phone
+      // shouldn't have to guess. Keyboard and screen readers get it for free.
+      return '<button type="button" class="load-day'+cls+'" data-day="'+x.date+'"'
+        + ' aria-pressed="'+(state.dayFilter === x.date)+'"'
+        + ' title="'+escapeHtml(dayFilterLabel(x.date))+' — '+x.n+' due">'
+        + '<span class="load-n">'+x.n+'</span>'
+        + '<span class="load-bar" style="height:'+h+'px"></span>'
+        + '<span class="load-label">'+escapeHtml(label)+'</span></button>';
     }).join('');
-    // Every day at the peak is highlighted, so the sentence has to name all of them --
-    // flagging two bars and mentioning one reads like a bug.
-    var peaks = days.filter(function(x){ return x.n === max; });
-    var names = peaks.map(function(x){
-      return x.date === today ? 'Today' : new Date(x.date+'T00:00:00').toLocaleDateString(undefined,{weekday:'long'});
-    });
     var note;
-    if(max < 2) note = 'A light week — nothing stacked up.';
-    else if(names.length === 1) note = names[0] + ' has ' + max + ' things due.';
-    else note = names.slice(0,-1).join(', ') + ' and ' + names[names.length-1] + ' each have ' + max + ' due.';
-    return '<section class="week-load"><h2>The week ahead</h2><div class="load-row">'+bars+'</div>'
-      + '<p class="load-note">'+escapeHtml(note)+'</p></section>';
+    if(state.dayFilter){
+      var picked = days.filter(function(x){ return x.date === state.dayFilter; })[0];
+      var n = picked ? picked.n : 0;
+      note = 'Showing ' + (n === 1 ? 'the 1 task' : n + ' tasks') + ' due ' + dayFilterLabel(state.dayFilter) + '.';
+    } else {
+      // Every day at the peak is highlighted, so the sentence has to name all of them --
+      // flagging two bars and mentioning one reads like a bug.
+      var peaks = days.filter(function(x){ return x.n === max; });
+      var names = peaks.map(function(x){
+        return x.date === today ? 'Today' : new Date(x.date+'T00:00:00').toLocaleDateString(undefined,{weekday:'long'});
+      });
+      if(max < 2) note = 'A light week — nothing stacked up.';
+      else if(names.length === 1) note = names[0] + ' has ' + max + ' things due.';
+      else note = names.slice(0,-1).join(', ') + ' and ' + names[names.length-1] + ' each have ' + max + ' due.';
+    }
+    return '<section class="week-load"><h2>The week ahead</h2><div class="load-row" id="load-row">'+bars+'</div>'
+      + '<p class="load-note">' + escapeHtml(note)
+      + (state.dayFilter ? ' <button type="button" class="load-clear" id="load-clear">Show the whole week</button>' : '')
+      + '</p></section>';
+  }
+
+  // "Today"/"Tomorrow" beat a date anyone has to decode, and a weekday beats both for the
+  // rest of the week -- nobody thinks of Thursday's homework as "the 3rd".
+  function dayFilterLabel(date){
+    var today = todayStr();
+    if(date === today) return 'today';
+    if(date === dateAdd(today, 1)) return 'tomorrow';
+    return new Date(date+'T00:00:00').toLocaleDateString(undefined,{weekday:'long'});
   }
 
   function renderHorizon(){
@@ -2357,13 +2419,11 @@
         + '</div></section>'
       : '';
 
-    function col(key){
-      var h = HORIZON[key];
-      var list = byBucket[key];
-      return '<section class="quadrant horizon-col '+h.cls+(key==='none'?' span-all':'')+'">'
+    function section(cls, accent, title, subtitle, list, extraCls){
+      return '<section class="quadrant horizon-col '+cls+(extraCls?' '+extraCls:'')+'">'
         + '<div class="q-header">'
-        + '<span class="dot" style="background:'+h.accent+'"></span>'
-        + '<div class="q-header-text"><div class="q-title">'+h.title+'</div><div class="q-subtitle">'+h.subtitle+'</div></div>'
+        + '<span class="dot" style="background:'+accent+'"></span>'
+        + '<div class="q-header-text"><div class="q-title">'+escapeHtml(title)+'</div><div class="q-subtitle">'+escapeHtml(subtitle)+'</div></div>'
         + '<span class="q-count">'+list.length+'</span>'
         + '</div>'
         + '<div class="q-body'+(list.length?'':' is-empty')+'">'
@@ -2371,12 +2431,32 @@
                        : '<div class="q-empty">Nothing here.</div>')
         + '</div></section>';
     }
+    function col(key){
+      var h = HORIZON[key];
+      return section(h.cls, h.accent, h.title, h.subtitle, byBucket[key], key==='none' ? 'span-all' : '');
+    }
+
+    // Picking a day off the strip collapses the five columns into one. Keeping the grid would
+    // put every match in a single column with four empty ones beside it, which reads as broken
+    // rather than as a filter.
+    var board;
+    if(state.dayFilter){
+      var dayList = tasks.filter(function(t){ return t.due === state.dayFilter; });
+      var isToday = state.dayFilter === todayStr();
+      board = section(isToday ? 'h-today' : 'h-week',
+        isToday ? HORIZON.today.accent : HORIZON.week.accent,
+        'Due ' + dayFilterLabel(state.dayFilter),
+        new Date(state.dayFilter+'T00:00:00').toLocaleDateString(undefined,{month:'long',day:'numeric'}),
+        dayList, 'span-all');
+    } else {
+      board = HORIZON_ORDER.map(col).join('');
+    }
 
     document.getElementById('view-root').innerHTML =
       '<div class="horizon-outer">'
       + renderWeekLoad(visibleTasks())
       + subjectBar
-      + '<div class="horizon-board">' + HORIZON_ORDER.map(col).join('') + '</div>'
+      + '<div class="horizon-board">' + board + '</div>'
       + '</div>';
 
     document.querySelectorAll('#subject-pills button').forEach(function(btn){
@@ -2385,6 +2465,15 @@
         render();
       });
     });
+    document.querySelectorAll('#load-row .load-day').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        // Clicking the day you're already on is the obvious way to back out of the filter.
+        state.dayFilter = (state.dayFilter === btn.dataset.day) ? null : btn.dataset.day;
+        render();
+      });
+    });
+    var clearBtn = document.getElementById('load-clear');
+    if(clearBtn) clearBtn.addEventListener('click', function(){ state.dayFilter = null; render(); });
     attachCardHandlers();
   }
 
@@ -3218,6 +3307,23 @@
     document.getElementById('open-family-settings').classList.toggle('hidden', isKidMode()); // roster management is adults-only
     syncMobileChrome();
     syncBoardLabels();
+    renderBoardStyleToggle();
+  }
+
+  // Everyone gets to choose their own board without going through Family Settings -- which
+  // is adults-only, so before this a kid couldn't change their own view at all. The choice
+  // lives on the family member, so it follows them to whatever device they log in on.
+  function renderBoardStyleToggle(){
+    var el = document.getElementById('board-style-toggle');
+    if(!el) return;
+    // Nowhere to save it if we don't know who this is, and it's meaningless off the board.
+    var show = state.view === 'matrix' && !!state.currentFamilyMember;
+    el.classList.toggle('hidden', !show);
+    if(!show) return;
+    var style = currentBoardStyle();
+    el.querySelectorAll('button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.board === style);
+    });
   }
 
   // The toolbars change height per view (and per family size), so the "fill the rest of
@@ -5802,7 +5908,9 @@
     });
     document.getElementById('fam-save').addEventListener('click', function(){
       var cleaned = draft.filter(function(m){ return m.name && m.name.trim(); })
-        .map(function(m){ return { id:m.id, name:m.name.trim(), color:m.color, email:(m.email||'').trim().toLowerCase(), role: m.role==='kid'?'kid':'adult', timezone: m.timezone || homeTzDraft }; });
+        // This rebuilds each member from a whitelist, so any field missing here is silently
+        // dropped on save -- which is exactly what was happening to the board choice.
+        .map(function(m){ return { id:m.id, name:m.name.trim(), color:m.color, email:(m.email||'').trim().toLowerCase(), role: m.role==='kid'?'kid':'adult', timezone: m.timezone || homeTzDraft, board: (m.board==='horizon'||m.board==='matrix') ? m.board : null }; });
       state.family = cleaned;
       state.homeTimezone = homeTzDraft;
       resolveCurrentFamilyMember();
@@ -6071,6 +6179,15 @@
   document.getElementById('open-family-settings').addEventListener('click', openFamilySettingsModal);
   document.getElementById('add-dream-btn').addEventListener('click', openAddDreamModal);
   document.getElementById('add-goal-btn').addEventListener('click', openAddGoalModal);
+  document.getElementById('board-style-toggle').addEventListener('click', function(e){
+    var btn = e.target.closest('button[data-board]');
+    if(!btn || !state.currentFamilyMember) return;
+    state.currentFamilyMember.board = btn.dataset.board;
+    state.dayFilter = null;      // the day strip only exists on one of the two boards
+    state.subjectFilter = null;
+    persistCalendar();           // it's a property of the family member, so it syncs everywhere
+    render();
+  });
   document.getElementById('compass-mode-toggle').addEventListener('click', function(e){
     var btn = e.target.closest('button[data-mode]');
     if(!btn || !state.compassFilter) return;
