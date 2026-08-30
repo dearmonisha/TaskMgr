@@ -3633,6 +3633,115 @@
     draft.assignees = (sourceTask.assignees || []).slice();
     draft.activity = (sourceTask.activity || []).slice();
 
+    /* Repeats. A repeating task needs a date to repeat from, so the control only appears once a
+       due date is set -- otherwise "every Tuesday" has nothing to anchor to. This block is built
+       and wired on its own, separately from the rest of the modal, because setting a due date
+       changes it: re-rendering the whole modal to update it would tear out the date input the
+       person is still standing in, which on a phone closes the picker mid-tap. */
+    function taskRepeatHtml(){
+      var tFreq = draft.recurrence ? draft.recurrence.freq : '';
+      var tFreqSel = tFreq;
+      if(tFreq === 'weekly' && draft.recurrence.byWeekday && draft.recurrence.byWeekday.length > 1) tFreqSel = 'custom';
+      if(!draft.due){
+        return '<div class="field-label">Repeats</div>'
+          + '<div class="settings-help" style="margin-top:0;">Set a due date first, and you can make this task repeat from it.</div>';
+      }
+      var tWeekPicker = '';
+      if(tFreq === 'weekly'){
+        if(!(draft.recurrence.byWeekday && draft.recurrence.byWeekday.length)){
+          draft.recurrence.byWeekday = [new Date(draft.due+'T00:00:00').getDay()];
+        }
+        var tDays = draft.recurrence.byWeekday;
+        tWeekPicker = '<div class="field-label">Repeat on</div><div class="weekday-picker" id="t-weekdays">'
+          + WEEKDAY_LABELS.map(function(lbl,i){
+              return '<button type="button" data-dow="'+i+'" data-full="'+WEEKDAY_FULL[i]+'" aria-pressed="'+(tDays.indexOf(i)!==-1)+'" class="'+(tDays.indexOf(i)!==-1?'selected':'')+'">'+lbl+'</button>';
+            }).join('')
+          + '</div>';
+      }
+      var tDetail = '';
+      if(tFreq){
+        var tEnds = draft.recurrence.until ? 'until' : (draft.recurrence.count ? 'count' : 'never');
+        tDetail = '<div class="row-2" style="margin-top:10px;">'
+          + '<div><div class="field-label" style="margin-top:0;">Every</div><input type="number" min="1" class="text-input" id="t-interval" value="'+(draft.recurrence.interval||1)+'"></div>'
+          + '<div><div class="field-label" style="margin-top:0;">&nbsp;</div><div style="padding:9px 0;font-size:12.5px;color:var(--ink-muted);">'+({daily:'day(s)',weekly:'week(s)',monthly:'month(s)',yearly:'year(s)'}[tFreq])+'</div></div>'
+          + '</div>'
+          + tWeekPicker
+          + '<div class="field-label">Ends</div>'
+          + '<div class="ends-row">'
+          + '<label class="ends-option"><input type="radio" name="t-ends" value="never" '+(tEnds==='never'?'checked':'')+'> Never</label>'
+          + '<label class="ends-option"><input type="radio" name="t-ends" value="until" '+(tEnds==='until'?'checked':'')+'> On date <input type="date" id="t-until" value="'+(draft.recurrence.until||'')+'" '+(tEnds!=='until'?'disabled':'')+'></label>'
+          + '<label class="ends-option"><input type="radio" name="t-ends" value="count" '+(tEnds==='count'?'checked':'')+'> After <input type="number" min="1" id="t-count" value="'+(draft.recurrence.count||5)+'" '+(tEnds!=='count'?'disabled':'')+'> times</label>'
+          + '</div>'
+          + '<div class="repeat-summary">'+escapeHtml(describeRecurrence(draft.recurrence))
+          + (draft.recurrenceDone ? ' Done ' + draft.recurrenceDone + ' time' + (draft.recurrenceDone===1?'':'s') + ' so far.' : '')
+          + '</div>';
+      }
+      return '<div class="field-label">Repeats</div>'
+        + '<select class="text-input" id="t-repeat-freq">'
+        + '<option value=""'+(tFreqSel===''?' selected':'')+'>Does not repeat</option>'
+        + '<option value="daily"'+(tFreqSel==='daily'?' selected':'')+'>Daily</option>'
+        + '<option value="weekly"'+(tFreqSel==='weekly'?' selected':'')+'>Weekly</option>'
+        + '<option value="custom"'+(tFreqSel==='custom'?' selected':'')+'>Custom - pick days of the week</option>'
+        + '<option value="monthly"'+(tFreqSel==='monthly'?' selected':'')+'>Monthly</option>'
+        + '<option value="yearly"'+(tFreqSel==='yearly'?' selected':'')+'>Yearly</option>'
+        + '</select>'
+        + tDetail;
+    }
+
+    // Redraws just the repeat block, leaving every other field -- including the date input the
+    // person may still have open -- exactly where it was.
+    function refreshTaskRepeat(){
+      var wrap = document.getElementById('m-repeat');
+      if(!wrap) return;
+      wrap.innerHTML = taskRepeatHtml();
+      bindTaskRepeat();
+    }
+
+    function bindTaskRepeat(){
+      var tFreqEl = document.getElementById('t-repeat-freq');
+      if(tFreqEl) tFreqEl.addEventListener('change', function(e){
+        var picked = e.target.value;
+        if(!picked){ draft.recurrence = null; }
+        else {
+          var realFreq = picked === 'custom' ? 'weekly' : picked;
+          var keep = (draft.recurrence && draft.recurrence.byWeekday && draft.recurrence.byWeekday.length)
+            ? draft.recurrence.byWeekday.slice() : null;
+          draft.recurrence = {
+            freq: realFreq, interval: 1,
+            byWeekday: realFreq === 'weekly' ? (keep || [new Date(draft.due+'T00:00:00').getDay()]) : null,
+            until: null, count: null
+          };
+        }
+        refreshTaskRepeat();
+      });
+      var tInt = document.getElementById('t-interval');
+      if(tInt) tInt.addEventListener('input', function(e){ draft.recurrence.interval = Math.max(1, parseInt(e.target.value,10)||1); });
+      document.querySelectorAll('#t-weekdays button').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var dow = parseInt(btn.dataset.dow,10);
+          var list = (draft.recurrence.byWeekday || []).slice();
+          var i = list.indexOf(dow);
+          if(i === -1) list.push(dow);
+          else if(list.length > 1) list.splice(i, 1);
+          list.sort(function(a,b){ return a-b; });
+          draft.recurrence.byWeekday = list;
+          refreshTaskRepeat();
+        });
+      });
+      document.querySelectorAll('input[name="t-ends"]').forEach(function(radio){
+        radio.addEventListener('change', function(){
+          if(radio.value === 'never'){ draft.recurrence.until = null; draft.recurrence.count = null; }
+          else if(radio.value === 'until'){ draft.recurrence.until = draft.recurrence.until || dateAdd(draft.due, 90); draft.recurrence.count = null; }
+          else { draft.recurrence.count = draft.recurrence.count || 5; draft.recurrence.until = null; }
+          refreshTaskRepeat();
+        });
+      });
+      var tUntil = document.getElementById('t-until');
+      if(tUntil) tUntil.addEventListener('change', function(e){ draft.recurrence.until = e.target.value || null; });
+      var tCount = document.getElementById('t-count');
+      if(tCount) tCount.addEventListener('input', function(e){ draft.recurrence.count = Math.max(1, parseInt(e.target.value,10)||1); });
+    }
+
     function renderTaskForm(){
       var qkey = quadrantOf(draft);
       var priorityBtns = QUADRANT_ORDER.map(function(k){
@@ -3665,57 +3774,7 @@
           + '</div>';
       }
 
-      /* Repeats. A repeating task needs a date to repeat from, so the control only appears
-         once a due date is set -- otherwise "every Tuesday" has nothing to anchor to. */
-      var tFreq = draft.recurrence ? draft.recurrence.freq : '';
-      var tFreqSel = tFreq;
-      if(tFreq === 'weekly' && draft.recurrence.byWeekday && draft.recurrence.byWeekday.length > 1) tFreqSel = 'custom';
-      var repeatHtml = '';
-      if(!draft.due){
-        repeatHtml = '<div class="field-label">Repeats</div>'
-          + '<div class="settings-help" style="margin-top:0;">Set a due date first, and you can make this task repeat from it.</div>';
-      } else {
-        var tWeekPicker = '';
-        if(tFreq === 'weekly'){
-          if(!(draft.recurrence.byWeekday && draft.recurrence.byWeekday.length)){
-            draft.recurrence.byWeekday = [new Date(draft.due+'T00:00:00').getDay()];
-          }
-          var tDays = draft.recurrence.byWeekday;
-          tWeekPicker = '<div class="field-label">Repeat on</div><div class="weekday-picker" id="t-weekdays">'
-            + WEEKDAY_LABELS.map(function(lbl,i){
-                return '<button type="button" data-dow="'+i+'" data-full="'+WEEKDAY_FULL[i]+'" aria-pressed="'+(tDays.indexOf(i)!==-1)+'" class="'+(tDays.indexOf(i)!==-1?'selected':'')+'">'+lbl+'</button>';
-              }).join('')
-            + '</div>';
-        }
-        var tDetail = '';
-        if(tFreq){
-          var tEnds = draft.recurrence.until ? 'until' : (draft.recurrence.count ? 'count' : 'never');
-          tDetail = '<div class="row-2" style="margin-top:10px;">'
-            + '<div><div class="field-label" style="margin-top:0;">Every</div><input type="number" min="1" class="text-input" id="t-interval" value="'+(draft.recurrence.interval||1)+'"></div>'
-            + '<div><div class="field-label" style="margin-top:0;">&nbsp;</div><div style="padding:9px 0;font-size:12.5px;color:var(--ink-muted);">'+({daily:'day(s)',weekly:'week(s)',monthly:'month(s)',yearly:'year(s)'}[tFreq])+'</div></div>'
-            + '</div>'
-            + tWeekPicker
-            + '<div class="field-label">Ends</div>'
-            + '<div class="ends-row">'
-            + '<label class="ends-option"><input type="radio" name="t-ends" value="never" '+(tEnds==='never'?'checked':'')+'> Never</label>'
-            + '<label class="ends-option"><input type="radio" name="t-ends" value="until" '+(tEnds==='until'?'checked':'')+'> On date <input type="date" id="t-until" value="'+(draft.recurrence.until||'')+'" '+(tEnds!=='until'?'disabled':'')+'></label>'
-            + '<label class="ends-option"><input type="radio" name="t-ends" value="count" '+(tEnds==='count'?'checked':'')+'> After <input type="number" min="1" id="t-count" value="'+(draft.recurrence.count||5)+'" '+(tEnds!=='count'?'disabled':'')+'> times</label>'
-            + '</div>'
-            + '<div class="repeat-summary">'+escapeHtml(describeRecurrence(draft.recurrence))
-            + (draft.recurrenceDone ? ' Done ' + draft.recurrenceDone + ' time' + (draft.recurrenceDone===1?'':'s') + ' so far.' : '')
-            + '</div>';
-        }
-        repeatHtml = '<div class="field-label">Repeats</div>'
-          + '<select class="text-input" id="t-repeat-freq">'
-          + '<option value=""'+(tFreqSel===''?' selected':'')+'>Does not repeat</option>'
-          + '<option value="daily"'+(tFreqSel==='daily'?' selected':'')+'>Daily</option>'
-          + '<option value="weekly"'+(tFreqSel==='weekly'?' selected':'')+'>Weekly</option>'
-          + '<option value="custom"'+(tFreqSel==='custom'?' selected':'')+'>Custom - pick days of the week</option>'
-          + '<option value="monthly"'+(tFreqSel==='monthly'?' selected':'')+'>Monthly</option>'
-          + '<option value="yearly"'+(tFreqSel==='yearly'?' selected':'')+'>Yearly</option>'
-          + '</select>'
-          + tDetail;
-      }
+      var repeatHtml = taskRepeatHtml();
 
       var html = ''
         + '<div class="scrim" id="scrim">'
@@ -3727,7 +3786,7 @@
         + '<div><div class="field-label" style="margin-top:0;">Due date</div><input type="date" id="m-due" value="'+(draft.due||'')+'"></div>'
         + '<div><div class="field-label" style="margin-top:0;">Status</div><button class="status-toggle'+(draft.completed?' complete':'')+'" id="m-status">'+(draft.completed?icon('refresh')+' Mark incomplete':icon('check')+' Mark complete')+'</button></div>'
         + '</div>'
-        + repeatHtml
+        + '<div id="m-repeat">' + repeatHtml + '</div>'
         + '<div class="field-label">Tags</div><div class="tag-list" id="m-tags">'+tagsHtml+'</div>'
         + '<input class="dashed-input" id="m-tag-input" placeholder="Add a tag, press Enter">'
         + '<div class="field-label">Subtasks</div><div id="m-subtasks">'+subtasksHtml+'</div>'
@@ -3784,51 +3843,12 @@
       document.getElementById('m-due').addEventListener('change', function(e){
         draft.due = e.target.value || null;
         if(!draft.due) draft.recurrence = null;   // nothing left to repeat from
-        renderTaskForm();
+        // Only the repeat block depends on the due date, so only the repeat block is redrawn.
+        // A full re-render here would replace this very input while the picker is still open.
+        refreshTaskRepeat();
       });
 
-      var tFreqEl = document.getElementById('t-repeat-freq');
-      if(tFreqEl) tFreqEl.addEventListener('change', function(e){
-        var picked = e.target.value;
-        if(!picked){ draft.recurrence = null; }
-        else {
-          var realFreq = picked === 'custom' ? 'weekly' : picked;
-          var keep = (draft.recurrence && draft.recurrence.byWeekday && draft.recurrence.byWeekday.length)
-            ? draft.recurrence.byWeekday.slice() : null;
-          draft.recurrence = {
-            freq: realFreq, interval: 1,
-            byWeekday: realFreq === 'weekly' ? (keep || [new Date(draft.due+'T00:00:00').getDay()]) : null,
-            until: null, count: null
-          };
-        }
-        renderTaskForm();
-      });
-      var tInt = document.getElementById('t-interval');
-      if(tInt) tInt.addEventListener('input', function(e){ draft.recurrence.interval = Math.max(1, parseInt(e.target.value,10)||1); });
-      document.querySelectorAll('#t-weekdays button').forEach(function(btn){
-        btn.addEventListener('click', function(){
-          var dow = parseInt(btn.dataset.dow,10);
-          var list = (draft.recurrence.byWeekday || []).slice();
-          var i = list.indexOf(dow);
-          if(i === -1) list.push(dow);
-          else if(list.length > 1) list.splice(i, 1);
-          list.sort(function(a,b){ return a-b; });
-          draft.recurrence.byWeekday = list;
-          renderTaskForm();
-        });
-      });
-      document.querySelectorAll('input[name="t-ends"]').forEach(function(radio){
-        radio.addEventListener('change', function(){
-          if(radio.value === 'never'){ draft.recurrence.until = null; draft.recurrence.count = null; }
-          else if(radio.value === 'until'){ draft.recurrence.until = draft.recurrence.until || dateAdd(draft.due, 90); draft.recurrence.count = null; }
-          else { draft.recurrence.count = draft.recurrence.count || 5; draft.recurrence.until = null; }
-          renderTaskForm();
-        });
-      });
-      var tUntil = document.getElementById('t-until');
-      if(tUntil) tUntil.addEventListener('change', function(e){ draft.recurrence.until = e.target.value || null; });
-      var tCount = document.getElementById('t-count');
-      if(tCount) tCount.addEventListener('input', function(e){ draft.recurrence.count = Math.max(1, parseInt(e.target.value,10)||1); });
+      bindTaskRepeat();
 
       document.getElementById('m-status').addEventListener('click', function(){
         draft.completed = !draft.completed;
@@ -4512,7 +4532,11 @@
           title: (draft.title||'').trim() || 'Untitled event',
           category: draft.category, attendees: draft.attendees.slice(),
           date: draft.date, endDate: draft.endDate || null,
+          // endTime was missing here, so every duration change was thrown away on save and the
+          // event kept whatever length it already had. Anything editable in this modal has to
+          // be listed -- the save overwrites from this object, it doesn't merge the draft.
           allDay: draft.allDay, time: draft.allDay ? null : draft.time,
+          endTime: draft.allDay ? null : (draft.endTime || null),
           location: draft.location||'', notes: draft.notes||'',
           recurrence: draft.recurrence ? Object.assign({}, draft.recurrence) : null
         };
