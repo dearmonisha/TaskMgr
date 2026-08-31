@@ -95,6 +95,12 @@
   .quick-add button.btn-add-detail:hover{background:rgba(70,44,25,0.06);opacity:1;}
 
   .stats-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;align-items:center;}
+  .stats-row.is-empty{display:none;}   /* drop the top margin too, not just the content */
+
+  /* Confetti for a finished task. Purely decorative, so it's aria-hidden, never intercepts a
+     click, and doesn't run at all for anyone who asked for reduced motion. */
+  .confetti-layer{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;}
+  .confetti-bit{position:absolute;width:8px;height:8px;border-radius:1px;will-change:transform,opacity;}
   .stat-pill{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--hairline);padding:5px 12px;border-radius:var(--radius-pill);font-size:12px;font-weight:600;color:var(--ink-muted);}
   .stat-dot{width:8px;height:8px;border-radius:50%;flex:none;}
   .stat-pill.done-today{background:#e6f3e7;border-color:#bfe0c2;color:#2c6b30;}
@@ -125,6 +131,10 @@
   .axis-left{grid-column:1;text-align:center;font-size:12px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;text-decoration:underline;text-underline-offset:4px;color:var(--ink-muted);writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;}
   .axis-left.important{grid-row:2;}
   .axis-left.not-important{grid-row:3;}
+  /* When a row's quadrants are both collapsed the rotated label is the tallest thing in it, so
+     it would hold the row open on its own and leave its underline dangling past the panels.
+     Pinned to the top it reads alongside the headers instead. */
+  .matrix-cross.has-collapsed .axis-left{align-self:start;}
 
   .quadrant{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius-panel);display:flex;flex-direction:column;overflow:hidden;}
   .q-do-first{grid-column:2;grid-row:2;}
@@ -152,6 +162,17 @@
   .q-eliminate .q-body.drag-over{background:var(--eliminate-tint);color:var(--eliminate);}
 
   .q-empty{margin:auto;text-align:center;font-style:italic;color:var(--ink-muted);font-size:12.5px;padding:20px;}
+  /* An empty section is its header and nothing else. align-self stops the grid stretching it
+     back to the height of its tallest neighbour, which would undo the whole point. */
+  .quadrant.is-collapsed{align-self:start;}
+  .quadrant.is-collapsed .q-header{border-bottom:0;border-radius:var(--radius-panel);}
+  .quadrant.is-collapsed .q-title,.quadrant.is-collapsed .q-count{opacity:.72;}
+  /* Empty quadrants are still drop targets -- the panel stands in for the missing body. */
+  .quadrant.is-collapsed.drag-over{border-color:currentColor;border-style:dashed;}
+  .q-do-first.is-collapsed.drag-over{background:var(--do-first-tint);color:var(--do-first);}
+  .q-schedule.is-collapsed.drag-over{background:var(--schedule-tint);color:var(--schedule);}
+  .q-delegate.is-collapsed.drag-over{background:var(--delegate-tint);color:var(--delegate);}
+  .q-eliminate.is-collapsed.drag-over{background:var(--eliminate-tint);color:var(--eliminate);}
 
   /* ---------- Task card ---------- */
   .task-card{background:var(--paper);border:1px solid var(--hairline);border-radius:var(--radius-card);padding:12px 14px;box-shadow:0 2px 6px rgba(50,35,24,0.12);cursor:pointer;position:relative;}
@@ -942,6 +963,9 @@
     #open-my-calendars{display:none;}           /* reachable from the settings sheet */
     #add-goal-btn,#add-dream-btn{display:none;} /* the FAB does these now */
     #add-event-btn{display:none;}               /* the FAB does this now */
+    /* Its only child is "Add Task…", which the FAB already covers -- an empty flex row would
+       still take a gap's worth of a small screen. */
+    #task-toolbar .quick-add{display:none;}
 
     .banner{font-size:12px;padding:10px 12px;gap:8px;margin:10px 0 0;border-radius:12px;flex-wrap:wrap;}
     .banner span{flex:1 1 100%;}
@@ -1085,6 +1109,7 @@
     /* min-height is set by applyFillHeights() from the element's real offset — a CSS
        calc() can't know how tall the toolbars and countdown strip ended up. */
     .quadrant{height:100%;min-height:0;}
+    .quadrant.is-collapsed{height:auto;}   /* nothing in it to scroll, so nothing to fill */
     .q-body{flex:1 1 auto;min-height:0;max-height:none;padding:14px;}
     .matrix-cross.matrix-empty{min-height:0;}
     .matrix-cross.matrix-empty .q-body{min-height:170px;}
@@ -1211,15 +1236,9 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" id="search-input" placeholder="Search tasks or tags">
         </div>
-        <div class="seg3 hidden" id="board-style-toggle" style="width:158px;" title="How your task board is laid out">
-          <button type="button" data-board="horizon">By date</button>
-          <button type="button" data-board="matrix">Matrix</button>
-        </div>
       </div>
-      <div class="quick-add">
-        <input type="text" id="quick-add-input" placeholder="Quick add a task… try 'urgent' or 'tomorrow'">
-        <button id="quick-add-btn">Add</button>
-        <button id="add-task-full-btn" class="btn-add-detail" title="Add a task with all details set up front">Add Task…</button>
+      <div class="quick-add" style="justify-content:flex-end;">
+        <button id="add-task-full-btn" title="Add a task with all details set up front">Add Task…</button>
       </div>
     </div>
 
@@ -1281,6 +1300,7 @@
 
 <div id="modal-root"></div>
 <div class="toast-wrap"><div class="toast" id="toast"></div></div>
+<div class="confetti-layer" id="confetti-layer" aria-hidden="true"></div>
 
 <script>
 (function(){
@@ -1338,8 +1358,6 @@
     return (member && member.role === 'kid') ? 'horizon' : 'matrix';
   }
   function currentBoardStyle(){ return boardStyleFor(state.currentFamilyMember); }
-  var URGENT_WORDS = ['urgent','asap','today','tomorrow','deadline','!!'];
-  var NOT_IMPORTANT_WORDS = ['maybe','someday','minor','low priority','junk','declutter'];
   var LS_TASKS = 'eisenhower_tasks_local_v1';
   var LS_CALENDAR = 'eisenhower_calendar_local_v1';
   var LS_DREAMS = 'eisenhower_dreams_local_v1';
@@ -2209,35 +2227,20 @@
 
   function renderStats(){
     renderPersonTabs();
-    var counts = {doFirst:0,schedule:0,delegate:0,eliminate:0};
+    // The per-bucket pills said exactly what the section headers below already say, twice on
+    // every screen. Only "done today" is left, because nothing else reports it -- a completed
+    // task leaves the board entirely, so without this the day's work vanishes without trace.
     var doneToday = 0;
     state.tasks.filter(personMatch).forEach(function(t){
       if(t.deleted) return;
-      if(!t.completed) counts[quadrantOf(t)]++;
       if(t.completed && t.completedAt && t.completedAt.slice(0,10) === todayStr()) doneToday++;
     });
-    var html;
-    if(currentBoardStyle() === 'horizon'){
-      var hCounts = { overdue:0, today:0, week:0, later:0, none:0 };
-      state.tasks.filter(personMatch).forEach(function(t){
-        if(t.deleted || t.completed) return;
-        hCounts[horizonBucket(t)]++;
-      });
-      // Only the columns that need attention earn a pill; "later" and "no date" are noise here.
-      html = ['overdue','today','week'].map(function(k){
-        var h = HORIZON[k];
-        return '<span class="stat-pill"><span class="stat-dot" style="background:'+h.accent+'"></span>'+hCounts[k]+' '+h.title+'</span>';
-      }).join('');
-    } else {
-      html = QUADRANT_ORDER.map(function(k){
-        var q = QUADRANTS[k];
-        return '<span class="stat-pill"><span class="stat-dot" style="background:'+q.accent+'"></span>'+counts[k]+' '+q.title+'</span>';
-      }).join('');
-    }
-    if(doneToday > 0){
-      html += '<span class="stat-pill done-today">'+icon('check')+' '+doneToday+' done today</span>';
-    }
-    document.getElementById('stats-row').innerHTML = html;
+    var row = document.getElementById('stats-row');
+    row.innerHTML = doneToday > 0
+      ? '<span class="stat-pill done-today">'+icon('check')+' '+doneToday+' done today</span>'
+      : '';
+    // An empty row still costs its top margin, so it goes away entirely when there's nothing.
+    row.classList.toggle('is-empty', doneToday === 0);
   }
 
   /* ================= FILTERING ================= */
@@ -2334,24 +2337,27 @@
     function panel(qkey){
       var q = QUADRANTS[qkey];
       var list = byQ[qkey];
-      var body = list.length
-        ? list.map(taskCardHtml).join('')
-        : '<div class="q-empty">Nothing here — drag a task over, or add one above.</div>';
-      // is-empty opts the body out of the card grid so the placeholder can centre itself.
-      return '<div class="quadrant '+q.cls+'">'
-        + '<div class="q-header">'
+      var header = '<div class="q-header">'
         + '<span class="dot" style="background:'+q.accent+'"></span>'
         + '<div class="q-header-text"><div class="q-title">'+q.title+'</div><div class="q-subtitle">'+q.subtitle+'</div></div>'
         + '<span class="q-count">'+list.length+'</span>'
-        + '</div>'
-        + '<div class="q-body'+(list.length?'':' is-empty')+'" data-quadrant="'+qkey+'">'+body+'</div>'
+        + '</div>';
+      // An empty quadrant shrinks to its header rather than holding open 220px of nothing.
+      // The drop target moves onto the panel itself so a task can still be dragged into an
+      // empty quadrant -- collapsing it must not quietly remove the way to fill it.
+      if(!list.length){
+        return '<div class="quadrant '+q.cls+' is-collapsed" data-quadrant="'+qkey+'">' + header + '</div>';
+      }
+      return '<div class="quadrant '+q.cls+'">' + header
+        + '<div class="q-body" data-quadrant="'+qkey+'">' + list.map(taskCardHtml).join('') + '</div>'
         + '</div>';
     }
 
     // A board with nothing on it shouldn't stretch to fill a 1080px-tall window — that just
     // makes four large voids. It stays compact until there's something to show.
     var boardEmpty = !tasks.length;
-    var html = '<div class="matrix-outer"><div class="matrix-cross'+(boardEmpty?' matrix-empty':'')+'">'
+    var anyCollapsed = QUADRANT_ORDER.some(function(k){ return !byQ[k].length; });
+    var html = '<div class="matrix-outer"><div class="matrix-cross'+(boardEmpty?' matrix-empty':'')+(anyCollapsed?' has-collapsed':'')+'">'
       + '<span></span>'
       + '<span class="axis-top urgent">Urgent</span>'
       + '<span class="axis-top not-urgent">Not Urgent</span>'
@@ -2463,17 +2469,21 @@
         + '</div></section>'
       : '';
 
-    function section(cls, accent, title, subtitle, list, extraCls){
-      return '<section class="quadrant horizon-col '+cls+(extraCls?' '+extraCls:'')+'">'
+    // alwaysBody: the day-filtered view is the only thing on screen, so an empty one says so in
+    // words. A bucket column among four others doesn't need to -- its header already reads "0".
+    function section(cls, accent, title, subtitle, list, extraCls, alwaysBody){
+      var collapse = !list.length && !alwaysBody;
+      return '<section class="quadrant horizon-col '+cls+(extraCls?' '+extraCls:'')+(collapse?' is-collapsed':'')+'">'
         + '<div class="q-header">'
         + '<span class="dot" style="background:'+accent+'"></span>'
         + '<div class="q-header-text"><div class="q-title">'+escapeHtml(title)+'</div><div class="q-subtitle">'+escapeHtml(subtitle)+'</div></div>'
         + '<span class="q-count">'+list.length+'</span>'
         + '</div>'
-        + '<div class="q-body'+(list.length?'':' is-empty')+'">'
-        + (list.length ? list.map(taskCardHtml).join('')
-                       : '<div class="q-empty">Nothing here.</div>')
-        + '</div></section>';
+        + (collapse ? ''
+             : '<div class="q-body'+(list.length?'':' is-empty')+'">'
+               + (list.length ? list.map(taskCardHtml).join('') : '<div class="q-empty">Nothing due then.</div>')
+               + '</div>')
+        + '</section>';
     }
     function col(key){
       var h = HORIZON[key];
@@ -2491,7 +2501,7 @@
         isToday ? HORIZON.today.accent : HORIZON.week.accent,
         'Due ' + dayFilterLabel(state.dayFilter),
         new Date(state.dayFilter+'T00:00:00').toLocaleDateString(undefined,{month:'long',day:'numeric'}),
-        dayList, 'span-all');
+        dayList, 'span-all', true);
     } else {
       board = HORIZON_ORDER.map(col).join('');
     }
@@ -3397,19 +3407,16 @@
     document.getElementById('open-family-settings').classList.toggle('hidden', isKidMode()); // roster management is adults-only
     syncMobileChrome();
     syncBoardLabels();
-    renderBoardStyleToggle();
   }
 
   // Everyone gets to choose their own board without going through Family Settings -- which
   // is adults-only, so before this a kid couldn't change their own view at all. The choice
   // lives on the family member, so it follows them to whatever device they log in on.
+  // It lives in the settings sheet now: it's a preference you set once, not a control you
+  // reach for while working, and the toolbar row is worth more on a phone.
   function renderBoardStyleToggle(){
     var el = document.getElementById('board-style-toggle');
     if(!el) return;
-    // Nowhere to save it if we don't know who this is, and it's meaningless off the board.
-    var show = state.view === 'matrix' && !!state.currentFamilyMember;
-    el.classList.toggle('hidden', !show);
-    if(!show) return;
     var style = currentBoardStyle();
     el.querySelectorAll('button').forEach(function(b){
       b.classList.toggle('active', b.dataset.board === style);
@@ -3449,6 +3456,10 @@
     if(window.innerWidth < 1025) return;
     targets.forEach(function(el){
       if(el.classList.contains('matrix-empty')) return;
+      // The rows are 1fr, so stretching the grid to the viewport would hand a collapsed
+      // quadrant's row a full share of the height anyway -- exactly the space collapsing was
+      // meant to give back. With something empty, let the grid size to its content.
+      if(el.querySelector('.is-collapsed')) return;
       var top = el.getBoundingClientRect().top + window.scrollY;
       var h = window.innerHeight - top - 34;
       if(h > 340) el.style.minHeight = Math.round(h) + 'px';
@@ -3489,7 +3500,9 @@
     root.querySelectorAll('[data-action="toggle"]').forEach(function(el){
       el.addEventListener('click', function(e){
         e.stopPropagation();
-        toggleComplete(el.dataset.id);
+        // Read the position now: completing re-renders the board, and this element goes with it.
+        var r = el.getBoundingClientRect();
+        toggleComplete(el.dataset.id, { x: r.left + r.width/2, y: r.top + r.height/2 });
       });
     });
     root.querySelectorAll('.task-card, .list-row').forEach(function(el){
@@ -3511,7 +3524,9 @@
       });
       card.addEventListener('dragend', function(){ card.classList.remove('dragging'); });
     });
-    var zones = root.querySelectorAll('.q-body');
+    // A collapsed (empty) quadrant carries data-quadrant on the panel itself, since it has no
+    // body to drop into.
+    var zones = root.querySelectorAll('[data-quadrant]');
     zones.forEach(function(zone){
       zone.addEventListener('dragover', function(e){
         e.preventDefault();
@@ -3551,7 +3566,8 @@
     return next;
   }
 
-  function toggleComplete(id){
+  // origin is the tick's position on screen, captured before the re-render removes the element.
+  function toggleComplete(id, origin){
     var t = findTask(id);
     if(!t) return;
 
@@ -3567,6 +3583,7 @@
         t.quadrantEnteredAt = nowISO();   // the aging counter is about this cycle, not the series
         logActivity(t, 'Completed for ' + fmtDate(wasDue) + ' - next ' + fmtDate(next));
         persist(); render();
+        burstConfetti(origin);   // this week's is done, even though the series carries on
         showToast('Done for ' + fmtDate(wasDue) + ' - next ' + fmtDate(next), function(){
           t.due = wasDue;
           t.recurrenceDone = wasDone;
@@ -3583,6 +3600,46 @@
     t.completedAt = t.completed ? nowISO() : null;
     if(isSharedTask(t)) logActivity(t, t.completed ? 'Marked complete' : 'Marked incomplete');
     persist(); render();
+    if(t.completed) burstConfetti(origin);   // finishing is the win; un-ticking isn't
+  }
+
+  /* A small burst thrown from wherever the tick was, because finishing something should feel
+     like finishing something. Built from a handful of absolutely-positioned bits driven by the
+     Web Animations API -- no canvas, no library, and each bit removes itself when it lands. */
+  var CONFETTI_COLORS = ['var(--do-first)','var(--schedule)','var(--delegate)','var(--eliminate)','var(--due-today)'];
+  function burstConfetti(origin){
+    var layer = document.getElementById('confetti-layer');
+    if(!layer || !origin) return;
+    // Honour the OS setting rather than the media query in our stylesheet, which only disables
+    // transitions. Also skip where animate() isn't available rather than leaving bits on screen.
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if(!document.body.animate) return;
+    // Ticking a long list quickly shouldn't leave hundreds of nodes behind.
+    if(layer.childElementCount > 120) layer.innerHTML = '';
+
+    for(var i = 0; i < 16; i++){
+      var bit = document.createElement('span');
+      bit.className = 'confetti-bit';
+      bit.style.background = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+      bit.style.left = origin.x + 'px';
+      bit.style.top = origin.y + 'px';
+      if(i % 3 === 0) bit.style.borderRadius = '50%';
+      layer.appendChild(bit);
+
+      // Up and out first, then down past where it started -- a lob, not an explosion.
+      var angle = (-Math.PI / 2) + (Math.random() - 0.5) * 2.1;
+      var reach = 70 + Math.random() * 90;
+      var midX = Math.cos(angle) * reach, midY = Math.sin(angle) * reach;
+      var anim = bit.animate([
+        { transform:'translate(-50%,-50%) rotate(0deg) scale(1)', opacity:1 },
+        { transform:'translate(calc(-50% + '+midX.toFixed(1)+'px), calc(-50% + '+midY.toFixed(1)+'px)) rotate('+Math.round(Math.random()*260)+'deg) scale(1)',
+          opacity:1, offset:0.45 },
+        { transform:'translate(calc(-50% + '+(midX*1.35).toFixed(1)+'px), calc(-50% + '+(midY + 150 + Math.random()*90).toFixed(1)+'px)) rotate('+Math.round(360+Math.random()*360)+'deg) scale(.85)',
+          opacity:0 }
+      ], { duration: 900 + Math.random()*500, easing:'cubic-bezier(.22,.7,.36,1)' });
+      // Closure per bit so each removes itself, not whichever one the loop ended on.
+      (function(node){ anim.onfinish = function(){ node.remove(); }; })(bit);
+    }
   }
 
   function moveToQuadrant(id, qkey){
@@ -3650,30 +3707,6 @@
     hideToast();
   }
 
-  function guessQuadrantFromText(text){
-    var lower = text.toLowerCase();
-    var urgent = URGENT_WORDS.some(function(w){ return lower.indexOf(w) !== -1; });
-    var notImportant = NOT_IMPORTANT_WORDS.some(function(w){ return lower.indexOf(w) !== -1; });
-    return { importance: !notImportant, urgency: urgent };
-  }
-
-  function quickAddTask(text){
-    text = text.trim();
-    if(!text) return;
-    var guess = guessQuadrantFromText(text);
-    var task = {
-      id: uid(), title: text, notes: '',
-      importance: guess.importance, urgency: guess.urgency,
-      assignees: defaultTaskAssignees(), due: null, tags: [],
-      subtasks: [], completed: false, completedAt: null,
-      quadrantEnteredAt: nowISO(), activity: []
-    };
-    state.tasks.push(task);
-    persist(); render();
-    var qkey = quadrantOf(task);
-    showToast('Added to '+QUADRANTS[qkey].title, false, 2400);
-  }
-
   /* ================= TOAST ================= */
   var toastTimer;
   function showToast(message, withUndo, duration){
@@ -3699,7 +3732,7 @@
   function openAddTaskModal(){
     var t = {
       id: uid(), title: '', notes: '',
-      importance: true, urgency: false, // default: Schedule quadrant, same "no signal" default as quick-add
+      importance: true, urgency: false, // default: Schedule quadrant -- important, not on fire yet
       assignees: defaultTaskAssignees(), due: null, tags: [],
       subtasks: [], completed: false, completedAt: null,
       quadrantEnteredAt: nowISO(), activity: []
@@ -5871,7 +5904,17 @@
     var html = ''
       + '<div class="scrim" id="scrim">'
       + '<div class="modal">'
-      + '<div class="field-label" style="margin-top:0;">Sync</div>'
+      // Set once and then left alone, so it belongs here rather than taking a slot in a toolbar
+      // that's read every day.
+      + (state.currentFamilyMember ? (
+          '<div class="field-label" style="margin-top:0;">My task board</div>'
+          + '<div class="settings-help" style="margin-top:0;">By date sorts tasks into Overdue / Today / This week. Matrix sorts them by urgent and important. This is your choice — it doesn\'t change anyone else\'s.</div>'
+          + '<div class="seg3" id="board-style-toggle" style="width:200px;margin-top:8px;">'
+          + '<button type="button" data-board="horizon">By date</button>'
+          + '<button type="button" data-board="matrix">Matrix</button>'
+          + '</div>'
+        ) : '')
+      + '<div class="field-label"'+(state.currentFamilyMember?'':' style="margin-top:0;"')+'>Sync</div>'
       + '<div id="s-health" class="settings-help" style="margin-top:0;">Checking…</div>'
       + '<div class="settings-actions"><button class="btn-primary" id="s-refresh">Sync now</button></div>'
 
@@ -5902,6 +5945,19 @@
     document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id==='scrim') close(); });
     document.getElementById('s-cancel').addEventListener('click', close);
     document.getElementById('s-refresh').addEventListener('click', function(){ retrySyncNow(); refreshHealth(); });
+
+    renderBoardStyleToggle();
+    var boardToggle = document.getElementById('board-style-toggle');
+    if(boardToggle) boardToggle.addEventListener('click', function(e){
+      var btn = e.target.closest('button[data-board]');
+      if(!btn || !state.currentFamilyMember) return;
+      state.currentFamilyMember.board = btn.dataset.board;
+      state.dayFilter = null;      // the day strip only exists on one of the two boards
+      state.subjectFilter = null;
+      persistCalendar();           // it's a property of the family member, so it syncs everywhere
+      renderBoardStyleToggle();    // the sheet stays open, so it has to show the new choice
+      render();
+    });
 
     function refreshHealth(){
       var el = document.getElementById('s-health');
@@ -6318,17 +6374,6 @@
     state.search = e.target.value;
     render();
   });
-  document.getElementById('quick-add-btn').addEventListener('click', function(){
-    var input = document.getElementById('quick-add-input');
-    quickAddTask(input.value);
-    input.value = '';
-  });
-  document.getElementById('quick-add-input').addEventListener('keydown', function(e){
-    if(e.key === 'Enter'){
-      quickAddTask(e.target.value);
-      e.target.value = '';
-    }
-  });
   document.getElementById('open-settings').addEventListener('click', openSettingsModal);
   document.getElementById('add-task-full-btn').addEventListener('click', openAddTaskModal);
   document.getElementById('setup-banner-connect').addEventListener('click', openSettingsModal);
@@ -6355,15 +6400,6 @@
   document.getElementById('open-family-settings').addEventListener('click', openFamilySettingsModal);
   document.getElementById('add-dream-btn').addEventListener('click', openAddDreamModal);
   document.getElementById('add-goal-btn').addEventListener('click', openAddGoalModal);
-  document.getElementById('board-style-toggle').addEventListener('click', function(e){
-    var btn = e.target.closest('button[data-board]');
-    if(!btn || !state.currentFamilyMember) return;
-    state.currentFamilyMember.board = btn.dataset.board;
-    state.dayFilter = null;      // the day strip only exists on one of the two boards
-    state.subjectFilter = null;
-    persistCalendar();           // it's a property of the family member, so it syncs everywhere
-    render();
-  });
   document.getElementById('compass-mode-toggle').addEventListener('click', function(e){
     var btn = e.target.closest('button[data-mode]');
     if(!btn || !state.compassFilter) return;
