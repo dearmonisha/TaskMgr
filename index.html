@@ -743,6 +743,12 @@
     border-radius:8px;cursor:pointer;transition:background .12s ease;
   }
   .load-day:hover{background:var(--surface-2);}
+  /* Where next week starts. The This week column stops at Saturday, so the strip says where. */
+  .load-day.newweek{margin-left:9px;position:relative;}
+  .load-day.newweek::before{
+    content:'';position:absolute;left:-6px;top:6px;bottom:6px;
+    border-left:1px dashed var(--hairline-strong);
+  }
   .load-day:focus-visible{outline:2px solid var(--schedule);outline-offset:1px;}
   .load-bar{display:block;width:100%;border-radius:5px 5px 2px 2px;background:var(--schedule);min-height:4px;transition:background .12s ease;}
   .load-day.busy .load-bar{background:var(--overdue);}
@@ -759,6 +765,20 @@
     color:var(--schedule);font-weight:600;text-decoration:underline;cursor:pointer;
   }
   .subject-bar{margin-bottom:18px;}
+
+  /* ---------- Hiding imported events ---------- */
+  .hide-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px;}
+  .hidden-list{
+    flex-basis:100%;margin-top:10px;padding-top:10px;
+    border-top:1px dashed var(--hairline-strong);
+  }
+  .hidden-row{
+    display:flex;align-items:center;gap:9px;padding:5px 0;
+    border-bottom:1px solid var(--hairline);
+  }
+  .hidden-row:last-child{border-bottom:0;}
+  .hidden-title{flex:1;min-width:0;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .hidden-when{font-size:11px;color:var(--ink-muted);white-space:nowrap;font-variant-numeric:tabular-nums;}
 
   @media (max-width:1024px){ .horizon-board{grid-template-columns:repeat(2,minmax(0,1fr));} }
   @media (max-width:640px){
@@ -1281,18 +1301,35 @@
   var HORIZON = {
     overdue: { key:'overdue', title:'Overdue',   subtitle:'past its date',   accent:'var(--overdue)', cls:'h-overdue' },
     today:   { key:'today',   title:'Today',     subtitle:'due today',       accent:'var(--due-today)', cls:'h-today' },
-    week:    { key:'week',    title:'This week', subtitle:'next 7 days',     accent:'var(--schedule)', cls:'h-week' },
-    later:   { key:'later',   title:'Later',     subtitle:'beyond a week',   accent:'var(--delegate)', cls:'h-later' },
+    week:    { key:'week',    title:'This week', subtitle:'before Sunday',   accent:'var(--schedule)', cls:'h-week' },
+    later:   { key:'later',   title:'Later',     subtitle:'next week onward',accent:'var(--delegate)', cls:'h-later' },
     none:    { key:'none',    title:'No date yet', subtitle:'pick one up when there\'s a gap', accent:'var(--ink-faint)', cls:'h-none' }
   };
   var HORIZON_ORDER = ['overdue','today','week','later','none'];
+
+  // The calendar week this date sits in, Sunday through Saturday.
+  function weekStart(dateStr){
+    var d = new Date(dateStr + 'T00:00:00');
+    return dateAdd(dateStr, -d.getDay());
+  }
+  function weekEnd(dateStr){ return dateAdd(weekStart(dateStr), 6); }
 
   function horizonBucket(task){
     if(!task.due) return 'none';
     var today = todayStr();
     if(task.due < today) return 'overdue';
     if(task.due === today) return 'today';
-    return task.due <= dateAdd(today, 7) ? 'week' : 'later';
+    // "This week" means the week on the wall -- Sunday to Saturday -- not a rolling seven days.
+    // On a Thursday, "next 7 days" reaches into next week, so something due next Wednesday
+    // showed up under "This week", which is exactly the thing a student plans around.
+    return task.due <= weekEnd(today) ? 'week' : 'later';
+  }
+
+  // On a Saturday the week is already over, so "before Sunday" would be a promise of nothing.
+  function horizonSubtitle(key){
+    if(key !== 'week') return HORIZON[key].subtitle;
+    var today = todayStr();
+    return weekEnd(today) === today ? 'the week is done' : 'before Sunday';
   }
 
   // Adults keep the matrix; kids get the horizon board unless someone says otherwise.
@@ -1427,6 +1464,7 @@
     search: '',
     subjectFilter: null,   // horizon board: which subject tag is showing
     dayFilter: null,       // horizon board: 'YYYY-MM-DD' picked off the week strip, or null
+    showHiddenImports: false, // temporarily reveal hidden imported events, for un-hiding them
     ghSha: null,
     syncStatus: 'idle', // idle | busy | ok | err | local
     deletedBuffer: null, // {task, index} for undo
@@ -2358,6 +2396,10 @@
       var h = 10 + Math.round((x.n / (max || 1)) * 46);
       var cls = x.n === 0 ? ' empty' : (x.n === max && max > 1 ? ' busy' : '');
       if(state.dayFilter === x.date) cls += ' picked';
+      // The strip runs seven days from today, so it usually crosses into next week. Marking
+      // where that happens keeps it honest against the "This week" column beside it, which
+      // stops at Saturday.
+      if(x.date !== today && new Date(x.date+'T00:00:00').getDay() === 0) cls += ' newweek';
       var label = x.date === today ? 'Today' : new Date(x.date+'T00:00:00').toLocaleDateString(undefined,{weekday:'short'});
       // A button, not a div: the whole point is that it's tappable, and a kid on a phone
       // shouldn't have to guess. Keyboard and screen readers get it for free.
@@ -2380,13 +2422,15 @@
       var names = peaks.map(function(x){
         return x.date === today ? 'Today' : new Date(x.date+'T00:00:00').toLocaleDateString(undefined,{weekday:'long'});
       });
-      if(max < 2) note = 'A light week — nothing stacked up.';
+      if(max < 2) note = 'Nothing stacked up in the next 7 days.';
       else if(names.length === 1) note = names[0] + ' has ' + max + ' things due.';
       else note = names.slice(0,-1).join(', ') + ' and ' + names[names.length-1] + ' each have ' + max + ' due.';
     }
-    return '<section class="week-load"><h2>The week ahead</h2><div class="load-row" id="load-row">'+bars+'</div>'
+    // Named for what it actually shows. It rolls forward from today, so calling it "the week"
+    // would contradict the This week column, which stops on Saturday.
+    return '<section class="week-load"><h2>The next 7 days</h2><div class="load-row" id="load-row">'+bars+'</div>'
       + '<p class="load-note">' + escapeHtml(note)
-      + (state.dayFilter ? ' <button type="button" class="load-clear" id="load-clear">Show the whole week</button>' : '')
+      + (state.dayFilter ? ' <button type="button" class="load-clear" id="load-clear">Show all 7 days</button>' : '')
       + '</p></section>';
   }
 
@@ -2433,7 +2477,7 @@
     }
     function col(key){
       var h = HORIZON[key];
-      return section(h.cls, h.accent, h.title, h.subtitle, byBucket[key], key==='none' ? 'span-all' : '');
+      return section(h.cls, h.accent, h.title, horizonSubtitle(key), byBucket[key], key==='none' ? 'span-all' : '');
     }
 
     // Picking a day off the strip collapses the five columns into one. Keeping the grid would
@@ -2567,6 +2611,52 @@
       endDate: span ? dateAdd(date, span) : master.endDate,
       isOverride:false, isVirtual:true, masterId: masterId
     });
+  }
+
+  /* Hiding imported events.
+
+     A subscribed feed is all-or-nothing at the source -- a school calendar carries every
+     year group's assemblies, a sports feed carries fixtures for teams your kid isn't on.
+     Removing the whole subscription is too blunt, so single events (or a whole repeating
+     series) can be hidden instead.
+
+     The list lives on the subscription rather than on the person: an imported event is only
+     ever visible to the subscription's owner anyway, so keeping it there means it syncs to
+     every device that person uses, survives a re-sync, and shows up in My Calendars -- which
+     is where you'd go looking for it. Keys are the event id for a whole series, or
+     "<id>::<date>" for one date of one. Both are stable across re-syncs because the imported
+     id is derived from the feed's own UID. */
+  function hideKeyFor(event, dateStr){ return dateStr ? (event.id + '::' + dateStr) : event.id; }
+
+  function isHiddenImport(event, dateStr){
+    if(!event || event.source !== 'ics') return false;
+    var sub = findSubscription(event.subscriptionId);
+    var list = sub && sub.hidden;
+    if(!list || !list.length) return false;
+    return list.indexOf(hideKeyFor(event, dateStr)) !== -1;
+  }
+
+  function setImportHidden(event, dateStr, hidden){
+    var sub = findSubscription(event.subscriptionId);
+    if(!sub) return;
+    var key = hideKeyFor(event, dateStr);
+    var list = (sub.hidden || []).slice();
+    var i = list.indexOf(key);
+    if(hidden && i === -1) list.push(key);
+    else if(!hidden && i !== -1) list.splice(i, 1);
+    sub.hidden = list;
+    persistCalendar();
+  }
+
+  // Everything currently hidden on one subscription, resolved back to something readable.
+  // A key whose event has since vanished from the feed is dropped -- it can't come back.
+  function hiddenEntriesFor(sub){
+    return (sub.hidden || []).map(function(key){
+      var parts = key.split('::');
+      var ev = state.events.find(function(e){ return e.id === parts[0]; });
+      if(!ev) return null;
+      return { key: key, title: ev.title, date: parts[1] || ev.date, wholeSeries: !parts[1] && !!ev.recurrence };
+    }).filter(Boolean);
   }
 
   // Which "calendar" an occurrence belongs to, for the source pills.
@@ -4072,6 +4162,9 @@
 
     state.events.forEach(function(ev){
       var span = eventSpanDays(ev);
+      // A whole imported series can be hidden; skipping it here keeps it out of every view at
+      // once rather than leaving each one to remember.
+      if(isHiddenImport(ev, null) && !state.showHiddenImports) return;
 
       if(ev.recurrenceId || !ev.recurrence){
         // one-off event, or a standalone override tied to a series
@@ -4090,6 +4183,7 @@
       function emit(dateStr){
         matched++;
         if(rule.count && matched > rule.count) return false;   // series is finished
+        if(isHiddenImport(ev, dateStr) && !state.showHiddenImports) return true;  // one date of a series
         if((ev.exceptionDates||[]).indexOf(dateStr) === -1 && occurrenceInRange(dateStr, span, rangeStart, rangeEnd)){
           out.push(Object.assign({}, ev, {
             occurrenceId: ev.id+'::'+dateStr, occurrenceDate: dateStr, date: dateStr,
@@ -4232,6 +4326,7 @@
     var whenLabel = sourceEvent.allDay ? fmtLong(occ.occurrenceDate) : (fmtLong(occ.occurrenceDate) + ' at ' + formatTime12(sourceEvent.time));
     var syncedLabel = sub && sub.lastSyncedAt ? ('Synced '+fmtRelative(sub.lastSyncedAt)) : 'Not synced yet';
     var canManage = sub && state.currentFamilyMember && state.currentFamilyMember.id === sub.ownerFamilyMemberId;
+    var isRepeating = !!sourceEvent.recurrence;
 
     var html = ''
       + '<div class="scrim" id="scrim">'
@@ -4241,7 +4336,19 @@
       + '<div class="field-label" style="margin-top:0;">When</div><div style="font-size:13px;">'+whenLabel+(sourceEvent.endDate?' – '+fmtLong(sourceEvent.endDate):'')+'</div>'
       + (sourceEvent.location ? '<div class="field-label">Location</div><div style="font-size:13px;">'+escapeHtml(sourceEvent.location)+'</div>' : '')
       + (sourceEvent.notes ? '<div class="field-label">Notes</div><div style="font-size:13px;white-space:pre-wrap;">'+escapeHtml(sourceEvent.notes)+'</div>' : '')
-      + '<div class="settings-help">This event is read-only here — it\'s managed by the source calendar. To change it, edit it there; to stop seeing it, remove the subscription from My Calendars.</div>'
+      + '<div class="settings-help">This event is read-only here — it\'s managed by the source calendar. To change it, edit it there.</div>'
+      // A feed carries everything the school or club publishes, not just what applies to you.
+      // Hiding one entry beats dropping the whole subscription to be rid of it.
+      + (canManage ? (
+          '<div class="field-label">Not relevant?</div>'
+          + '<div class="hide-actions">'
+          + (isRepeating
+              ? '<button type="button" class="btn-sm" id="ie-hide-one">Hide just this one</button>'
+                + '<button type="button" class="btn-sm" id="ie-hide-all">Hide every one of these</button>'
+              : '<button type="button" class="btn-sm" id="ie-hide-one">Hide this event</button>')
+          + '</div>'
+          + '<div class="settings-help" style="margin-top:6px;">It stays hidden through re-syncs. Bring it back from My Calendars.</div>'
+        ) : '')
       + '<div class="modal-footer">'
       + (canManage ? '<button class="btn-sm" id="ie-manage">Manage subscription</button>' : '<span></span>')
       + '<button class="btn-close" id="ie-close">Close</button>'
@@ -4252,6 +4359,25 @@
     document.getElementById('ie-close').addEventListener('click', function(){ document.getElementById('modal-root').innerHTML=''; });
     var manageBtn = document.getElementById('ie-manage');
     if(manageBtn) manageBtn.addEventListener('click', function(){ openMyCalendarsModal(); });
+
+    function hideIt(dateStr, label){
+      setImportHidden(sourceEvent, dateStr, true);
+      document.getElementById('modal-root').innerHTML = '';
+      state.showHiddenImports = false;
+      render();
+      showToast(label, false, 3200);
+    }
+    var hideOne = document.getElementById('ie-hide-one');
+    if(hideOne) hideOne.addEventListener('click', function(){
+      // A one-off has no per-date key -- hiding "this one" is hiding the event.
+      hideIt(isRepeating ? occ.occurrenceDate : null,
+        isRepeating ? ('Hidden for ' + fmtDate(occ.occurrenceDate) + '. Bring it back from My Calendars.')
+                    : 'Event hidden. Bring it back from My Calendars.');
+    });
+    var hideAll = document.getElementById('ie-hide-all');
+    if(hideAll) hideAll.addEventListener('click', function(){
+      hideIt(null, 'All of these hidden. Bring them back from My Calendars.');
+    });
   }
 
   function openEventModal(occ){
@@ -5546,6 +5672,21 @@
           }).join('')
         + '<button type="button" class="color-reset" data-set-color="'+s.id+'" data-color="">Match the category</button>'
         + '</div>';
+      // Anything hidden from this feed is listed here, because this is where you'd come looking
+      // for an event that has quietly stopped appearing.
+      var hidden = hiddenEntriesFor(s);
+      var hiddenHtml = hidden.length
+        ? '<div class="hidden-list">'
+          + '<div class="field-label" style="margin-top:0;">Hidden — ' + hidden.length + ' ' + (hidden.length===1?'entry':'entries') + '</div>'
+          + hidden.map(function(h){
+              return '<div class="hidden-row">'
+                + '<span class="hidden-title">' + escapeHtml(h.title) + '</span>'
+                + '<span class="hidden-when">' + escapeHtml(h.wholeSeries ? 'every one' : fmtDate(h.date)) + '</span>'
+                + '<button type="button" class="btn-sm" data-unhide="'+s.id+'" data-key="'+escapeHtml(h.key)+'">Show again</button>'
+                + '</div>';
+            }).join('')
+          + '</div>'
+        : '';
       return '<div class="family-row" data-sub="'+s.id+'" style="align-items:flex-start;flex-wrap:wrap;">'
         + '<button type="button" class="color-swatch" data-open-pop="'+s.id+'" style="background:'+swatchColor+'" title="Change this calendar\'s colour"></button>'
         + '<div style="flex:1;min-width:0;">'
@@ -5558,6 +5699,7 @@
             : '<button type="button" class="btn-sm" data-action="sync-sub" data-sub="'+s.id+'">Sync now</button>')
         + '<button type="button" class="rm" data-action="rm-sub" data-sub="'+s.id+'" title="Remove" aria-label="Remove">'+icon('close')+'</button>'
         + palette
+        + hiddenHtml
         + '</div>';
     }).join('') : '<div class="list-empty">No calendars imported yet.</div>';
     document.getElementById('my-cal-list').innerHTML = html;
@@ -5602,6 +5744,16 @@
           renderMyCalendarsPanelIfOpen();
         });
         input.value = '';
+      });
+    });
+    document.querySelectorAll('[data-unhide]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var sub = findSubscription(btn.dataset.unhide);
+        if(!sub) return;
+        sub.hidden = (sub.hidden||[]).filter(function(k){ return k !== btn.dataset.key; });
+        persistCalendar();
+        renderMyCalendarsList();
+        if(state.view === 'calendar') render();
       });
     });
     document.querySelectorAll('[data-action="rm-sub"]').forEach(function(btn){
