@@ -1,7 +1,12 @@
 // Shared helpers for the sync API (Cloudflare Pages Functions + D1).
 
 export const KINDS = new Set([
-  'task', 'event', 'subscription', 'dream', 'goal', 'priority', 'profile', 'member'
+  'task', 'event', 'subscription', 'dream', 'goal', 'priority', 'profile', 'member',
+  // Event categories used to be a hardcoded list in the app; they're now rows like anything
+  // else, so a family can name and colour their own.
+  'category',
+  // The family message board.
+  'message'
 ]);
 
 export const META_KEYS = new Set(['homeTimezone', 'appTitle', 'appSubtitle']);
