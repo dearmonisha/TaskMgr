@@ -494,22 +494,22 @@
      A single column at reading width. Notes are short, so the card is quiet: the name and the
      time do the framing and the text carries the weight. */
   .msg-wrap{max-width:680px;margin:18px auto 0;display:flex;flex-direction:column;gap:16px;}
-  .msg-composer{
-    background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius-panel);
-    padding:14px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow-sm);
-  }
-  .msg-composer-head{display:flex;align-items:center;gap:9px;}
+  .msg-composer-head{display:flex;align-items:center;gap:9px;margin-bottom:12px;}
   .msg-composer-who{font-size:13px;font-weight:600;color:var(--ink-muted);}
-  .msg-composer textarea{
-    width:100%;box-sizing:border-box;resize:vertical;min-height:74px;
-    border:1px solid var(--hairline);border-radius:var(--radius-card);padding:11px 13px;
-    background:var(--surface-2);font:inherit;font-size:14px;color:var(--ink);outline:none;
+  .msg-input{
+    width:100%;box-sizing:border-box;resize:vertical;min-height:110px;
+    border:1px solid var(--hairline);border-radius:var(--radius-card);padding:12px 14px;
+    background:var(--surface-2);font:inherit;font-size:15px;color:var(--ink);outline:none;
   }
-  .msg-composer textarea:focus{border-color:var(--accent);}
-  .msg-composer-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
-  .msg-composer-btns{display:flex;gap:8px;margin-left:auto;}
+  .msg-input:focus{border-color:var(--accent);}
+  /* Room for the floating + so it never sits on top of the last note's buttons. */
+  .msg-empty{
+    text-align:center;color:var(--ink-muted);padding:44px 20px;
+    display:flex;flex-direction:column;align-items:center;gap:14px;
+  }
+  .msg-empty p{margin:0;font-size:14px;}
 
-  .msg-list{display:flex;flex-direction:column;gap:12px;}
+  .msg-list{display:flex;flex-direction:column;gap:12px;padding-bottom:88px;}
   .msg-card{
     background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius-panel);
     padding:14px 16px;position:relative;
@@ -535,9 +535,7 @@
 
   @media (max-width:760px){
     .msg-wrap{margin-top:12px;gap:13px;}
-    .msg-composer textarea{font-size:16px;}   /* 16px stops iOS zooming the page on focus */
-    .msg-composer-btns{width:100%;}
-    .msg-composer-btns .btn-primary{flex:1;min-height:var(--tap);}
+    .msg-input{font-size:16px;}   /* 16px stops iOS zooming the page on focus */
   }
 
   .cat-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:9px;position:relative;}
@@ -971,6 +969,8 @@
     align-items:center;justify-content:center;
     -webkit-tap-highlight-color:transparent;
   }
+  /* The message board has no toolbar Add button, so its + floats at every screen size. */
+  .fab.always{display:flex;bottom:28px;}
   .fab .ic{width:24px;height:24px;stroke-width:2.2;}
   .fab:active{transform:scale(0.94);}
 
@@ -1546,8 +1546,6 @@
     // ---- Message board ----
     // [{id,text,authorId,createdAt,updatedAt,pinned}] -- one shared wall for the whole family
     messages: [],
-    messageDraft: '',     // kept across re-renders so a sync pull can't wipe what you're typing
-    editingMessageId: null,
     // Event times are entered/stored as a naive wall-clock anchored to this zone (e.g. "6:00 PM"
     // means 6pm here). Each family member can have their own timezone (see family[].timezone) --
     // when displaying a time to someone in a different zone, it's converted from homeTimezone to
@@ -2661,37 +2659,20 @@
     });
   }
 
-  // Anyone can edit their own note. Adults can remove any of them, because somebody has to be
-  // able to take down what shouldn't be up there.
-  function canEditMessage(m){
-    var me = state.currentFamilyMember;
-    return !!me && m.authorId === me.id;
-  }
-  function canDeleteMessage(m){
+  // Your own note, or any note if you're an adult -- somebody has to be able to fix or take
+  // down what shouldn't be up there. Pinning is deliberately not gated: see renderMessages.
+  function canManageMessage(m){
     var me = state.currentFamilyMember;
     return !!me && (m.authorId === me.id || me.role !== 'kid');
   }
+  var canEditMessage = canManageMessage;
+  var canDeleteMessage = canManageMessage;
 
   function renderMessages(){
-    var me = state.currentFamilyMember;
     var list = sortedMessages();
-    var editing = state.editingMessageId ? (state.messages || []).find(function(m){ return m.id === state.editingMessageId; }) : null;
 
-    var composer = me
-      ? '<section class="msg-composer">'
-        + '<div class="msg-composer-head">'
-        + avatarHtml([me.id])
-        + '<span class="msg-composer-who">' + escapeHtml(editing ? 'Editing your note' : (me.name + ', what\'s happening?')) + '</span>'
-        + '</div>'
-        + '<textarea id="msg-input" rows="3" placeholder="Back late tonight — dinner\'s in the fridge">' + escapeHtml(state.messageDraft || '') + '</textarea>'
-        + '<div class="msg-composer-foot">'
-        + '<label class="check-inline"><input type="checkbox" id="msg-pin"' + (state.messageDraftPinned ? ' checked' : '') + '> Keep at the top</label>'
-        + '<div class="msg-composer-btns">'
-        + (editing ? '<button type="button" class="btn-sm" id="msg-cancel">Cancel</button>' : '')
-        + '<button type="button" class="btn-primary" id="msg-post">' + (editing ? 'Save' : 'Post') + '</button>'
-        + '</div></div></section>'
-      : '<section class="msg-composer"><div class="settings-help" style="margin:0;">We couldn\'t match your login to a family member yet, so there\'s nobody to post as. Ask an adult to add you in Family Settings with the email you log in with.</div></section>';
-
+    // The board is the board. Composing happens in a sheet off the + button, so opening the
+    // tab shows what's on the wall rather than an empty box asking you to write something.
     var body = list.length
       ? list.map(function(m){
           var who = messageAuthor(m);
@@ -2705,33 +2686,24 @@
             + '</div>'
             + '<div class="msg-text">' + escapeHtml(m.text || '') + '</div>'
             + '<div class="msg-actions">'
+            // Pinning is how the family agrees what matters this week, so it isn't owned by
+            // whoever happened to write the note -- anyone can pin or unpin anything.
             + '<button type="button" data-msg-pin="' + escapeHtml(m.id) + '">' + (m.pinned ? 'Unpin' : 'Pin') + '</button>'
             + (canEditMessage(m) ? '<button type="button" data-msg-edit="' + escapeHtml(m.id) + '">Edit</button>' : '')
             + (canDeleteMessage(m) ? '<button type="button" class="danger" data-msg-del="' + escapeHtml(m.id) + '">Delete</button>' : '')
             + '</div></article>';
         }).join('')
-      : '<div class="list-empty">Nothing on the board. Post the first note — anyone in the family will see it.</div>';
+      : '<div class="msg-empty">'
+        + '<p>Nothing on the board yet.</p>'
+        + (state.currentFamilyMember
+            ? '<button type="button" class="btn-primary" id="msg-first">Post the first note</button>'
+            : '<p class="settings-help" style="margin:0;">We couldn\'t match your login to a family member yet, so there\'s nobody to post as. Ask an adult to add you in Family Settings with the email you log in with.</p>')
+        + '</div>';
 
-    document.getElementById('view-root').innerHTML =
-      '<div class="msg-wrap">' + composer + '<div class="msg-list">' + body + '</div></div>';
+    document.getElementById('view-root').innerHTML = '<div class="msg-wrap"><div class="msg-list">' + body + '</div></div>';
 
-    var input = document.getElementById('msg-input');
-    if(input){
-      // Held in state, so a sync pull landing mid-sentence re-renders without losing the text.
-      input.addEventListener('input', function(){ state.messageDraft = input.value; });
-      var pin = document.getElementById('msg-pin');
-      if(pin) pin.addEventListener('change', function(){ state.messageDraftPinned = pin.checked; });
-      document.getElementById('msg-post').addEventListener('click', postMessage);
-      // Ctrl/Cmd+Enter posts, because a plain Enter has to stay available for a new line.
-      input.addEventListener('keydown', function(e){
-        if(e.key === 'Enter' && (e.metaKey || e.ctrlKey)){ e.preventDefault(); postMessage(); }
-      });
-      var cancel = document.getElementById('msg-cancel');
-      if(cancel) cancel.addEventListener('click', function(){
-        state.editingMessageId = null; state.messageDraft = ''; state.messageDraftPinned = false;
-        render();
-      });
-    }
+    var first = document.getElementById('msg-first');
+    if(first) first.addEventListener('click', function(){ openMessageModal(null); });
 
     document.querySelectorAll('[data-msg-pin]').forEach(function(btn){
       btn.addEventListener('click', function(){
@@ -2743,16 +2715,7 @@
       });
     });
     document.querySelectorAll('[data-msg-edit]').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var m = (state.messages || []).find(function(x){ return x.id === btn.dataset.msgEdit; });
-        if(!m) return;
-        state.editingMessageId = m.id;
-        state.messageDraft = m.text || '';
-        state.messageDraftPinned = !!m.pinned;
-        render();
-        var el = document.getElementById('msg-input');
-        if(el){ el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
-      });
+      btn.addEventListener('click', function(){ openMessageModal(btn.dataset.msgEdit); });
     });
     document.querySelectorAll('[data-msg-del]').forEach(function(btn){
       btn.addEventListener('click', function(){
@@ -2760,31 +2723,68 @@
         if(!m) return;
         if(!window.confirm('Delete this note? Everyone loses it.')) return;
         state.messages = (state.messages || []).filter(function(x){ return x.id !== m.id; });
-        if(state.editingMessageId === m.id){ state.editingMessageId = null; state.messageDraft = ''; }
         persistMessages(); render();
       });
     });
   }
 
-  function postMessage(){
+  /* The composer. A sheet rather than a box on the page: the draft lives in the modal's own
+     DOM, which render() never touches, so a sync landing mid-sentence can't wipe it. */
+  function openMessageModal(id){
     var me = state.currentFamilyMember;
-    var text = (state.messageDraft || '').trim();
-    if(!me || !text) return;
-    if(state.editingMessageId){
-      var m = (state.messages || []).find(function(x){ return x.id === state.editingMessageId; });
-      if(m){ m.text = text; m.pinned = !!state.messageDraftPinned; m.updatedAt = nowISO(); }
-      state.editingMessageId = null;
-    } else {
-      state.messages.push({
-        id: uid(), text: text, authorId: me.id,
-        createdAt: nowISO(), updatedAt: nowISO(), pinned: !!state.messageDraftPinned
-      });
+    if(!me) return;
+    var existing = id ? (state.messages || []).find(function(m){ return m.id === id; }) : null;
+    if(id && !existing) return;
+
+    document.getElementById('modal-root').innerHTML = ''
+      + '<div class="scrim" id="scrim"><div class="modal">'
+      + '<div class="msg-composer-head">'
+      + avatarHtml([me.id])
+      + '<span class="msg-composer-who">' + escapeHtml(existing ? 'Editing a note' : (me.name + ', what\'s happening?')) + '</span>'
+      + '</div>'
+      + '<textarea class="msg-input" id="msg-input" rows="4" placeholder="Back late tonight — dinner\'s in the fridge">'
+      + escapeHtml(existing ? (existing.text || '') : '') + '</textarea>'
+      + '<label class="check-inline" style="margin-top:12px;"><input type="checkbox" id="msg-pin-new"'
+      + (existing && existing.pinned ? ' checked' : '') + '> Keep at the top</label>'
+      + '<div class="modal-footer">'
+      + '<span></span>'
+      + '<div style="display:flex;gap:10px;">'
+      + '<button class="btn-sm" id="msg-cancel">Cancel</button>'
+      + '<button class="btn-close" id="msg-post">' + (existing ? 'Save' : 'Post') + '</button>'
+      + '</div></div></div></div>';
+
+    function close(){ document.getElementById('modal-root').innerHTML = ''; applyDeferred(); }
+    document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id === 'scrim') close(); });
+    document.getElementById('msg-cancel').addEventListener('click', close);
+
+    var input = document.getElementById('msg-input');
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
+
+    function submit(){
+      var text = input.value.trim();
+      if(!text) return;   // an empty note is a mis-tap, not a post
+      var pinned = document.getElementById('msg-pin-new').checked;
+      if(existing){
+        existing.text = text;
+        existing.pinned = pinned;
+        existing.updatedAt = nowISO();
+      } else {
+        state.messages.push({
+          id: uid(), text: text, authorId: me.id,
+          createdAt: nowISO(), updatedAt: nowISO(), pinned: pinned
+        });
+      }
+      close();
+      persistMessages();
+      render();
+      showToast(existing ? 'Note updated' : 'Posted to the board', false, 2200);
     }
-    state.messageDraft = '';
-    state.messageDraftPinned = false;
-    persistMessages();
-    render();
-    showToast('Posted to the board', false, 2200);
+    document.getElementById('msg-post').addEventListener('click', submit);
+    // Ctrl/Cmd+Enter posts; a plain Enter has to stay available for a new line.
+    input.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' && (e.metaKey || e.ctrlKey)){ e.preventDefault(); submit(); }
+    });
   }
 
   function persistMessages(){ queueChanges(); }
@@ -6613,10 +6613,10 @@
     if(state.view === 'calendar') return { label:'New event', run:function(){ openAddEventModal(state.calAnchor); } };
     if(state.view === 'compass')  return { label:'New goal',  run:openAddGoalModal };
     if(state.view === 'dreams')   return { label:'New dream', run:openAddDreamModal };
-    if(state.view === 'messages') return { label:'New message', run:function(){
-      var el = document.getElementById('msg-input');
-      if(el){ el.focus(); el.scrollIntoView({ block:'center' }); }
-    } };
+    // Only offered once we know who you'd be posting as.
+    if(state.view === 'messages') return state.currentFamilyMember
+      ? { label:'New message', run:function(){ openMessageModal(null); } }
+      : null;
     if(state.view === 'archive')  return null;
     return { label:'New task', run:openAddTaskModal };
   }
@@ -6631,6 +6631,9 @@
     if(!fab) return;
     var act = fabAction();
     fab.classList.toggle('hidden', !act);
+    // Every other view has its own Add button in the toolbar; the message board doesn't, so
+    // its + is the only way in and has to show on a laptop as well as a phone.
+    fab.classList.toggle('always', state.view === 'messages');
     if(act) fab.setAttribute('aria-label', act.label);
   }
 
