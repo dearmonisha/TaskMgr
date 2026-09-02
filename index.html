@@ -970,9 +970,14 @@
     -webkit-tap-highlight-color:transparent;
   }
   /* The message board has no toolbar Add button, so its + floats at every screen size. */
-  .fab.always{display:flex;bottom:28px;}
+  /* Only the display is forced here. The desktop bottom offset is set under a min-width query
+     below: putting it here beat the base rule on phones too, parking the + behind the bottom
+     nav bar where nothing could reach it. */
+  .fab.always{display:flex;}
   .fab .ic{width:24px;height:24px;stroke-width:2.2;}
   .fab:active{transform:scale(0.94);}
+  /* No bottom nav above 760px, so the + sits near the edge instead of clearing a tab bar. */
+  @media (min-width:761px){ .fab.always{bottom:28px;} }
 
   /* ---------- 8. Day sheet (phone month view) ---------- */
   .day-sheet-title{display:flex;align-items:baseline;gap:9px;margin-bottom:14px;}
