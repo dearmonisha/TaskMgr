@@ -187,8 +187,6 @@
   .meta-pill{font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:var(--radius-pill);background:rgba(50,35,24,0.06);color:var(--ink-muted);white-space:nowrap;}
   .meta-pill.due-overdue{background:var(--overdue-bg);color:var(--overdue);}
   .meta-pill.due-today{background:var(--due-today-bg);color:var(--due-today);}
-  .meta-pill.aging{background:rgba(50,35,24,0.06);color:var(--ink-muted);}
-  .meta-pill.aging.alert{background:var(--overdue-bg);color:var(--overdue);}
   .meta-pill.tag{background:rgba(0,143,160,0.1);color:#0b6b78;}
 
   /* below 640px: stack quadrants */
@@ -490,6 +488,67 @@
   .banner .dismiss{background:transparent;color:var(--due-today);border:1px solid currentColor;}
 
   .family-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px;}
+  /* Category editor rows. Same shape as a family row, but the name field carries the weight. */
+
+  /* ---------- Message board ----------
+     A single column at reading width. Notes are short, so the card is quiet: the name and the
+     time do the framing and the text carries the weight. */
+  .msg-wrap{max-width:680px;margin:18px auto 0;display:flex;flex-direction:column;gap:16px;}
+  .msg-composer{
+    background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius-panel);
+    padding:14px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow-sm);
+  }
+  .msg-composer-head{display:flex;align-items:center;gap:9px;}
+  .msg-composer-who{font-size:13px;font-weight:600;color:var(--ink-muted);}
+  .msg-composer textarea{
+    width:100%;box-sizing:border-box;resize:vertical;min-height:74px;
+    border:1px solid var(--hairline);border-radius:var(--radius-card);padding:11px 13px;
+    background:var(--surface-2);font:inherit;font-size:14px;color:var(--ink);outline:none;
+  }
+  .msg-composer textarea:focus{border-color:var(--accent);}
+  .msg-composer-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .msg-composer-btns{display:flex;gap:8px;margin-left:auto;}
+
+  .msg-list{display:flex;flex-direction:column;gap:12px;}
+  .msg-card{
+    background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius-panel);
+    padding:14px 16px;position:relative;
+  }
+  .msg-card.pinned{border-color:var(--due-today);background:var(--due-today-bg);}
+  .msg-pinned-flag{
+    position:absolute;top:-9px;left:14px;display:inline-flex;align-items:center;gap:4px;
+    background:var(--due-today);color:#fff;border-radius:var(--radius-pill);
+    padding:2px 9px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  }
+  .msg-pinned-flag .ic{width:11px;height:11px;}
+  .msg-head{display:flex;align-items:center;gap:9px;margin-bottom:7px;}
+  .msg-who{font-size:13px;font-weight:700;}
+  .msg-when{font-size:11.5px;color:var(--ink-faint);margin-left:auto;white-space:nowrap;}
+  .msg-text{font-size:14.5px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;}
+  .msg-actions{display:flex;gap:14px;margin-top:11px;}
+  .msg-actions button{
+    background:none;border:0;padding:0;font:inherit;font-size:12px;font-weight:600;
+    color:var(--ink-muted);cursor:pointer;
+  }
+  .msg-actions button:hover{color:var(--ink);text-decoration:underline;}
+  .msg-actions button.danger:hover{color:var(--overdue);}
+
+  @media (max-width:760px){
+    .msg-wrap{margin-top:12px;gap:13px;}
+    .msg-composer textarea{font-size:16px;}   /* 16px stops iOS zooming the page on focus */
+    .msg-composer-btns{width:100%;}
+    .msg-composer-btns .btn-primary{flex:1;min-height:var(--tap);}
+  }
+
+  .cat-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:9px;position:relative;}
+  .cat-row .cat-icon{flex:none;width:118px;}
+  .cat-row .cat-name{flex:1;min-width:130px;}
+  .cat-row .cat-preview{flex:none;display:inline-flex;width:22px;justify-content:center;}
+  .cat-row .cat-locked{
+    flex:none;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--ink-faint);padding:0 6px;
+  }
+  /* .color-pop is flex:1 1 100%, so it wraps onto its own line under the row it belongs to. */
   .family-row .fam-name{flex:1.2;min-width:110px;}
   .family-row .fam-email{flex:1.6;min-width:150px;}
   .family-row .fam-role{flex:none;width:120px;}
@@ -1211,6 +1270,7 @@
         <div class="view-switcher" id="view-switcher">
           <button data-view="matrix" class="active">Matrix</button>
           <button data-view="calendar">Calendar</button>
+          <button data-view="messages">Messages</button>
           <button data-view="dreams" class="hidden">Dreams</button>
           <button data-view="compass">Compass</button>
           <button data-view="list">List</button>
@@ -1443,11 +1503,6 @@
     if(!task.importance && task.urgency) return 'delegate';
     return 'eliminate';
   }
-  function agingDays(task){
-    if(!task.quadrantEnteredAt) return 0;
-    var diff = Date.now() - new Date(task.quadrantEnteredAt).getTime();
-    return Math.floor(diff/86400000);
-  }
   function escapeHtml(s){
     return String(s==null?'':s).replace(/[&<>"']/g,function(c){
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
@@ -1486,6 +1541,13 @@
     family: [],           // [{id,name,color,email,role:'adult'|'kid',timezone,board:'horizon'|'matrix'|null}]
     events: [],           // see EVENT SCHEMA below
     calendarSubscriptions: [], // [{id,ownerFamilyMemberId,name,url,category,enabled,lastSyncedAt,lastError,syncStatus}]
+    eventCategories: [],  // [{id,label,icon,color,order}] -- seeded from EVENT_CATEGORY_SEED, then owned by the family
+
+    // ---- Message board ----
+    // [{id,text,authorId,createdAt,updatedAt,pinned}] -- one shared wall for the whole family
+    messages: [],
+    messageDraft: '',     // kept across re-renders so a sync pull can't wipe what you're typing
+    editingMessageId: null,
     // Event times are entered/stored as a naive wall-clock anchored to this zone (e.g. "6:00 PM"
     // means 6pm here). Each family member can have their own timezone (see family[].timezone) --
     // when displaying a time to someone in a different zone, it's converted from homeTimezone to
@@ -1497,6 +1559,7 @@
     dayNowTimer: null,    // interval that walks the "now" line down the day grid
     calAnchor: todayStr(),// reference date for month/week/agenda navigation
     calFilter: 'all',     // 'all' or a family member id
+    calFilterTouched: false, // has anyone picked a calendar tab? until then identity picks it
     // Which calendars to show. null/empty = everything. Otherwise a list of source keys:
     // 'manual', 'tasks', or a subscription id. Deliberately NOT part of the synced model --
     // it's a per-device view preference, not shared family data.
@@ -1579,6 +1642,7 @@
     brush:     '<path d="M9.5 14.5l-3 3a2.1 2.1 0 1 0 3 3l3-3"/><path d="M13.4 17.1L20 10.5a2.6 2.6 0 0 0-3.7-3.7L9.7 13.4"/><path d="M6.5 8.6l2.4-4.9 4.9-2.4"/>',
     trophy:    '<path d="M7.5 3.5h9v5.2a4.5 4.5 0 0 1-9 0z"/><path d="M7.5 5H4.8v1.4A3.2 3.2 0 0 0 8 9.6M16.5 5h2.7v1.4a3.2 3.2 0 0 1-3.2 3.2M12 13.2V17M8.4 20.5h7.2M9.6 17h4.8v3.5H9.6z"/>',
     leaf:      '<path d="M4.5 19.5C3 14 6.5 5.5 19.5 4.5c1 11-6 15.5-11.5 14.5"/><path d="M4.5 19.5c3-5.4 6.4-8.4 10.5-10.5"/>',
+    chat:      '<path d="M20.5 12.2c0 4-3.8 7.2-8.5 7.2a10 10 0 0 1-2.6-.33L4.5 20.5l1.2-3.4A6.8 6.8 0 0 1 3.5 12.2C3.5 8.2 7.3 5 12 5s8.5 3.2 8.5 7.2z"/>',
     refresh:   '<path d="M20 11.5A8 8 0 1 0 18 17M20 5.5v6h-6"/>'
   };
   function icon(name, extraClass){
@@ -1589,19 +1653,49 @@
   // restyled) layout there, so this needs to be a JS check, not only a media query.
   function isPhone(){ return window.matchMedia('(max-width:760px)').matches; }
 
-  var EVENT_CATEGORIES = {
-    band:        { label:'Band',        icon:'music',     color:'#3b6ea5' },
-    homework:    { label:'Homework',    icon:'book',      color:'#a56a3b' },
-    concert:     { label:'Concert',     icon:'mic',       color:'#b0507e' },
-    projects:    { label:'Projects',    icon:'tools',     color:'#5c7a89' },
-    test:        { label:'Test',        icon:'clipboard', color:'#a8372e' },
-    gym:         { label:'Gym',         icon:'dumbbell',  color:'#d9822b' },
-    birthday:    { label:'Birthday',    icon:'cake',      color:'#bc5460' },
-    appointment: { label:'Appointment', icon:'pulse',     color:'#8765be' },
-    trip:        { label:'Trip',        icon:'plane',     color:'#c9922f' },
-    chore:       { label:'Chore',       icon:'sparkle',   color:'#6d6059' },
-    other:       { label:'Other',       icon:'pin',       color:'#462c19' }
-  };
+  /* Event categories are data, not code: this list only seeds an empty store, and after that
+     the family edits their own in Settings. The ids are the slugs already written on existing
+     events, so seeding is idempotent -- two devices seeding at once write the same rows. */
+  var EVENT_CATEGORY_SEED = [
+    { id:'band',        label:'Band',        icon:'music',     color:'#3b6ea5' },
+    { id:'homework',    label:'Homework',    icon:'book',      color:'#a56a3b' },
+    { id:'study',       label:'Study',       icon:'book',      color:'#0e7c86' },
+    { id:'test',        label:'Test',        icon:'clipboard', color:'#a8372e' },
+    { id:'projects',    label:'Projects',    icon:'tools',     color:'#5c7a89' },
+    { id:'concert',     label:'Concert',     icon:'mic',       color:'#b0507e' },
+    { id:'celebration', label:'Celebration', icon:'sparkle',   color:'#d9822b' },
+    { id:'birthday',    label:'Birthday',    icon:'cake',      color:'#bc5460' },
+    { id:'meeting',     label:'Meeting',     icon:'family',    color:'#6d8b3a' },
+    { id:'work',        label:'Work',        icon:'clipboard', color:'#5c7a89' },
+    { id:'gym',         label:'Gym',         icon:'dumbbell',  color:'#d9822b' },
+    { id:'appointment', label:'Appointment', icon:'pulse',     color:'#8765be' },
+    { id:'trip',        label:'Trip',        icon:'plane',     color:'#c9922f' },
+    { id:'chore',       label:'Chore',       icon:'sparkle',   color:'#6d6059' },
+    { id:'other',       label:'Other',       icon:'pin',       color:'#462c19' }
+  ];
+  // Every event that names no category, or names one since deleted, lands here -- so this one
+  // can be renamed and recoloured but never removed.
+  var FALLBACK_CATEGORY_ID = 'other';
+  // Offered in the category editor's icon picker. Names match ICON_PATHS.
+  var CATEGORY_ICONS = ['pin','book','clipboard','music','mic','tools','dumbbell','cake','pulse',
+    'plane','sparkle','mountain','heart','brush','trophy','leaf','star','clock','family','calendar','check'];
+
+  function categoryList(){
+    return (state.eventCategories || []).slice().sort(function(a,b){
+      return (a.order == null ? 999 : a.order) - (b.order == null ? 999 : b.order);
+    });
+  }
+  function fallbackCategory(){
+    var list = state.eventCategories || [];
+    for(var i = 0; i < list.length; i++) if(list[i].id === FALLBACK_CATEGORY_ID) return list[i];
+    // Only reachable before the first seed; keeps every caller safe from a null.
+    return { id:FALLBACK_CATEGORY_ID, label:'Other', icon:'pin', color:'#462c19' };
+  }
+  function categoryById(id){
+    var list = state.eventCategories || [];
+    for(var i = 0; i < list.length; i++) if(list[i].id === id) return list[i];
+    return fallbackCategory();
+  }
   var FAMILY_COLOR_PALETTE = ['#13808a','#955c82','#bc5460','#008fa0','#8765be','#3e8f44','#c9922f','#a8372e'];
   // Chip backgrounds carry white text, so every one of these is dark enough to stay legible.
   var CALENDAR_COLOR_PALETTE = [
@@ -1669,6 +1763,11 @@
     if(!state.personTouched){
       state.person = state.currentFamilyMember ? state.currentFamilyMember.id : 'all';
     }
+    // Same for the calendar: opening on everyone's events means reading six people's days to
+    // find your own. The All tab is still one tap away.
+    if(!state.calFilterTouched){
+      state.calFilter = state.currentFamilyMember ? state.currentFamilyMember.id : 'all';
+    }
   }
   function isKidMode(){
     return !!(state.currentFamilyMember && state.currentFamilyMember.role === 'kid');
@@ -1731,7 +1830,9 @@
     goal:         { get: function(){ return state.compassGoals; },       set: function(v){ state.compassGoals = v; },       idOf: function(o){ return o.id; } },
     priority:     { get: function(){ return state.compassPriorities; },  set: function(v){ state.compassPriorities = v; },  idOf: function(o){ return o.id; } },
     // Compass profiles are keyed by the kid they belong to, not by an id field.
-    profile:      { get: function(){ return state.compassProfiles; },    set: function(v){ state.compassProfiles = v; },    idOf: function(o){ return 'profile:' + o.ownerId; } }
+    profile:      { get: function(){ return state.compassProfiles; },    set: function(v){ state.compassProfiles = v; },    idOf: function(o){ return 'profile:' + o.ownerId; } },
+    category:     { get: function(){ return state.eventCategories; },    set: function(v){ state.eventCategories = v; },    idOf: function(o){ return 'category:' + o.id; } },
+    message:      { get: function(){ return state.messages; },           set: function(v){ state.messages = v; },           idOf: function(o){ return 'message:' + o.id; } }
   };
 
   var sync = {
@@ -1743,6 +1844,7 @@
     backoff: 0,
     lastError: null,
     started: false,
+    unknownKinds: {},     // kinds this server rejected; see the bad_kind branch in flushQueue
     deferred: null,       // remote items held back while a modal is open
     online: true
   };
@@ -1772,15 +1874,16 @@
   function loadCalendarLocalOnly(){
     try{
       var raw = JSON.parse(localStorage.getItem(LS_CALENDAR) || 'null');
-      return { family: (raw && raw.family) || [], events: (raw && raw.events) || [], calendarSubscriptions: (raw && raw.calendarSubscriptions) || [], homeTimezone: (raw && raw.homeTimezone) || DEFAULT_TIMEZONE };
-    }catch(e){ return { family: [], events: [], calendarSubscriptions: [], homeTimezone: DEFAULT_TIMEZONE }; }
+      return { family: (raw && raw.family) || [], events: (raw && raw.events) || [], calendarSubscriptions: (raw && raw.calendarSubscriptions) || [], eventCategories: (raw && raw.eventCategories) || [], messages: (raw && raw.messages) || [], homeTimezone: (raw && raw.homeTimezone) || DEFAULT_TIMEZONE };
+    }catch(e){ return { family: [], events: [], calendarSubscriptions: [], eventCategories: [], messages: [], homeTimezone: DEFAULT_TIMEZONE }; }
   }
   function loadCalendarLocal(){
     var c = loadCalendarLocalOnly();
-    state.family = c.family; state.events = c.events; state.calendarSubscriptions = c.calendarSubscriptions; state.homeTimezone = c.homeTimezone;
+    state.family = c.family; state.events = c.events; state.calendarSubscriptions = c.calendarSubscriptions;
+    state.eventCategories = c.eventCategories; state.messages = c.messages; state.homeTimezone = c.homeTimezone;
   }
   function cacheCalendarLocal(){
-    try{ localStorage.setItem(LS_CALENDAR, JSON.stringify({family: state.family, events: state.events, calendarSubscriptions: state.calendarSubscriptions, homeTimezone: state.homeTimezone})); }catch(e){}
+    try{ localStorage.setItem(LS_CALENDAR, JSON.stringify({family: state.family, events: state.events, calendarSubscriptions: state.calendarSubscriptions, eventCategories: state.eventCategories, messages: state.messages, homeTimezone: state.homeTimezone})); }catch(e){}
   }
   function loadDreamsLocalOnly(){
     try{
@@ -1883,7 +1986,11 @@
   var flushSoon = debounce(function(){ flushQueue(); }, 600);
 
   function queueChanges(){
-    var ops = collectOps().concat(collectMetaOps());
+    // Anything of a kind this server has already rejected stays local rather than being
+    // re-queued each time only to be dropped again on the next flush.
+    var ops = collectOps().concat(collectMetaOps()).filter(function(op){
+      return !op.kind || serverKnowsKind(op.kind);
+    });
     cacheAllLocal();
     if(!ops.length) return;
     sync.queue = sync.queue.concat(ops);
@@ -1938,9 +2045,26 @@
       });
     }).catch(function(err){
       sync.inFlight = false;
+      // The server rejects the WHOLE batch on an unknown kind, and the ops stay queued -- so a
+      // server one version behind the app would retry forever and block every other change on
+      // the device. Note the kind, drop those ops, and keep the rest moving. Those items still
+      // work locally; they just don't sync until the API files are updated too.
+      if(err.status === 400 && err.code === 'bad_kind'){
+        var m = /Unknown kind:\s*([\w-]+)/.exec(err.message || '');
+        if(m && !sync.unknownKinds[m[1]]){
+          sync.unknownKinds[m[1]] = true;
+          sync.queue = sync.queue.filter(function(op){ return serverKnowsKind(op.kind); });
+          saveSyncLocal();
+          return flushQueue();
+        }
+      }
       handleSyncError(err, function(){ flushQueue(); });
     });
   }
+
+  // Kinds this server has said it doesn't understand. Only a real rejection populates this,
+  // so a fully updated deployment never takes this path.
+  function serverKnowsKind(kind){ return !sync.unknownKinds[kind]; }
 
   function pull(){
     return apiFetch('/api/state?since=' + sync.cursor).then(function(res){
@@ -2085,14 +2209,34 @@
       // synced and nobody has migrated yet — say so rather than looking "synced".
       var empty = h && h.seq === 0;
       return pull().then(function(){
+        // Only after a real pull: seeding before we know what the store holds would resurrect
+        // categories the family had deleted.
+        seedCategoriesIfEmpty(true);
         startSync();
         if(sync.queue.length) flushQueue();
         showSetupBanner(empty && !state.tasks.length && !state.events.length);
       });
     }).catch(function(err){
+      // No server to ask, so this device is on its own copy -- it still needs categories to
+      // render, but it must not write them to the cache yet: a boot that failed hasn't loaded
+      // anyone else's data, and persisting here would overwrite the cache with a half-empty
+      // state. The next boot that reaches the server persists them properly.
+      seedCategoriesIfEmpty(false);
       handleSyncError(err, function(){ bootSync(); });
       startSync();
     });
+  }
+
+  /* The seed runs once per store. "Other" can't be deleted, so a store that has ever been
+     seeded always has at least one category -- which makes "empty" a safe test for "new",
+     and stops a second device re-adding categories someone deliberately removed. */
+  function seedCategoriesIfEmpty(persist){
+    if((state.eventCategories || []).length) return;
+    state.eventCategories = EVENT_CATEGORY_SEED.map(function(c, i){
+      return { id:c.id, label:c.label, icon:c.icon, color:c.color, order:i };
+    });
+    if(persist) persistCalendar();
+    render();
   }
 
   function updateSyncStatus(s){
@@ -2276,11 +2420,6 @@
       var isToday = t.due === todayStr();
       var cls = overdue ? 'due-overdue' : (isToday ? 'due-today' : '');
       pills += '<span class="meta-pill '+cls+'">'+(overdue?'Overdue ':'')+fmtDate(t.due)+'</span>';
-    }
-    var days = agingDays(t);
-    if(days >= 3){
-      var isDoFirst = quadrantOf(t) === 'doFirst';
-      pills += '<span class="meta-pill aging'+(isDoFirst?' alert':'')+'">'+icon('clock')+days+'d here</span>';
     }
     if(t.recurrence && t.recurrence.freq){
       pills += '<span class="meta-pill repeats" title="'+escapeHtml(describeRecurrence(t.recurrence))+'">'+icon('refresh')+shortRecurrence(t.recurrence)+'</span>';
@@ -2507,6 +2646,149 @@
     attachCardHandlers();
   }
 
+  /* ================= MESSAGE BOARD =================
+     One shared wall for the whole family -- "back late tonight", "bins go out Tuesday". It is
+     deliberately not per-person: there is no inbox, no unread count and nobody to address a
+     note to. Everything anyone posts is on the same page, newest first, with pinned notes held
+     at the top for the things that stay true for a while. */
+
+  function messageAuthor(m){ return familyMember(m.authorId); }
+
+  function sortedMessages(){
+    return (state.messages || []).slice().sort(function(a, b){
+      if(!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;   // pinned first, then newest
+      return String(b.createdAt || '').localeCompare(String(a.createdAt || ''));
+    });
+  }
+
+  // Anyone can edit their own note. Adults can remove any of them, because somebody has to be
+  // able to take down what shouldn't be up there.
+  function canEditMessage(m){
+    var me = state.currentFamilyMember;
+    return !!me && m.authorId === me.id;
+  }
+  function canDeleteMessage(m){
+    var me = state.currentFamilyMember;
+    return !!me && (m.authorId === me.id || me.role !== 'kid');
+  }
+
+  function renderMessages(){
+    var me = state.currentFamilyMember;
+    var list = sortedMessages();
+    var editing = state.editingMessageId ? (state.messages || []).find(function(m){ return m.id === state.editingMessageId; }) : null;
+
+    var composer = me
+      ? '<section class="msg-composer">'
+        + '<div class="msg-composer-head">'
+        + avatarHtml([me.id])
+        + '<span class="msg-composer-who">' + escapeHtml(editing ? 'Editing your note' : (me.name + ', what\'s happening?')) + '</span>'
+        + '</div>'
+        + '<textarea id="msg-input" rows="3" placeholder="Back late tonight — dinner\'s in the fridge">' + escapeHtml(state.messageDraft || '') + '</textarea>'
+        + '<div class="msg-composer-foot">'
+        + '<label class="check-inline"><input type="checkbox" id="msg-pin"' + (state.messageDraftPinned ? ' checked' : '') + '> Keep at the top</label>'
+        + '<div class="msg-composer-btns">'
+        + (editing ? '<button type="button" class="btn-sm" id="msg-cancel">Cancel</button>' : '')
+        + '<button type="button" class="btn-primary" id="msg-post">' + (editing ? 'Save' : 'Post') + '</button>'
+        + '</div></div></section>'
+      : '<section class="msg-composer"><div class="settings-help" style="margin:0;">We couldn\'t match your login to a family member yet, so there\'s nobody to post as. Ask an adult to add you in Family Settings with the email you log in with.</div></section>';
+
+    var body = list.length
+      ? list.map(function(m){
+          var who = messageAuthor(m);
+          var edited = m.updatedAt && m.updatedAt !== m.createdAt;
+          return '<article class="msg-card' + (m.pinned ? ' pinned' : '') + '" data-msg="' + escapeHtml(m.id) + '">'
+            + (m.pinned ? '<span class="msg-pinned-flag">' + icon('star') + 'Pinned</span>' : '')
+            + '<div class="msg-head">'
+            + avatarHtml([m.authorId])
+            + '<span class="msg-who">' + escapeHtml(who ? who.name : 'Someone') + '</span>'
+            + '<span class="msg-when" title="' + escapeHtml(m.createdAt || '') + '">' + escapeHtml(fmtRelative(m.createdAt)) + (edited ? ' · edited' : '') + '</span>'
+            + '</div>'
+            + '<div class="msg-text">' + escapeHtml(m.text || '') + '</div>'
+            + '<div class="msg-actions">'
+            + '<button type="button" data-msg-pin="' + escapeHtml(m.id) + '">' + (m.pinned ? 'Unpin' : 'Pin') + '</button>'
+            + (canEditMessage(m) ? '<button type="button" data-msg-edit="' + escapeHtml(m.id) + '">Edit</button>' : '')
+            + (canDeleteMessage(m) ? '<button type="button" class="danger" data-msg-del="' + escapeHtml(m.id) + '">Delete</button>' : '')
+            + '</div></article>';
+        }).join('')
+      : '<div class="list-empty">Nothing on the board. Post the first note — anyone in the family will see it.</div>';
+
+    document.getElementById('view-root').innerHTML =
+      '<div class="msg-wrap">' + composer + '<div class="msg-list">' + body + '</div></div>';
+
+    var input = document.getElementById('msg-input');
+    if(input){
+      // Held in state, so a sync pull landing mid-sentence re-renders without losing the text.
+      input.addEventListener('input', function(){ state.messageDraft = input.value; });
+      var pin = document.getElementById('msg-pin');
+      if(pin) pin.addEventListener('change', function(){ state.messageDraftPinned = pin.checked; });
+      document.getElementById('msg-post').addEventListener('click', postMessage);
+      // Ctrl/Cmd+Enter posts, because a plain Enter has to stay available for a new line.
+      input.addEventListener('keydown', function(e){
+        if(e.key === 'Enter' && (e.metaKey || e.ctrlKey)){ e.preventDefault(); postMessage(); }
+      });
+      var cancel = document.getElementById('msg-cancel');
+      if(cancel) cancel.addEventListener('click', function(){
+        state.editingMessageId = null; state.messageDraft = ''; state.messageDraftPinned = false;
+        render();
+      });
+    }
+
+    document.querySelectorAll('[data-msg-pin]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var m = (state.messages || []).find(function(x){ return x.id === btn.dataset.msgPin; });
+        if(!m) return;
+        m.pinned = !m.pinned;
+        m.updatedAt = nowISO();
+        persistMessages(); render();
+      });
+    });
+    document.querySelectorAll('[data-msg-edit]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var m = (state.messages || []).find(function(x){ return x.id === btn.dataset.msgEdit; });
+        if(!m) return;
+        state.editingMessageId = m.id;
+        state.messageDraft = m.text || '';
+        state.messageDraftPinned = !!m.pinned;
+        render();
+        var el = document.getElementById('msg-input');
+        if(el){ el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+      });
+    });
+    document.querySelectorAll('[data-msg-del]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var m = (state.messages || []).find(function(x){ return x.id === btn.dataset.msgDel; });
+        if(!m) return;
+        if(!window.confirm('Delete this note? Everyone loses it.')) return;
+        state.messages = (state.messages || []).filter(function(x){ return x.id !== m.id; });
+        if(state.editingMessageId === m.id){ state.editingMessageId = null; state.messageDraft = ''; }
+        persistMessages(); render();
+      });
+    });
+  }
+
+  function postMessage(){
+    var me = state.currentFamilyMember;
+    var text = (state.messageDraft || '').trim();
+    if(!me || !text) return;
+    if(state.editingMessageId){
+      var m = (state.messages || []).find(function(x){ return x.id === state.editingMessageId; });
+      if(m){ m.text = text; m.pinned = !!state.messageDraftPinned; m.updatedAt = nowISO(); }
+      state.editingMessageId = null;
+    } else {
+      state.messages.push({
+        id: uid(), text: text, authorId: me.id,
+        createdAt: nowISO(), updatedAt: nowISO(), pinned: !!state.messageDraftPinned
+      });
+    }
+    state.messageDraft = '';
+    state.messageDraftPinned = false;
+    persistMessages();
+    render();
+    showToast('Posted to the board', false, 2200);
+  }
+
+  function persistMessages(){ queueChanges(); }
+
   function renderList(){
     var tasks = visibleTasks().sort(compareByDue);
     var byQ = {doFirst:[],schedule:[],delegate:[],eliminate:[]};
@@ -2568,7 +2850,7 @@
 
   /* ================= CALENDAR: RENDER ================= */
   function familyMember(id){ return state.family.find(function(m){ return m.id===id; }); }
-  function categoryOf(occ){ return EVENT_CATEGORIES[occ.category] || EVENT_CATEGORIES.other; }
+  function categoryOf(occ){ return categoryById(occ.category); }
 
   /* The colour an occurrence is drawn in. A calendar the user has given its own colour wins;
      otherwise it falls back to the colour of its category, which is what everything used
@@ -3166,7 +3448,7 @@
     }
     subs.forEach(function(sub){
       var owner = familyMember(sub.ownerFamilyMemberId);
-      var cat = EVENT_CATEGORIES[sub.category] || EVENT_CATEGORIES.other;
+      var cat = categoryById(sub.category);
       list.push({
         key: sub.id,
         label: sub.name || 'Untitled calendar',
@@ -3246,7 +3528,11 @@
         }).join('');
     famTabs.innerHTML = famHtml;
     famTabs.querySelectorAll('button').forEach(function(b){
-      b.addEventListener('click', function(){ state.calFilter = b.dataset.fam; render(); });
+      b.addEventListener('click', function(){
+        state.calFilter = b.dataset.fam;
+        state.calFilterTouched = true;   // stop the identity default from stealing the tab back
+        render();
+      });
     });
   }
 
@@ -3373,7 +3659,8 @@
     var isCal = state.view === 'calendar';
     var isDreams = state.view === 'dreams';
     var isCompass = state.view === 'compass';
-    var isTaskView = !isCal && !isDreams && !isCompass;
+    var isMessages = state.view === 'messages';
+    var isTaskView = !isCal && !isDreams && !isCompass && !isMessages;
     document.getElementById('task-toolbar').classList.toggle('hidden', !isTaskView);
     document.getElementById('calendar-toolbar').classList.toggle('hidden', !isCal);
     document.getElementById('dream-toolbar').classList.toggle('hidden', !isDreams);
@@ -3445,6 +3732,12 @@
     toggleToolbars();
     if(state.view === 'calendar'){
       renderCalendar();
+      syncChromeHeight();
+    applyFillHeights();
+      return;
+    }
+    if(state.view === 'messages'){
+      renderMessages();
       syncChromeHeight();
     applyFillHeights();
       return;
@@ -3552,7 +3845,7 @@
         t.recurrenceDone = wasDone + 1;
         t.lastCompletedFor = wasDue;
         t.due = next;
-        t.quadrantEnteredAt = nowISO();   // the aging counter is about this cycle, not the series
+        t.quadrantEnteredAt = nowISO();   // this cycle started now, not when the series did
         logActivity(t, 'Completed for ' + fmtDate(wasDue) + ' - next ' + fmtDate(next));
         persist(); render();
         burstConfetti();   // this week's is done, even though the series carries on
@@ -4424,9 +4717,8 @@
     }
 
     function renderEventModal(){
-      var catButtons = Object.keys(EVENT_CATEGORIES).map(function(key){
-        var c = EVENT_CATEGORIES[key];
-        return '<button type="button" class="cat-btn'+(draft.category===key?' selected':'')+'" data-cat="'+key+'"><span style="color:'+c.color+'">'+icon(c.icon)+'</span> '+c.label+'</button>';
+      var catButtons = categoryList().map(function(c){
+        return '<button type="button" class="cat-btn'+(draft.category===c.id?' selected':'')+'" data-cat="'+escapeHtml(c.id)+'"><span style="color:'+c.color+'">'+icon(c.icon)+'</span> '+escapeHtml(c.label)+'</button>';
       }).join('');
 
       var attendeeChips = '<span class="tag-chip attendee-chip'+(draft.attendees.indexOf('all')!==-1?' active':'')+'" data-id="all">Everyone</span>'
@@ -5682,7 +5974,7 @@
       var source = isFile
         ? 'From a file' + (s.lastFileName ? ' · ' + escapeHtml(s.lastFileName) : '')
         : escapeHtml(s.url);
-      var cat = EVENT_CATEGORIES[s.category] || EVENT_CATEGORIES.other;
+      var cat = categoryById(s.category);
       var swatchColor = s.color || cat.color;
       var palette = '<div class="color-pop hidden" data-pop="'+s.id+'">'
         + CALENDAR_COLOR_PALETTE.map(function(c){
@@ -5809,7 +6101,7 @@
       + '<div class="settings-field"><label>Name</label><input class="text-input" id="mc-name" placeholder="e.g. Lincoln Elementary"></div>'
       + '<div class="settings-field"><label>Calendar URL (.ics or webcal://)</label><input class="text-input" id="mc-url" placeholder="https://school.example.edu/calendar.ics"></div>'
       + '<div class="settings-field"><label>Default category</label><select class="text-input" id="mc-category">'
-      + Object.keys(EVENT_CATEGORIES).map(function(k){ return '<option value="'+k+'">'+EVENT_CATEGORIES[k].label+'</option>'; }).join('')
+      + categoryList().map(function(c){ return '<option value="'+escapeHtml(c.id)+'">'+escapeHtml(c.label)+'</option>'; }).join('')
       + '</select></div>'
       + '<div class="settings-actions">'
       + '<button class="btn-primary" id="mc-add">Add & Sync</button>'
@@ -5819,7 +6111,7 @@
       + '<div class="settings-help" style="margin-top:0;">For a calendar that won\'t give you a link — export it to an .ics file and bring it in here. Importing the same calendar again later replaces what came from it last time, so nothing is duplicated and cancelled events drop off.</div>'
       + '<div class="settings-field"><label>Name</label><input class="text-input" id="mc-file-name" placeholder="e.g. Tanvi school"></div>'
       + '<div class="settings-field"><label>Default category</label><select class="text-input" id="mc-file-category">'
-      + Object.keys(EVENT_CATEGORIES).map(function(k){ return '<option value="'+k+'">'+EVENT_CATEGORIES[k].label+'</option>'; }).join('')
+      + categoryList().map(function(c){ return '<option value="'+escapeHtml(c.id)+'">'+escapeHtml(c.label)+'</option>'; }).join('')
       + '</select></div>'
       + '<div class="settings-field"><input type="file" id="mc-file" accept=".ics,text/calendar"></div>'
       + '<div class="settings-actions">'
@@ -5884,6 +6176,92 @@
   }
 
   /* ================= SETTINGS / SYNC MODAL ================= */
+  /* The category editor. Rows write straight through to state on every keystroke or click --
+     there's no draft-and-save here because there's no destructive step to guard: the only
+     irreversible action (remove) asks first and says what it will do. */
+  function renderCategoryEditor(){
+    var box = document.getElementById('cat-list');
+    if(!box) return;
+    var list = categoryList();
+    box.innerHTML = list.map(function(c){
+      var locked = c.id === FALLBACK_CATEGORY_ID;
+      return '<div class="cat-row" data-cat="'+escapeHtml(c.id)+'">'
+        + '<button type="button" class="color-swatch" data-cat-pop="'+escapeHtml(c.id)+'" style="background:'+c.color+'" title="Change this colour"></button>'
+        + '<select class="text-input cat-icon" data-cat="'+escapeHtml(c.id)+'" title="Icon" aria-label="Icon">'
+        + CATEGORY_ICONS.map(function(n){ return '<option value="'+n+'"'+(n===c.icon?' selected':'')+'>'+n+'</option>'; }).join('')
+        + '</select>'
+        + '<span class="cat-preview" style="color:'+c.color+'">'+icon(c.icon)+'</span>'
+        + '<input class="text-input cat-name" data-cat="'+escapeHtml(c.id)+'" placeholder="Category name" value="'+escapeHtml(c.label)+'">'
+        + (locked
+            ? '<span class="cat-locked" title="Anything filed under a removed category lands here">Fallback</span>'
+            : '<button type="button" class="rm cat-remove" data-cat="'+escapeHtml(c.id)+'" title="Remove" aria-label="Remove">'+icon('close')+'</button>')
+        + '<div class="color-pop hidden" data-cat-palette="'+escapeHtml(c.id)+'">'
+        + CALENDAR_COLOR_PALETTE.map(function(col){
+            return '<button type="button" class="color-chip'+(c.color===col?' on':'')+'" data-cat-color="'+escapeHtml(c.id)+'" data-color="'+col+'" style="background:'+col+'" aria-label="Use this colour"></button>';
+          }).join('')
+        + '</div>'
+        + '</div>';
+    }).join('');
+
+    box.querySelectorAll('[data-cat-pop]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var pop = box.querySelector('[data-cat-palette="'+btn.dataset.catPop+'"]');
+        var opening = pop && pop.classList.contains('hidden');
+        box.querySelectorAll('.color-pop').forEach(function(el){ el.classList.add('hidden'); });
+        if(opening) pop.classList.remove('hidden');
+      });
+    });
+    box.querySelectorAll('[data-cat-color]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var c = categoryById(btn.dataset.catColor);
+        c.color = btn.dataset.color;
+        persistCalendar();
+        renderCategoryEditor();
+        if(state.view === 'calendar') render();
+      });
+    });
+    box.querySelectorAll('.cat-name').forEach(function(inp){
+      inp.addEventListener('input', function(){
+        categoryById(inp.dataset.cat).label = inp.value;
+        persistCalendar();
+      });
+    });
+    box.querySelectorAll('.cat-icon').forEach(function(sel){
+      sel.addEventListener('change', function(){
+        categoryById(sel.dataset.cat).icon = sel.value;
+        persistCalendar();
+        renderCategoryEditor();
+        if(state.view === 'calendar') render();
+      });
+    });
+    box.querySelectorAll('.cat-remove').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id = btn.dataset.cat;
+        var cat = categoryById(id);
+        // Events keep pointing at a category id, so count them before removing and say so --
+        // "3 events will move to Other" is the thing you need to know before deciding.
+        var affected = (state.events || []).filter(function(e){ return e.category === id; });
+        var subs = (state.calendarSubscriptions || []).filter(function(x){ return x.category === id; });
+        var msg = 'Remove "' + (cat.label || 'this category') + '"?';
+        if(affected.length || subs.length){
+          msg += '\n\n' + [
+            affected.length ? affected.length + ' event' + (affected.length===1?'':'s') : null,
+            subs.length ? subs.length + ' imported calendar' + (subs.length===1?'':'s') : null
+          ].filter(Boolean).join(' and ') + ' will move to Other.';
+        }
+        if(!window.confirm(msg)) return;
+        affected.forEach(function(e){ e.category = FALLBACK_CATEGORY_ID; });
+        subs.forEach(function(x){ x.category = FALLBACK_CATEGORY_ID; });
+        state.eventCategories = (state.eventCategories || []).filter(function(x){ return x.id !== id; });
+        persistCalendar();
+        renderCategoryEditor();
+        var t = document.getElementById('cat-toggle');
+        if(t) t.textContent = 'Edit ' + state.eventCategories.length + ' categories…';
+        render();
+      });
+    });
+  }
+
   function openSettingsModal(){
     var cfg = getMigrationConfig();
     var html = ''
@@ -5899,7 +6277,19 @@
           + '<button type="button" data-board="matrix">Matrix</button>'
           + '</div>'
         ) : '')
-      + '<div class="field-label"'+(state.currentFamilyMember?'':' style="margin-top:0;"')+'>Sync</div>'
+
+      // Collapsed by default: fifteen rows would push Sync and everything under it off the
+      // screen, and this is a list you set up once and rarely open again.
+      + '<div class="field-label">Event categories</div>'
+      + '<div class="settings-help" style="margin-top:0;">The labels on the Add Event screen. Everyone in the family sees the same list.</div>'
+      + '<div class="settings-actions"><button class="btn-sm" id="cat-toggle" aria-expanded="false"></button></div>'
+      + '<div id="cat-panel" class="hidden">'
+      + '<div class="settings-help" style="margin-top:0;">Rename, recolour or remove any of them. Anything filed under a category you remove moves to Other.</div>'
+      + '<div id="cat-list"></div>'
+      + '<div class="settings-actions"><button class="btn-sm" id="cat-add">Add a category</button></div>'
+      + '</div>'
+
+      + '<div class="field-label">Sync</div>'
       + '<div id="s-health" class="settings-help" style="margin-top:0;">Checking…</div>'
       + '<div class="settings-actions"><button class="btn-primary" id="s-refresh">Sync now</button></div>'
 
@@ -5930,6 +6320,37 @@
     document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id==='scrim') close(); });
     document.getElementById('s-cancel').addEventListener('click', close);
     document.getElementById('s-refresh').addEventListener('click', function(){ retrySyncNow(); refreshHealth(); });
+
+    var catToggle = document.getElementById('cat-toggle');
+    var catPanel = document.getElementById('cat-panel');
+    function syncCatToggle(){
+      var open = !catPanel.classList.contains('hidden');
+      var n = (state.eventCategories || []).length;
+      catToggle.textContent = open ? 'Done editing' : ('Edit ' + n + ' categor' + (n === 1 ? 'y' : 'ies') + '…');
+      catToggle.setAttribute('aria-expanded', String(open));
+    }
+    catToggle.addEventListener('click', function(){
+      catPanel.classList.toggle('hidden');
+      if(!catPanel.classList.contains('hidden')) renderCategoryEditor();
+      syncCatToggle();
+    });
+    syncCatToggle();
+
+    renderCategoryEditor();
+    document.getElementById('cat-add').addEventListener('click', function(){
+      var n = (state.eventCategories || []).length;
+      state.eventCategories.push({
+        id: 'cat-' + uid().slice(0, 8),   // a fresh id, so it can never collide with a seeded one
+        label: '', icon: 'pin',
+        color: CALENDAR_COLOR_PALETTE[n % CALENDAR_COLOR_PALETTE.length],
+        order: n
+      });
+      persistCalendar();
+      renderCategoryEditor();
+      syncCatToggle();
+      var inputs = document.querySelectorAll('#cat-list .cat-name');
+      if(inputs.length) inputs[inputs.length - 1].focus();
+    });
 
     renderBoardStyleToggle();
     var boardToggle = document.getElementById('board-style-toggle');
@@ -6144,6 +6565,7 @@
   var NAV_ITEMS = [
     { view:'matrix',   label:'Matrix',   icon:'matrix'   },
     { view:'calendar', label:'Calendar', icon:'calendar' },
+    { view:'messages', label:'Messages', icon:'chat'     },
     { view:'compass',  label:'Compass',  icon:'compass'  },
     { view:'list',     label:'List',     icon:'list'     },
     { view:'archive',  label:'Archive',  icon:'archive'  }
@@ -6158,7 +6580,7 @@
     render();
   }
 
-  var VIEW_ICONS = { matrix:'matrix', calendar:'calendar', compass:'compass', list:'list', archive:'archive', dreams:'star' };
+  var VIEW_ICONS = { matrix:'matrix', calendar:'calendar', messages:'chat', compass:'compass', list:'list', archive:'archive', dreams:'star' };
   function decorateViewSwitcher(){
     document.querySelectorAll('#view-switcher button[data-view]').forEach(function(b){
       if(b.querySelector('svg')) return;
@@ -6191,6 +6613,10 @@
     if(state.view === 'calendar') return { label:'New event', run:function(){ openAddEventModal(state.calAnchor); } };
     if(state.view === 'compass')  return { label:'New goal',  run:openAddGoalModal };
     if(state.view === 'dreams')   return { label:'New dream', run:openAddDreamModal };
+    if(state.view === 'messages') return { label:'New message', run:function(){
+      var el = document.getElementById('msg-input');
+      if(el){ el.focus(); el.scrollIntoView({ block:'center' }); }
+    } };
     if(state.view === 'archive')  return null;
     return { label:'New task', run:openAddTaskModal };
   }
