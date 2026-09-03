@@ -2057,6 +2057,10 @@
         if(m && !sync.unknownKinds[m[1]]){
           sync.unknownKinds[m[1]] = true;
           sync.queue = sync.queue.filter(function(op){ return serverKnowsKind(op.kind); });
+          // The shadow is "what the server has". Dropping the ops without forgetting the
+          // shadow told this device those rows were saved when they never left it -- so once
+          // the API caught up, nothing was ever re-sent. Forget them and they queue again.
+          forgetShadowKind(m[1]);
           saveSyncLocal();
           return flushQueue();
         }
@@ -2068,6 +2072,40 @@
   // Kinds this server has said it doesn't understand. Only a real rejection populates this,
   // so a fully updated deployment never takes this path.
   function serverKnowsKind(kind){ return !sync.unknownKinds[kind]; }
+
+  // Drops a kind's entries from the shadow, so the next diff sees every one of them as new
+  // and queues it. Used when we learn the server does not in fact have them.
+  function forgetShadowKind(kind){
+    var prefix = kind + ':';
+    Object.keys(sync.shadow).forEach(function(key){
+      if(key.indexOf(prefix) === 0) delete sync.shadow[key];
+    });
+  }
+
+  /* The shadow is rebuilt from local state at boot, on the assumption that what's local came
+     from the server. That assumption breaks for anything created while the server couldn't
+     store it -- categories seeded locally, or rows dropped because the API was a version
+     behind. Those rows sit in local state marked as synced and are never sent again, which
+     is how one person's category list can stay invisible to everyone else.
+
+     /api/health already reports how many rows of each kind the store holds, so compare: a
+     kind we hold rows for and the server holds none of has never made it across. */
+  function pushKindsTheServerIsMissing(serverCounts){
+    var counts = serverCounts || {};
+    var repaired = [];
+    Object.keys(SYNC_KINDS).forEach(function(kind){
+      var mine = (SYNC_KINDS[kind].get() || []).length;
+      if(mine > 0 && !counts[kind]){
+        forgetShadowKind(kind);
+        repaired.push(kind + ' \u00d7' + mine);
+      }
+    });
+    if(repaired.length){
+      queueChanges();   // the diff now sees them as new and sends them
+      return repaired;
+    }
+    return null;
+  }
 
   function pull(){
     return apiFetch('/api/state?since=' + sync.cursor).then(function(res){
@@ -2215,6 +2253,8 @@
         // Only after a real pull: seeding before we know what the store holds would resurrect
         // categories the family had deleted.
         seedCategoriesIfEmpty(true);
+        // ...then push anything this device holds that the store has never seen.
+        pushKindsTheServerIsMissing(h && h.items);
         startSync();
         if(sync.queue.length) flushQueue();
         showSetupBanner(empty && !state.tasks.length && !state.events.length);
