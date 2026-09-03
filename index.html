@@ -1848,6 +1848,8 @@
     lastError: null,
     started: false,
     unknownKinds: {},     // kinds this server rejected; see the bad_kind branch in flushQueue
+    didFullResync: false, // one cursor-reset repair per load; see resyncIfBehindServer
+    applyNow: false,      // take incoming rows even with a modal open (the manual re-download)
     deferred: null,       // remote items held back while a modal is open
     online: true
   };
@@ -2107,6 +2109,54 @@
     return null;
   }
 
+  /* The mirror of the above, and the more important half.
+
+     A device only ever asks for "everything since my cursor". If rows were skipped -- the
+     cursor moved past a page that was never applied, a cache was written from a half-loaded
+     state, an old build stored a kind it didn't understand -- nothing ever asks for them
+     again. The device sits there permanently missing rows that everyone else can see, and
+     restarting the app does not help, because the cursor is exactly what gets restored.
+
+     /api/health reports how many rows of each kind the store holds. If it holds more of
+     something than we do, we have skipped some: throw the cursor away and read the whole
+     store back. Once per load, so a genuine disagreement can't become a loop. */
+  /* Drops this device's place-marker and reads the store from the beginning. Unsent local
+     changes are kept -- they are still in the queue and go up afterwards -- so this only ever
+     adds what the device was missing. */
+  function forgetCursorAndRefetch(){
+    sync.cursor = 0;
+    sync.shadow = {};
+    sync.deferred = null;
+    saveSyncLocal();
+    // This is pressed from inside the settings sheet, and an open modal normally holds
+    // incoming rows back. Here the whole point is to take them, so say so.
+    sync.applyNow = true;
+    return pull().then(function(){
+      sync.applyNow = false;
+      rebuildShadow();     // whatever came back is now the agreed baseline
+      cacheAllLocal();
+    }, function(err){
+      sync.applyNow = false;
+      throw err;
+    });
+  }
+
+  function resyncIfBehindServer(serverCounts){
+    if(sync.didFullResync) return null;
+    var counts = serverCounts || {};
+    var behind = [];
+    Object.keys(SYNC_KINDS).forEach(function(kind){
+      var mine = (SYNC_KINDS[kind].get() || []).length;
+      var theirs = counts[kind] || 0;
+      if(theirs > mine) behind.push(kind + ': ' + mine + ' here vs ' + theirs + ' in the store');
+    });
+    if(!behind.length) return null;
+    sync.didFullResync = true;
+    sync.cursor = 0;          // ask for the store from the beginning
+    saveSyncLocal();
+    return behind;
+  }
+
   function pull(){
     return apiFetch('/api/state?since=' + sync.cursor).then(function(res){
       applyRemote(res);
@@ -2135,9 +2185,13 @@
     // While a modal is open the user is editing a draft of one of these; applying
     // underneath them is how you get a save that silently reverts. Hold and apply
     // on close instead.
-    if(items.length && document.getElementById('modal-root').innerHTML !== ''){
+    if(items.length && !sync.applyNow && document.getElementById('modal-root').innerHTML !== ''){
       sync.deferred = (sync.deferred || []).concat(items);
-      if(res.seq) { sync.cursor = res.seq; saveSyncLocal(); }
+      // The cursor deliberately does NOT move here. It is this device's "I have everything up
+      // to N" marker, and these rows are only held in memory -- closing the app instead of the
+      // modal would drop them while the marker claimed they had arrived, and nothing would ever
+      // ask for them again. Leaving it put means the next pull simply delivers them a second
+      // time, which costs one request and cannot lose anything.
       return;
     }
 
@@ -2249,7 +2303,12 @@
       // A store with nothing in it and no cursor means this device has never
       // synced and nobody has migrated yet — say so rather than looking "synced".
       var empty = h && h.seq === 0;
+      // Before the first pull: if the store holds rows we don't, our cursor has skipped them,
+      // and pulling "since the cursor" would skip them again. Reset it first so this pull
+      // reads the store from the beginning.
+      var behind = resyncIfBehindServer(h && h.items);
       return pull().then(function(){
+        if(behind) console.info('[sync] re-read the whole store; was missing ' + behind.join('; '));
         // Only after a real pull: seeding before we know what the store holds would resurrect
         // categories the family had deleted.
         seedCategoriesIfEmpty(true);
@@ -6336,7 +6395,11 @@
 
       + '<div class="field-label">Sync</div>'
       + '<div id="s-health" class="settings-help" style="margin-top:0;">Checking…</div>'
-      + '<div class="settings-actions"><button class="btn-primary" id="s-refresh">Sync now</button></div>'
+      + '<div class="settings-actions">'
+      + '<button class="btn-primary" id="s-refresh">Sync now</button>'
+      + '<button class="btn-sm" id="s-refetch" title="Forget what this device thinks it has and read the whole store again">Re-download everything</button>'
+      + '</div>'
+      + '<div class="settings-help" style="margin-top:6px;">If this device is showing fewer categories, events or notes than everyone else, use Re-download everything. It only reads — nothing on this device is sent or lost.</div>'
 
       + '<div class="field-label">Move data from the old GitHub sync</div>'
       + '<div class="settings-help" style="margin-top:0;">A one-off copy of your four JSON files into the new store. Read-only — nothing is written back to GitHub, and the token is used for this copy alone and never saved.</div>'
@@ -6365,6 +6428,24 @@
     document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id==='scrim') close(); });
     document.getElementById('s-cancel').addEventListener('click', close);
     document.getElementById('s-refresh').addEventListener('click', function(){ retrySyncNow(); refreshHealth(); });
+    document.getElementById('s-refetch').addEventListener('click', function(){
+      var btn = document.getElementById('s-refetch');
+      btn.disabled = true; btn.textContent = 'Reading…';
+      // A device only ever asks for "changes since my cursor", so anything it skipped is never
+      // requested again -- and restarting the app restores the very cursor that skipped it.
+      // Throwing the cursor away is the one thing that always recovers such a device.
+      forgetCursorAndRefetch().then(function(){
+        var el = document.getElementById('s-refetch');
+        if(el){ el.disabled = false; el.textContent = 'Re-download everything'; }
+        refreshHealth();
+        render();
+        showToast('Re-read everything from the shared store', false, 2600);
+      }).catch(function(){
+        var el = document.getElementById('s-refetch');
+        if(el){ el.disabled = false; el.textContent = 'Re-download everything'; }
+        say('Could not reach the store just now — try again when you are back online.', true);
+      });
+    });
 
     var catToggle = document.getElementById('cat-toggle');
     var catPanel = document.getElementById('cat-panel');
