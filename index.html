@@ -490,6 +490,158 @@
   .family-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px;}
   /* Category editor rows. Same shape as a family row, but the name field carries the weight. */
 
+  /* ---------- Mood Meter ----------
+     The grid is the feature, so it is sized to be read at a glance rather than tucked into a
+     corner: a true square that fills the column on a phone and is capped on a laptop so it
+     never becomes four enormous slabs. The axis labels sit outside the square on both, since
+     without them the four colours are just four colours. */
+  .mood-wrap{max-width:720px;margin:18px auto 0;display:flex;flex-direction:column;gap:18px;padding-bottom:40px;}
+
+  .mood-today{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    font-size:15px;background:var(--surface);border:1px solid var(--hairline);
+    border-radius:var(--radius-panel);padding:13px 16px;box-shadow:var(--shadow-sm);
+  }
+  .mood-today-empty{color:var(--ink-muted);}
+  .mood-dot{width:11px;height:11px;border-radius:50%;flex:none;display:inline-block;}
+  .mood-change{
+    margin-left:auto;background:none;border:0;padding:0;font:inherit;font-size:12.5px;
+    font-weight:700;color:var(--ink-muted);cursor:pointer;text-decoration:underline;
+  }
+  .mood-change:hover{color:var(--ink);}
+
+  /* grid + axes: a small CSS grid so the labels hug the square on every width */
+  .mood-grid-wrap{
+    display:grid;grid-template-columns:22px 1fr;grid-template-rows:1fr 22px;
+    gap:8px;align-items:center;
+    /* A square that fills a phone is right; the same square on a laptop would be half a
+       metre of colour. Cap it and centre it -- prominent, not overbearing. */
+    width:100%;max-width:520px;margin:0 auto;
+  }
+  .mood-axis-y{
+    grid-column:1;grid-row:1;height:100%;
+    display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+    font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--ink-faint);padding:4px 0;
+  }
+  /* Rotate the words, not the flex container: writing-mode on the container turns
+     flex-direction:column sideways, which stacked both labels on top of each other. */
+  .mood-axis-y > span:not(.mood-axis-arrow){writing-mode:vertical-rl;transform:rotate(180deg);}
+  .mood-axis-x{
+    grid-column:2;grid-row:2;
+    display:flex;align-items:center;justify-content:space-between;
+    font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--ink-faint);padding:0 4px;
+  }
+  .mood-axis-arrow{flex:1;margin:0 8px;border-top:1px dashed var(--hairline-strong);}
+  .mood-axis-y .mood-axis-arrow{border-top:0;border-left:1px dashed var(--hairline-strong);margin:8px 0;width:0;}
+
+  .mood-grid{
+    grid-column:2;grid-row:1;
+    display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px;
+    aspect-ratio:1/1;   /* a square, the way it is printed */
+  }
+  .mood-cell{
+    border:2px solid transparent;border-radius:var(--radius-panel);
+    display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;
+    gap:3px;padding:14px;cursor:pointer;color:#fff;text-align:left;
+    transition:transform .12s ease, box-shadow .12s ease, outline-color .12s ease;
+    -webkit-tap-highlight-color:transparent;position:relative;overflow:hidden;
+  }
+  .mood-cell:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
+  .mood-cell:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+  /* Rings rather than borders, so selecting a quadrant never changes its size and the four
+     squares stay aligned. A white border on a pale page was also simply invisible. */
+  .mood-cell.chosen{box-shadow:0 0 0 3px var(--ink);}
+  .mood-cell.open{box-shadow:0 0 0 3px var(--ink), var(--shadow-md);}
+  .mood-cell.chosen.open{box-shadow:0 0 0 3px var(--ink), var(--shadow-md);}
+  .mood-cell-label{font-family:var(--font-serif);font-size:19px;font-weight:700;line-height:1;}
+  .mood-cell-blurb{font-size:11.5px;font-weight:600;opacity:.92;line-height:1.25;}
+  .mood-cell-mark{
+    position:absolute;top:10px;right:10px;background:rgba(255,255,255,.22);
+    border-radius:var(--radius-pill);padding:3px 10px;font-size:11.5px;font-weight:700;
+    max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .m-red{background:#c8392f;}
+  .m-yellow{background:#d9a318;}
+  .m-blue{background:#2f6bb5;}
+  .m-green{background:#2f8b4f;}
+
+  .mood-words{
+    background:var(--surface);border:1px solid var(--hairline);
+    border-radius:var(--radius-panel);padding:15px 16px;box-shadow:var(--shadow-sm);
+  }
+  .mood-words h2{font-family:var(--font-serif);font-size:16px;font-weight:700;margin:0;}
+  .mood-words-hint{font-size:12.5px;color:var(--ink-muted);margin:3px 0 11px;}
+  /* Five by five, because position inside a quadrant carries meaning in the book: the cell
+     a word sits in tells you how intense it is, which a wrapped row of pills would lose. */
+  .mood-word-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;}
+  .mood-word{
+    border:1.5px solid var(--hairline-strong);background:var(--surface);color:var(--ink);
+    border-radius:10px;padding:10px 4px;font-size:12px;font-weight:600;line-height:1.15;
+    cursor:pointer;transition:background .12s,border-color .12s,transform .1s;
+    min-height:46px;display:flex;align-items:center;justify-content:center;text-align:center;
+    overflow-wrap:anywhere;hyphens:auto;-webkit-hyphens:auto;
+  }
+  .mood-word:hover{background:var(--surface-2);transform:translateY(-1px);}
+  .mood-word:focus-visible{outline:2px solid var(--ink);outline-offset:1px;}
+  .mood-word.on{background:var(--primary-btn);border-color:var(--primary-btn);color:var(--on-primary);}
+  /* A wash of the quadrant's colour behind the grid, so it still reads as "you are in red". */
+  .m-red-grid .mood-word{border-color:rgba(200,57,47,.30);}
+  .m-yellow-grid .mood-word{border-color:rgba(217,163,24,.38);}
+  .m-blue-grid .mood-word{border-color:rgba(47,107,181,.30);}
+  .m-green-grid .mood-word{border-color:rgba(47,139,79,.30);}
+  .mood-words-foot{display:flex;justify-content:flex-end;margin-top:12px;}
+
+  .mood-history{
+    background:var(--surface);border:1px solid var(--hairline);
+    border-radius:var(--radius-panel);padding:15px 16px;box-shadow:var(--shadow-sm);
+  }
+  .mood-hist-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+  .mood-history h2{font-family:var(--font-serif);font-size:16px;font-weight:700;margin:0;}
+  .mood-hist-nav{display:flex;align-items:center;gap:8px;margin-left:auto;}
+  .mood-hist-nav button{
+    border:1px solid var(--hairline-strong);background:var(--surface);color:var(--ink);
+    border-radius:8px;width:28px;height:28px;font-size:16px;line-height:1;cursor:pointer;
+  }
+  .mood-hist-nav button:disabled{opacity:.35;cursor:default;}
+  .mood-hist-month{font-size:13px;font-weight:700;min-width:118px;text-align:center;}
+  .mood-dow,.mood-month{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+  .mood-dow{margin-bottom:5px;}
+  .mood-dow span{
+    text-align:center;font-size:10px;font-weight:700;color:var(--ink-faint);
+    letter-spacing:.06em;
+  }
+  .mood-day{
+    aspect-ratio:1/1;border-radius:7px;background:var(--surface-2);
+    border:1px solid var(--hairline);display:flex;align-items:center;justify-content:center;
+  }
+  .mood-day.blank{background:none;border-color:transparent;}
+  .mood-day-n{font-size:10.5px;font-weight:700;color:var(--ink-faint);font-variant-numeric:tabular-nums;}
+  .mood-day.filled{border-color:transparent;}
+  .mood-day.filled .mood-day-n{color:#fff;}
+  .mood-day.today{outline:2px solid var(--ink);outline-offset:1px;}
+
+  .mood-bars{display:flex;flex-direction:column;gap:7px;margin-top:15px;}
+  .mood-bar-row{display:flex;align-items:center;gap:10px;font-size:12.5px;}
+  .mood-bar-key{display:flex;align-items:center;gap:6px;width:82px;flex:none;font-weight:600;}
+  .mood-bar-track{flex:1;height:8px;border-radius:999px;background:var(--surface-2);overflow:hidden;}
+  .mood-bar-fill{display:block;height:100%;border-radius:999px;}
+  .mood-bar-n{width:22px;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-muted);}
+  .mood-hist-note,.mood-hist-empty{font-size:12px;color:var(--ink-muted);margin:12px 0 0;}
+  .mood-hist-empty{margin:0;}
+
+  @media (max-width:760px){
+    .mood-wrap{margin-top:12px;gap:14px;padding-bottom:90px;}
+    .mood-cell{padding:11px;}
+    .mood-cell-label{font-size:17px;}
+    .mood-cell-blurb{font-size:10.5px;}
+    .mood-word-grid{gap:5px;}
+    .mood-word{font-size:10.5px;padding:8px 2px;min-height:48px;border-radius:9px;}
+    .mood-bar-key{width:70px;}
+    .mood-hist-month{min-width:96px;font-size:12px;}
+  }
+
   /* ---------- Message board ----------
      A single column at reading width. Notes are short, so the card is quiet: the name and the
      time do the framing and the text carries the weight. */
@@ -653,6 +805,14 @@
       --shadow-md:0 2px 8px rgba(0,0,0,.35), 0 10px 24px rgba(0,0,0,.3);
       --shadow-lg:0 12px 48px rgba(0,0,0,.6);
     }
+    /* The Mood Meter's colours are the book's, not the theme's, so they don't come from
+       tokens -- but they do need lifting off a dark ground to keep white text legible. */
+    .m-red{background:#d4564b;}
+    .m-yellow{background:#c8952a;}
+    .m-blue{background:#4a82c7;}
+    .m-green{background:#3f9c5f;}
+    .mood-cell.chosen,.mood-cell.open{box-shadow:0 0 0 3px #f2ece4;}
+
     /* Emoji-free UI still uses a couple of colour-on-colour chips; keep them legible. */
     .banner{background:var(--due-today-bg);border-color:#5a4520;color:var(--due-today);}
     input,textarea,select{color-scheme:dark;}
@@ -1276,6 +1436,7 @@
           <button data-view="matrix" class="active">Matrix</button>
           <button data-view="calendar">Calendar</button>
           <button data-view="messages">Messages</button>
+          <button data-view="mood">Mood</button>
           <button data-view="dreams" class="hidden">Dreams</button>
           <button data-view="compass">Compass</button>
           <button data-view="list">List</button>
@@ -1548,6 +1709,12 @@
     calendarSubscriptions: [], // [{id,ownerFamilyMemberId,name,url,category,enabled,lastSyncedAt,lastError,syncStatus}]
     eventCategories: [],  // [{id,label,icon,color,order}] -- seeded from EVENT_CATEGORY_SEED, then owned by the family
 
+    // ---- Mood Meter ----
+    // [{id:'<ownerId>|<date>',ownerId,date,quadrant,word,note,createdAt,updatedAt}]
+    moods: [],
+    moodPick: null,       // quadrant being expanded on the check-in grid, before a word is chosen
+    moodMonth: null,      // 'YYYY-MM' the history is showing; null means this month
+
     // ---- Message board ----
     // [{id,text,authorId,createdAt,updatedAt,pinned}] -- one shared wall for the whole family
     messages: [],
@@ -1645,6 +1812,7 @@
     brush:     '<path d="M9.5 14.5l-3 3a2.1 2.1 0 1 0 3 3l3-3"/><path d="M13.4 17.1L20 10.5a2.6 2.6 0 0 0-3.7-3.7L9.7 13.4"/><path d="M6.5 8.6l2.4-4.9 4.9-2.4"/>',
     trophy:    '<path d="M7.5 3.5h9v5.2a4.5 4.5 0 0 1-9 0z"/><path d="M7.5 5H4.8v1.4A3.2 3.2 0 0 0 8 9.6M16.5 5h2.7v1.4a3.2 3.2 0 0 1-3.2 3.2M12 13.2V17M8.4 20.5h7.2M9.6 17h4.8v3.5H9.6z"/>',
     leaf:      '<path d="M4.5 19.5C3 14 6.5 5.5 19.5 4.5c1 11-6 15.5-11.5 14.5"/><path d="M4.5 19.5c3-5.4 6.4-8.4 10.5-10.5"/>',
+    mood:      '<rect x="3.2" y="3.2" width="7.6" height="7.6" rx="1.6"/><rect x="13.2" y="3.2" width="7.6" height="7.6" rx="1.6"/><rect x="3.2" y="13.2" width="7.6" height="7.6" rx="1.6"/><rect x="13.2" y="13.2" width="7.6" height="7.6" rx="1.6" fill="currentColor"/>',
     chat:      '<path d="M20.5 12.2c0 4-3.8 7.2-8.5 7.2a10 10 0 0 1-2.6-.33L4.5 20.5l1.2-3.4A6.8 6.8 0 0 1 3.5 12.2C3.5 8.2 7.3 5 12 5s8.5 3.2 8.5 7.2z"/>',
     refresh:   '<path d="M20 11.5A8 8 0 1 0 18 17M20 5.5v6h-6"/>'
   };
@@ -1655,6 +1823,90 @@
   // True on phone-sized screens. Several views render a genuinely different (not just
   // restyled) layout there, so this needs to be a JS check, not only a media query.
   function isPhone(){ return window.matchMedia('(max-width:760px)').matches; }
+
+  /* ================= MOOD METER =================
+     The Mood Meter from Marc Brackett's "Permission to Feel" (the RULER work at Yale). Two
+     axes: how much energy you have, and how pleasant it feels. That makes four quadrants,
+     each with its own colour and its own vocabulary.
+
+     The colours are the book's and are not ours to restyle -- red/blue/yellow/green is the
+     thing people recognise -- so they are fixed hex values rather than theme tokens, with a
+     darker set for dark mode chosen to keep white text legible on them.
+
+     Picking the quadrant is the easy half. The point of the book is the second tap: "anxious"
+     and "irritated" sit in the same red square and are not the same feeling, and being able
+     to tell them apart is most of what the practice is for. */
+  /* Each quadrant is its own 5x5 of twenty-five words -- the four together are the 10x10
+     hundred-word meter as it is printed in the book. Position carries meaning inside a
+     quadrant too: reading down a column energy falls, reading across a row pleasantness
+     rises, so "peeved" and "enraged" are both red but sit at opposite corners of it. */
+  var MOOD_QUADRANTS = {
+    red:    { key:'red',    label:'Red',    blurb:'High energy, unpleasant',
+              words:[
+                'enraged','panicked','stressed','jittery','shocked',
+                'livid','furious','frustrated','tense','stunned',
+                'fuming','frightened','angry','nervous','restless',
+                'anxious','apprehensive','worried','irritated','annoyed',
+                'repulsed','troubled','concerned','uneasy','peeved'] },
+    yellow: { key:'yellow', label:'Yellow', blurb:'High energy, pleasant',
+              words:[
+                'surprised','upbeat','festive','exhilarated','ecstatic',
+                'hyper','cheerful','motivated','inspired','elated',
+                'energised','lively','excited','optimistic','enthusiastic',
+                'pleased','focused','happy','proud','thrilled',
+                'pleasant','joyful','hopeful','playful','blissful'] },
+    blue:   { key:'blue',   label:'Blue',   blurb:'Low energy, unpleasant',
+              words:[
+                'disgusted','glum','disappointed','down','apathetic',
+                'pessimistic','morose','discouraged','sad','bored',
+                'alienated','miserable','lonely','disheartened','tired',
+                'despondent','left out','sullen','exhausted','fatigued',
+                'worn out','hopeless','withdrawn','spent','drained'] },
+    green:  { key:'green',  label:'Green',  blurb:'Low energy, pleasant',
+              words:[
+                'at ease','easygoing','content','loving','fulfilled',
+                'calm','secure','satisfied','grateful','touched',
+                'relaxed','chill','restful','blessed','balanced',
+                'mellow','thoughtful','peaceful','comfortable','carefree',
+                'sleepy','tranquil','cosy','serene','safe'] }
+  };
+  // Reading order of the grid: the book prints energy up the side and pleasantness across.
+  var MOOD_GRID = ['red','yellow','blue','green'];
+  var MOOD_COLORS = {
+    red:    { light:'#c8392f', dark:'#d4564b' },
+    yellow: { light:'#d9a318', dark:'#d9a318' },
+    blue:   { light:'#2f6bb5', dark:'#4a82c7' },
+    green:  { light:'#2f8b4f', dark:'#3f9c5f' }
+  };
+  function moodColor(key){
+    var c = MOOD_COLORS[key] || MOOD_COLORS.green;
+    return prefersDarkNow() ? c.dark : c.light;
+  }
+  function prefersDarkNow(){
+    return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  }
+
+  function moodId(ownerId, date){ return ownerId + '|' + date; }
+  // One check-in per person per day, so the id is derived rather than random: checking in
+  // again the same day replaces the earlier answer instead of stacking up a second row.
+  function moodFor(ownerId, date){
+    var want = moodId(ownerId, date);
+    return (state.moods || []).find(function(m){ return m.id === want; }) || null;
+  }
+  function myMoodToday(){
+    var me = state.currentFamilyMember;
+    return me ? moodFor(me.id, todayStr()) : null;
+  }
+  /* Every person sees their own check-ins and nobody else's. Worth being plain about what
+     that does and does not mean: it is a boundary in this screen, not a lock on the data --
+     everything syncs through the one family store, so anyone willing to open a browser
+     console could read another person's rows. It is built to be private in use, which is
+     what makes an honest answer likely, not private against someone determined. */
+  function myMoods(){
+    var me = state.currentFamilyMember;
+    if(!me) return [];
+    return (state.moods || []).filter(function(m){ return m.ownerId === me.id; });
+  }
 
   /* Event categories are data, not code: this list only seeds an empty store, and after that
      the family edits their own in Settings. The ids are the slugs already written on existing
@@ -1835,7 +2087,8 @@
     // Compass profiles are keyed by the kid they belong to, not by an id field.
     profile:      { get: function(){ return state.compassProfiles; },    set: function(v){ state.compassProfiles = v; },    idOf: function(o){ return 'profile:' + o.ownerId; } },
     category:     { get: function(){ return state.eventCategories; },    set: function(v){ state.eventCategories = v; },    idOf: function(o){ return 'category:' + o.id; } },
-    message:      { get: function(){ return state.messages; },           set: function(v){ state.messages = v; },           idOf: function(o){ return 'message:' + o.id; } }
+    message:      { get: function(){ return state.messages; },           set: function(v){ state.messages = v; },           idOf: function(o){ return 'message:' + o.id; } },
+    mood:         { get: function(){ return state.moods; },              set: function(v){ state.moods = v; },              idOf: function(o){ return 'mood:' + o.id; } }
   };
 
   var sync = {
@@ -1879,16 +2132,17 @@
   function loadCalendarLocalOnly(){
     try{
       var raw = JSON.parse(localStorage.getItem(LS_CALENDAR) || 'null');
-      return { family: (raw && raw.family) || [], events: (raw && raw.events) || [], calendarSubscriptions: (raw && raw.calendarSubscriptions) || [], eventCategories: (raw && raw.eventCategories) || [], messages: (raw && raw.messages) || [], homeTimezone: (raw && raw.homeTimezone) || DEFAULT_TIMEZONE };
-    }catch(e){ return { family: [], events: [], calendarSubscriptions: [], eventCategories: [], messages: [], homeTimezone: DEFAULT_TIMEZONE }; }
+      return { family: (raw && raw.family) || [], events: (raw && raw.events) || [], calendarSubscriptions: (raw && raw.calendarSubscriptions) || [], eventCategories: (raw && raw.eventCategories) || [], messages: (raw && raw.messages) || [], moods: (raw && raw.moods) || [], homeTimezone: (raw && raw.homeTimezone) || DEFAULT_TIMEZONE };
+    }catch(e){ return { family: [], events: [], calendarSubscriptions: [], eventCategories: [], messages: [], moods: [], homeTimezone: DEFAULT_TIMEZONE }; }
   }
   function loadCalendarLocal(){
     var c = loadCalendarLocalOnly();
     state.family = c.family; state.events = c.events; state.calendarSubscriptions = c.calendarSubscriptions;
-    state.eventCategories = c.eventCategories; state.messages = c.messages; state.homeTimezone = c.homeTimezone;
+    state.eventCategories = c.eventCategories; state.messages = c.messages; state.moods = c.moods || [];
+    state.homeTimezone = c.homeTimezone;
   }
   function cacheCalendarLocal(){
-    try{ localStorage.setItem(LS_CALENDAR, JSON.stringify({family: state.family, events: state.events, calendarSubscriptions: state.calendarSubscriptions, eventCategories: state.eventCategories, messages: state.messages, homeTimezone: state.homeTimezone})); }catch(e){}
+    try{ localStorage.setItem(LS_CALENDAR, JSON.stringify({family: state.family, events: state.events, calendarSubscriptions: state.calendarSubscriptions, eventCategories: state.eventCategories, messages: state.messages, moods: state.moods, homeTimezone: state.homeTimezone})); }catch(e){}
   }
   function loadDreamsLocalOnly(){
     try{
@@ -2771,6 +3025,180 @@
   }
   var canEditMessage = canManageMessage;
   var canDeleteMessage = canManageMessage;
+
+  /* ---- the check-in screen ---- */
+  function renderMood(){
+    var me = state.currentFamilyMember;
+    if(!me){
+      document.getElementById('view-root').innerHTML =
+        '<div class="mood-wrap"><div class="settings-help" style="margin:30px 0 0;">We couldn\'t match your login to a family member yet, so there\'s nobody to check in as. Ask an adult to add you in Family Settings with the email you log in with.</div></div>';
+      return;
+    }
+    var today = myMoodToday();
+    var picked = state.moodPick;
+
+    // The grid is the thing the book is known for, so it leads and it stays put: the axes
+    // are what make the four colours mean something, and they are labelled on every screen
+    // size rather than dropped on a phone.
+    var grid = '<div class="mood-grid-wrap">'
+      + '<div class="mood-axis-y"><span>More energy</span><span class="mood-axis-arrow"></span><span>Less energy</span></div>'
+      + '<div class="mood-grid" id="mood-grid">'
+      + MOOD_GRID.map(function(key){
+          var q = MOOD_QUADRANTS[key];
+          var on = today && today.quadrant === key;
+          var open = picked === key;
+          return '<button type="button" class="mood-cell m-' + key + (on ? ' chosen' : '') + (open ? ' open' : '') + '"'
+            + ' data-quadrant="' + key + '" aria-pressed="' + (!!on) + '">'
+            + '<span class="mood-cell-label">' + q.label + '</span>'
+            + '<span class="mood-cell-blurb">' + escapeHtml(q.blurb) + '</span>'
+            + (on ? '<span class="mood-cell-mark">' + escapeHtml(today.word) + '</span>' : '')
+            + '</button>';
+        }).join('')
+      + '</div>'
+      + '<div class="mood-axis-x"><span>Less pleasant</span><span class="mood-axis-arrow"></span><span>More pleasant</span></div>'
+      + '</div>';
+
+    // Second tap: the words inside the colour you chose.
+    var words = '';
+    if(picked){
+      var q = MOOD_QUADRANTS[picked];
+      words = '<section class="mood-words m-' + picked + '-tint">'
+        + '<h2>' + q.label + ' &mdash; ' + escapeHtml(q.blurb) + '</h2>'
+        + '<p class="mood-words-hint">Which one is closest? Energy falls as you go down; it gets more pleasant as you go right.</p>'
+        + '<div class="mood-word-grid m-' + picked + '-grid">'
+        + q.words.map(function(w){
+            var on = today && today.quadrant === picked && today.word === w;
+            return '<button type="button" class="mood-word' + (on ? ' on' : '') + '" data-word="' + escapeHtml(w) + '">' + escapeHtml(w) + '</button>';
+          }).join('')
+        + '</div>'
+        + '<div class="mood-words-foot"><button type="button" class="btn-sm" id="mood-cancel">Not now</button></div>'
+        + '</section>';
+    }
+
+    var headline = today
+      ? '<div class="mood-today"><span class="mood-dot" style="background:' + moodColor(today.quadrant) + '"></span>'
+        + 'Today you felt <strong>' + escapeHtml(today.word) + '</strong>'
+        + '<button type="button" class="mood-change" id="mood-change">Change</button></div>'
+      : '<div class="mood-today mood-today-empty">How are you feeling today? Tap a colour.</div>';
+
+    document.getElementById('view-root').innerHTML =
+      '<div class="mood-wrap">' + headline + grid + words + renderMoodHistory() + '</div>';
+
+    document.querySelectorAll('#mood-grid .mood-cell').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        state.moodPick = (state.moodPick === btn.dataset.quadrant) ? null : btn.dataset.quadrant;
+        render();
+        var box = document.querySelector('.mood-words');
+        if(box) box.scrollIntoView({ block:'nearest', behavior:'smooth' });
+      });
+    });
+    document.querySelectorAll('.mood-word').forEach(function(btn){
+      btn.addEventListener('click', function(){ saveMood(state.moodPick, btn.dataset.word); });
+    });
+    var cancel = document.getElementById('mood-cancel');
+    if(cancel) cancel.addEventListener('click', function(){ state.moodPick = null; render(); });
+    var change = document.getElementById('mood-change');
+    if(change) change.addEventListener('click', function(){
+      state.moodPick = today ? today.quadrant : null; render();
+    });
+    document.querySelectorAll('[data-mood-month]').forEach(function(btn){
+      btn.addEventListener('click', function(){ state.moodMonth = btn.dataset.moodMonth; render(); });
+    });
+  }
+
+  function saveMood(quadrant, word){
+    var me = state.currentFamilyMember;
+    if(!me || !MOOD_QUADRANTS[quadrant] || !word) return;
+    var date = todayStr();
+    var existing = moodFor(me.id, date);
+    if(existing){
+      existing.quadrant = quadrant;
+      existing.word = word;
+      existing.updatedAt = nowISO();
+    } else {
+      state.moods.push({
+        id: moodId(me.id, date), ownerId: me.id, date: date,
+        quadrant: quadrant, word: word, note: '',
+        createdAt: nowISO(), updatedAt: nowISO()
+      });
+    }
+    state.moodPick = null;
+    persistMoods();
+    render();
+    showToast('Checked in: ' + word, false, 2200);
+  }
+
+  function persistMoods(){ queueChanges(); }
+
+  /* ---- history ----
+     A month at a time, one square per day, plus how the month broke down by colour. Enough
+     to notice a run of blue days without turning a feelings check-in into a report card. */
+  function monthKey(dateStr){ return dateStr.slice(0, 7); }
+  function monthLabel(key){
+    return new Date(key + '-01T00:00:00').toLocaleDateString(undefined, { month:'long', year:'numeric' });
+  }
+  function shiftMonth(key, by){
+    var y = parseInt(key.slice(0,4),10), m = parseInt(key.slice(5,7),10) - 1 + by;
+    var d = new Date(y, m, 1);
+    return d.getFullYear() + '-' + pad2(d.getMonth()+1);
+  }
+
+  function renderMoodHistory(){
+    var mine = myMoods();
+    if(!mine.length){
+      return '<section class="mood-history"><h2>Your check-ins</h2>'
+        + '<p class="mood-hist-empty">Once you start checking in, your month shows up here — only you see it.</p></section>';
+    }
+    var key = state.moodMonth || monthKey(todayStr());
+    var byDate = {};
+    mine.forEach(function(m){ byDate[m.date] = m; });
+
+    var first = new Date(key + '-01T00:00:00');
+    var daysInMonth = new Date(first.getFullYear(), first.getMonth()+1, 0).getDate();
+    var lead = first.getDay();   // Sunday-first, matching the calendar elsewhere in the app
+    var cells = '';
+    for(var i = 0; i < lead; i++) cells += '<span class="mood-day blank"></span>';
+    for(var d = 1; d <= daysInMonth; d++){
+      var ds = key + '-' + pad2(d);
+      var m = byDate[ds];
+      var isToday = ds === todayStr();
+      cells += '<span class="mood-day' + (m ? ' filled' : '') + (isToday ? ' today' : '') + '"'
+        + (m ? ' style="background:' + moodColor(m.quadrant) + '"' : '')
+        + ' title="' + escapeHtml(fmtDate(ds) + (m ? ' — ' + m.word : ' — no check-in')) + '">'
+        + '<span class="mood-day-n">' + d + '</span></span>';
+    }
+
+    // How the month went, by colour. Counts, not scores.
+    var counts = { red:0, yellow:0, blue:0, green:0 };
+    mine.forEach(function(m){ if(monthKey(m.date) === key && counts[m.quadrant] !== undefined) counts[m.quadrant]++; });
+    var total = counts.red + counts.yellow + counts.blue + counts.green;
+    var bars = MOOD_GRID.map(function(q){
+      var n = counts[q];
+      var pct = total ? Math.round((n / total) * 100) : 0;
+      return '<div class="mood-bar-row">'
+        + '<span class="mood-bar-key"><span class="mood-dot" style="background:' + moodColor(q) + '"></span>' + MOOD_QUADRANTS[q].label + '</span>'
+        + '<span class="mood-bar-track"><span class="mood-bar-fill" style="width:' + pct + '%;background:' + moodColor(q) + '"></span></span>'
+        + '<span class="mood-bar-n">' + n + '</span>'
+        + '</div>';
+    }).join('');
+
+    var thisMonth = monthKey(todayStr());
+    return '<section class="mood-history">'
+      + '<div class="mood-hist-head">'
+      + '<h2>Your check-ins</h2>'
+      + '<div class="mood-hist-nav">'
+      + '<button type="button" data-mood-month="' + shiftMonth(key, -1) + '" aria-label="Previous month">&lsaquo;</button>'
+      + '<span class="mood-hist-month">' + escapeHtml(monthLabel(key)) + '</span>'
+      + '<button type="button" data-mood-month="' + shiftMonth(key, 1) + '"' + (key >= thisMonth ? ' disabled' : '') + ' aria-label="Next month">&rsaquo;</button>'
+      + '</div></div>'
+      + '<div class="mood-dow">' + ['S','M','T','W','T','F','S'].map(function(x){ return '<span>' + x + '</span>'; }).join('') + '</div>'
+      + '<div class="mood-month">' + cells + '</div>'
+      + (total
+          ? '<div class="mood-bars">' + bars + '</div>'
+            + '<p class="mood-hist-note">' + total + ' check-in' + (total===1?'':'s') + ' this month. Only you can see this.</p>'
+          : '<p class="mood-hist-empty">No check-ins this month.</p>')
+      + '</section>';
+  }
 
   function renderMessages(){
     var list = sortedMessages();
@@ -3764,7 +4192,8 @@
     var isDreams = state.view === 'dreams';
     var isCompass = state.view === 'compass';
     var isMessages = state.view === 'messages';
-    var isTaskView = !isCal && !isDreams && !isCompass && !isMessages;
+    var isMood = state.view === 'mood';
+    var isTaskView = !isCal && !isDreams && !isCompass && !isMessages && !isMood;
     document.getElementById('task-toolbar').classList.toggle('hidden', !isTaskView);
     document.getElementById('calendar-toolbar').classList.toggle('hidden', !isCal);
     document.getElementById('dream-toolbar').classList.toggle('hidden', !isDreams);
@@ -3836,6 +4265,12 @@
     toggleToolbars();
     if(state.view === 'calendar'){
       renderCalendar();
+      syncChromeHeight();
+    applyFillHeights();
+      return;
+    }
+    if(state.view === 'mood'){
+      renderMood();
       syncChromeHeight();
     applyFillHeights();
       return;
@@ -6692,6 +7127,7 @@
     { view:'matrix',   label:'Matrix',   icon:'matrix'   },
     { view:'calendar', label:'Calendar', icon:'calendar' },
     { view:'messages', label:'Messages', icon:'chat'     },
+    { view:'mood',     label:'Mood',     icon:'mood'     },
     { view:'compass',  label:'Compass',  icon:'compass'  },
     { view:'list',     label:'List',     icon:'list'     },
     { view:'archive',  label:'Archive',  icon:'archive'  }
@@ -6706,7 +7142,7 @@
     render();
   }
 
-  var VIEW_ICONS = { matrix:'matrix', calendar:'calendar', messages:'chat', compass:'compass', list:'list', archive:'archive', dreams:'star' };
+  var VIEW_ICONS = { matrix:'matrix', calendar:'calendar', messages:'chat', mood:'mood', compass:'compass', list:'list', archive:'archive', dreams:'star' };
   function decorateViewSwitcher(){
     document.querySelectorAll('#view-switcher button[data-view]').forEach(function(b){
       if(b.querySelector('svg')) return;
@@ -6743,6 +7179,7 @@
     if(state.view === 'messages') return state.currentFamilyMember
       ? { label:'New message', run:function(){ openMessageModal(null); } }
       : null;
+    if(state.view === 'mood')     return null;   // the grid itself is the action
     if(state.view === 'archive')  return null;
     return { label:'New task', run:openAddTaskModal };
   }
