@@ -757,6 +757,36 @@
   .med-num input:focus{outline:none;border-color:var(--accent);}
   .med-num input:disabled{opacity:.7;}
 
+  /* Visual counters. Eight glasses of water is not really a number you type in once at the end
+     of the day -- it's eight small moments. So an item with a target can be ticked off as a row
+     of bottles (or plain pips for anything else countable), filled one at a time as the day
+     goes. The row replaces the number box rather than sitting beside it: two ways to say the
+     same thing is how they end up disagreeing. */
+  .med-vessels{
+    flex:none;display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;
+  }
+  .med-vessel{
+    padding:0;border:0;background:none;line-height:0;cursor:pointer;
+    color:var(--ink-faint);opacity:.5;transition:color .12s,opacity .12s,transform .1s;
+  }
+  .med-vessel:hover:not(:disabled){transform:translateY(-1px);}
+  .med-vessel:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:5px;}
+  .med-vessel:disabled{cursor:default;}
+  .med-vessel.on{color:var(--accent);opacity:1;}
+  .med-bottle{width:19px;height:32px;display:block;}
+  .med-bottle-line{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round;}
+  .med-bottle-water{fill:var(--accent);}
+  /* Pips are the same idea without the bottle: a dot that fills from the bottom. */
+  .med-pip{
+    width:17px;height:17px;border-radius:50%;display:block;
+    border:1.6px solid currentColor;box-sizing:border-box;overflow:hidden;
+  }
+  .med-pip i{display:block;width:100%;background:var(--accent);}
+  .med-vessel-count{
+    font-size:11.5px;font-weight:700;color:var(--ink-muted);white-space:nowrap;
+    font-variant-numeric:tabular-nums;margin-left:3px;
+  }
+
   .med-empty{
     text-align:center;color:var(--ink-muted);padding:30px 16px;
     display:flex;flex-direction:column;align-items:center;gap:14px;
@@ -829,7 +859,13 @@
   .med-foot{font-size:12px;color:var(--ink-muted);margin:13px 0 0;line-height:1.5;}
 
   /* the list editor */
-  .med-edit-row{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+  .med-edit-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:9px;}
+  .med-edit-row select{
+    flex:0 1 104px;box-sizing:border-box;font:inherit;font-size:13px;
+    border:1px solid var(--hairline-strong);border-radius:10px;padding:9px 6px;
+    background:var(--surface-2);color:var(--ink);
+  }
+  .med-edit-row select:focus{outline:none;border-color:var(--accent);}
   .med-edit-row input[type="text"]{
     flex:1;min-width:0;box-sizing:border-box;font:inherit;font-size:14px;
     border:1px solid var(--hairline-strong);border-radius:10px;padding:9px 11px;
@@ -864,7 +900,16 @@
     .med-rate-k{width:96px;}
     .med-weeks{height:88px;gap:4px;}
     .med-item-label{font-size:14px;}
+    /* A row of eight bottles plus a label doesn't fit across a phone, so the counter drops to
+       its own line, indented past the tick so it still reads as belonging to that item. */
+    .med-item{flex-wrap:wrap;}
+    .med-vessels{flex:1 1 100%;justify-content:flex-start;padding-left:40px;margin-top:2px;}
+    .med-bottle{width:21px;height:35px;}
+    .med-pip{width:19px;height:19px;}
     .med-num input{width:52px;font-size:16px;}   /* 16px stops iOS zooming on focus */
+    /* Label on its own line, the rest underneath -- five controls never fit across a phone. */
+    .med-edit-row > input[data-f="label"]{flex:1 1 100%;}
+    .med-edit-row select{flex:1 1 90px;font-size:16px;}
     .med-edit-row input[type="text"]{font-size:16px;}
     .med-edit-row input[type="number"]{font-size:16px;width:60px;}
   }
@@ -3483,9 +3528,9 @@
   var MEDIUM_SUGGESTIONS = [
     { label:'Read',           target:20, unit:'pages' },
     { label:'Move my body',   target:0,  unit:'' },
-    { label:'Drink water',    target:8,  unit:'glasses' },
+    { label:'Drink water',    target:8,  unit:'glasses', style:'bottle' },
     { label:'Tidy my room',   target:0,  unit:'' },
-    { label:'Practice',       target:30, unit:'min' },
+    { label:'Practice',       target:30, unit:'min', style:'pip' },
     { label:'No screens after 9', target:0, unit:'' }
   ];
 
@@ -3520,6 +3565,93 @@
     return (state.trackDays || []).find(function(d){ return d.id === want; }) || null;
   }
   function markOf(day, itemId){ return day && day.marks ? day.marks[itemId] : undefined; }
+
+  /* ---- how an item gets ticked off ----
+     'tick' is a checkbox, 'bottle' is a row of water bottles you fill through the day, 'pip' is
+     the same thing as plain dots. Only items with a target can use a counter -- without one
+     there is nothing to divide up. */
+  function guessCounterStyle(item){
+    var u = String(item.unit || '').toLowerCase().replace(/[^a-z]/g, '');
+    var l = String(item.label || '').toLowerCase();
+    if(/^(glass|glasses|bottle|bottles|ml|l|litre|litres|liter|liters|oz|ounce|ounces|cup|cups)$/.test(u)) return 'bottle';
+    if(/\b(water|hydrate|hydration)\b/.test(l) || /drink/.test(l)) return 'bottle';
+    return 'tick';
+  }
+  function counterStyleOf(item){
+    if(!(item.target > 0)) return 'tick';
+    if(item.style === 'tick' || item.style === 'bottle' || item.style === 'pip') return item.style;
+    return guessCounterStyle(item);   // nothing chosen: guess from the unit, and let them override
+  }
+  /* How many vessels, and how much each holds. The aim is a row you can count without counting:
+     around eight, never fewer than three or more than twelve, and a size that divides the target
+     cleanly so the last one isn't an odd sliver. 2,000 ml becomes eight 250s; 64 oz becomes eight
+     8s; 8 glasses is just eight glasses. */
+  function splitIntoVessels(target){
+    if(target <= 12) return { n: Math.max(Math.round(target), 1), chunk: 1 };
+    var best = null;
+    for(var n = 3; n <= 12; n++){
+      if(target % n !== 0) continue;
+      var score = Math.abs(n - 8);
+      if(!best || score < best.score) best = { n:n, chunk: target / n, score:score };
+    }
+    if(best) return { n: best.n, chunk: best.chunk };
+    return { n: 8, chunk: Math.ceil(target / 8) };   // nothing divides evenly: the last one runs short
+  }
+  // How full each vessel is, 0..1, given how much has been recorded.
+  function vesselLevels(value, n, chunk){
+    var v = Math.max(0, Number(value) || 0);
+    var out = [];
+    for(var k = 0; k < n; k++) out.push(Math.max(0, Math.min(1, (v - k * chunk) / chunk)));
+    return out;
+  }
+
+  // Neck at x9..15 from y5, shoulders out to the body, flat bottom at y37 in a 24x40 box.
+  var BOTTLE_PATH = 'M9 5V8c0 1.6-5 3-5 6v20a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V14c0-3-5-4.4-5-6V5';
+  var BOTTLE_CAP  = 'M8.6 1.6h6.8v3.6H8.6z';
+  var BOTTLE_TOP = 5, BOTTLE_BOTTOM = 37;
+  function bottleSvg(level, key){
+    var id = 'bw' + key;
+    var span = BOTTLE_BOTTOM - BOTTLE_TOP;
+    var h = span * level;
+    return '<svg class="med-bottle" viewBox="0 0 24 40" aria-hidden="true">'
+      // The water is a plain rectangle clipped to the bottle's own outline, so it takes the
+      // shoulders and the rounded base for free instead of being a second hand-drawn shape.
+      + '<defs><clipPath id="' + id + '"><path d="' + BOTTLE_PATH + 'Z"/></clipPath></defs>'
+      + (level > 0
+          ? '<rect class="med-bottle-water" clip-path="url(#' + id + ')" x="0" y="'
+            + (BOTTLE_BOTTOM - h).toFixed(1) + '" width="24" height="' + h.toFixed(1) + '"/>'
+          : '')
+      + '<path class="med-bottle-line" d="' + BOTTLE_CAP + '"/>'
+      + '<path class="med-bottle-line" d="' + BOTTLE_PATH + '"/>'
+      + '</svg>';
+  }
+  function pipSpan(level){
+    return '<span class="med-pip"><i style="height:' + Math.round(level * 100) + '%;margin-top:' + Math.round((1 - level) * 100) + '%"></i></span>';
+  }
+
+  // Tidy numbers: 250, 2.5, not 2.4999999999.
+  function trimNum(n){ return String(Math.round(n * 100) / 100); }
+
+  function vesselsHtml(item, value, locked){
+    var style = counterStyleOf(item);
+    if(style === 'tick') return '';
+    var split = splitIntoVessels(item.target);
+    var levels = vesselLevels(value, split.n, split.chunk);
+    var got = Math.min(Number(value) || 0, item.target);
+    return '<span class="med-vessels">'
+      + levels.map(function(lv, k){
+          var label = (lv >= 1 ? 'Undo ' : 'Fill ') + (k + 1) + ' of ' + split.n
+            + (split.chunk !== 1 ? ' — ' + trimNum(split.chunk) + ' ' + (item.unit || '') : '');
+          return '<button type="button" class="med-vessel' + (lv > 0 ? ' on' : '') + '"'
+            + ' data-med-vessel="' + escapeHtml(item.id) + '" data-med-k="' + k + '"'
+            + (locked ? ' disabled' : '') + ' aria-label="' + escapeHtml(label.trim()) + '">'
+            + (style === 'bottle' ? bottleSvg(lv, item.id.replace(/[^a-zA-Z0-9]/g, '') + '-' + k) : pipSpan(lv))
+            + '</button>';
+        }).join('')
+      + '<span class="med-vessel-count">' + trimNum(got) + '/' + item.target
+      + (item.unit ? ' ' + escapeHtml(item.unit) : '') + '</span>'
+      + '</span>';
+  }
   function itemDoneOn(item, day){
     var v = markOf(day, item.id);
     // An item with a target is done when you reach it; without one it's a plain tick.
@@ -3850,14 +3982,18 @@
               ? '<span class="med-item-target">Target ' + i.target + (i.unit ? ' ' + escapeHtml(i.unit) : '') + '</span>'
               : '')
           + '</span>'
-          + (i.target > 0
-              ? '<span class="med-num">'
-                + '<input type="number" inputmode="numeric" min="0" step="1" data-med-num="' + escapeHtml(i.id) + '"'
-                + ' value="' + (typeof v === 'number' ? v : '') + '"' + (mine ? '' : ' disabled')
-                + ' aria-label="' + escapeHtml(i.label) + ' amount">'
-                + (i.unit ? '<span>' + escapeHtml(i.unit) + '</span>' : '')
-                + '</span>'
-              : '')
+          // A counter replaces the number box rather than joining it: two controls for the same
+          // number is how they end up disagreeing.
+          + (counterStyleOf(i) !== 'tick'
+              ? vesselsHtml(i, typeof v === 'number' ? v : 0, !mine)
+              : (i.target > 0
+                  ? '<span class="med-num">'
+                    + '<input type="number" inputmode="numeric" min="0" step="1" data-med-num="' + escapeHtml(i.id) + '"'
+                    + ' value="' + (typeof v === 'number' ? v : '') + '"' + (mine ? '' : ' disabled')
+                    + ' aria-label="' + escapeHtml(i.label) + ' amount">'
+                    + (i.unit ? '<span>' + escapeHtml(i.unit) + '</span>' : '')
+                    + '</span>'
+                  : ''))
           + '</div>';
       }).join('') + '</div>';
     }
@@ -4038,6 +4174,22 @@
         setTrackMark(owner.id, date, item.id, done ? false : (item.target > 0 ? item.target : true));
       });
     });
+    // Filling bottles: tapping one fills everything up to it, tapping the last full one empties
+    // it again, so a mis-tap costs one tap rather than sending you to the number box.
+    document.querySelectorAll('[data-med-vessel]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var item = (state.trackItems || []).find(function(i){ return i.id === btn.dataset.medVessel; });
+        if(!item) return;
+        var k = parseInt(btn.dataset.medK, 10);
+        var split = splitIntoVessels(item.target);
+        var day = trackDayFor(owner.id, date);
+        var have = Number(markOf(day, item.id)) || 0;
+        var levels = vesselLevels(have, split.n, split.chunk);
+        var isLastFull = levels[k] >= 1 && (k === split.n - 1 || levels[k + 1] <= 0);
+        setTrackMark(owner.id, date, item.id,
+          isLastFull ? k * split.chunk : Math.min((k + 1) * split.chunk, item.target));
+      });
+    });
     document.querySelectorAll('[data-med-num]').forEach(function(input){
       input.addEventListener('change', function(){
         var raw = input.value.trim();
@@ -4056,8 +4208,8 @@
     if(!me) return;
     var draft = trackItemsFor(me.id)
       .filter(function(i){ return !i.archivedDate; })
-      .map(function(i){ return { id:i.id, label:i.label || '', target:(i.target > 0 ? String(i.target) : ''), unit:i.unit || '' }; });
-    if(!draft.length) draft.push({ id:null, label:'', target:'', unit:'' });
+      .map(function(i){ return { id:i.id, label:i.label || '', target:(i.target > 0 ? String(i.target) : ''), unit:i.unit || '', style:i.style || '' }; });
+    if(!draft.length) draft.push({ id:null, label:'', target:'', unit:'', style:'' });
 
     var root = document.getElementById('modal-root');
 
@@ -4068,6 +4220,7 @@
         draft[k].label  = row.querySelector('[data-f="label"]').value;
         draft[k].target = row.querySelector('[data-f="target"]').value;
         draft[k].unit   = row.querySelector('[data-f="unit"]').value;
+        draft[k].style  = row.querySelector('[data-f="style"]').value;
       });
     }
 
@@ -4085,6 +4238,13 @@
               + '<input type="text" data-f="label" placeholder="Read" value="' + escapeHtml(d.label) + '">'
               + '<input type="number" data-f="target" min="0" step="1" inputmode="numeric" placeholder="—" value="' + escapeHtml(d.target) + '">'
               + '<input type="text" data-f="unit" placeholder="pages" value="' + escapeHtml(d.unit) + '" style="max-width:88px;flex:0 1 88px;">'
+              // How you tick it off. "Auto" reads the unit: anything in glasses, bottles, ml or
+              // oz gets bottles without anyone having to ask for them.
+              + '<select data-f="style" aria-label="How to tick this off">'
+              + [['','Auto'],['tick','Tick box'],['bottle','Bottles'],['pip','Dots']].map(function(o){
+                  return '<option value="' + o[0] + '"' + (d.style === o[0] ? ' selected' : '') + '>' + o[1] + '</option>';
+                }).join('')
+              + '</select>'
               + '<button type="button" class="med-edit-del" data-med-del="' + k + '" aria-label="Remove this row">' + icon('close') + '</button>'
               + '</div>';
           }).join('')
@@ -4107,7 +4267,7 @@
       document.getElementById('med-save').addEventListener('click', save);
       document.getElementById('med-add-row').addEventListener('click', function(){
         readBack();
-        draft.push({ id:null, label:'', target:'', unit:'' });
+        draft.push({ id:null, label:'', target:'', unit:'', style:'' });
         paint();
         var rows = root.querySelectorAll('[data-med-i] [data-f="label"]');
         if(rows.length) rows[rows.length - 1].focus();
@@ -4116,7 +4276,7 @@
         btn.addEventListener('click', function(){
           readBack();
           draft.splice(parseInt(btn.dataset.medDel, 10), 1);
-          if(!draft.length) draft.push({ id:null, label:'', target:'', unit:'' });
+          if(!draft.length) draft.push({ id:null, label:'', target:'', unit:'', style:'' });
           paint();
         });
       });
@@ -4126,7 +4286,7 @@
           var s = chips[parseInt(btn.dataset.medSug, 10)];
           // An empty first row is a placeholder, not a row someone wanted.
           if(draft.length === 1 && !draft[0].label.trim() && !draft[0].id) draft.length = 0;
-          draft.push({ id:null, label:s.label, target:(s.target ? String(s.target) : ''), unit:s.unit });
+          draft.push({ id:null, label:s.label, target:(s.target ? String(s.target) : ''), unit:s.unit, style:s.style || '' });
           paint();
         });
       });
@@ -4148,13 +4308,14 @@
           existing.label = d.label.trim();
           existing.target = target;
           existing.unit = unit;
+          existing.style = d.style || '';
           existing.order = k;
           existing.archivedDate = null;
           existing.updatedAt = nowISO();
           keep[existing.id] = true;
         } else {
           var made = { id: uid(), ownerId: me.id, label: d.label.trim(), target: target, unit: unit,
-                       order: k, startDate: today, archivedDate: null,
+                       style: d.style || '', order: k, startDate: today, archivedDate: null,
                        createdAt: nowISO(), updatedAt: nowISO() };
           state.trackItems.push(made);
           keep[made.id] = true;
