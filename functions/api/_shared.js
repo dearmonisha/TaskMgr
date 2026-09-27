@@ -6,7 +6,11 @@ export const KINDS = new Set([
   // else, so a family can name and colour their own.
   'category',
   // The family message board.
-  'message'
+  'message',
+  // One Mood Meter check-in per person per day.
+  'mood',
+  // 75 Medium: the items a person tracks, one row per tracked day, one row per attempt.
+  'trackitem', 'trackday', 'trackrun'
 ]);
 
 export const META_KEYS = new Set(['homeTimezone', 'appTitle', 'appSubtitle']);
