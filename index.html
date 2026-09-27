@@ -706,6 +706,11 @@
   }
   .med-note.broke{background:var(--overdue-bg);border-color:var(--overdue);}
   .med-note.won{background:var(--eliminate-tint);border-color:var(--eliminate);}
+  /* The inline variant is a footnote to the numbers above it, not a card in its own right. */
+  .med-note.inline{
+    border:0;border-top:1px solid var(--hairline);border-radius:0;background:none;
+    padding:11px 0 0;margin-top:13px;font-size:12.5px;color:var(--ink-muted);
+  }
   .med-note strong{font-weight:700;}
   .med-note-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:11px;}
 
@@ -866,6 +871,9 @@
     background:var(--surface-2);color:var(--ink);
   }
   .med-edit-row select:focus{outline:none;border-color:var(--accent);}
+  /* A row that's just a tick has no use for a number or a unit, so they go quiet rather than
+     disappearing -- the row keeps its shape when you change your mind. */
+  .med-edit-row input:disabled{opacity:.35;}
   .med-edit-row input[type="text"]{
     flex:1;min-width:0;box-sizing:border-box;font:inherit;font-size:14px;
     border:1px solid var(--hairline-strong);border-radius:10px;padding:9px 11px;
@@ -887,11 +895,21 @@
 
   @media (max-width:760px){
     .med-wrap{margin-top:12px;gap:13px;padding-bottom:96px;}
-    .med-hero{padding:14px 15px;}
-    .med-day{font-size:26px;}
-    .med-stats{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;}
-    .med-stat{grid-column:span 2;padding:8px 9px;}
-    .med-stat:nth-child(4),.med-stat:nth-child(5){grid-column:span 3;}
+    .med-hero{padding:12px 14px;}
+    .med-day{font-size:23px;}
+    .med-hero-right{font-size:11.5px;}
+    .med-track{margin:9px 0 8px;height:8px;}
+    .med-note{padding:10px 13px;font-size:12.5px;}
+    .med-note.inline{padding:8px 0 0;margin-top:9px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .med-stats{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+      background:var(--surface-2);border:1px solid var(--hairline);
+      border-radius:var(--radius-card);overflow:hidden;
+    }
+    .med-stat{background:none;border:0;border-radius:0;padding:6px 2px;text-align:center;}
+    .med-stat + .med-stat{border-left:1px solid var(--hairline);}
+    .med-stat-n{font-size:16px;}
+    .med-stat-k{font-size:8.5px;letter-spacing:.04em;margin-top:1px;}
     .med-stat-n{font-size:17px;}
     .med-stat-k{font-size:9px;letter-spacing:.05em;}
     .med-grid-row{grid-template-columns:20px repeat(7,minmax(0,1fr));gap:4px;}
@@ -3534,6 +3552,21 @@
     { label:'No screens after 9', target:0, unit:'' }
   ];
 
+  /* What the editor offers, and what each one means. 'Auto' is the default because most rows
+     don't need a decision: no number is a tick, a number in glasses is bottles, anything else
+     is a typed number. */
+  var MEDIUM_STYLES = [
+    ['',       'Auto'],
+    ['tickonly','Just a tick'],
+    ['num',    'Type a number'],
+    ['bottle', 'Bottles'],
+    ['pip',    'Dots']
+  ];
+  // Only an explicit "Just a tick" locks the number away. Under Auto an empty number already
+  // means a plain tick, so there is nothing to take from anyone -- and typing one in is how
+  // most people will say "this one has a target".
+  function isPlainTick(d){ return d.style === 'tickonly'; }
+
   function mediumOwner(){
     var who = state.mediumWho;
     if(who){ var m = familyMember(who); if(m) return m; }
@@ -3575,12 +3608,19 @@
     var l = String(item.label || '').toLowerCase();
     if(/^(glass|glasses|bottle|bottles|ml|l|litre|litres|liter|liters|oz|ounce|ounces|cup|cups)$/.test(u)) return 'bottle';
     if(/\b(water|hydrate|hydration)\b/.test(l) || /drink/.test(l)) return 'bottle';
-    return 'tick';
+    return 'num';
   }
+  /* Four ways to finish an item:
+       tick    a box you check -- no number involved at all
+       num     you type how much you did
+       bottle  a row of bottles you fill through the day
+       pip     the same, as plain dots
+     No target means there is nothing to count, so it is always a plain tick. */
   function counterStyleOf(item){
     if(!(item.target > 0)) return 'tick';
-    if(item.style === 'tick' || item.style === 'bottle' || item.style === 'pip') return item.style;
-    return guessCounterStyle(item);   // nothing chosen: guess from the unit, and let them override
+    if(item.style === 'bottle' || item.style === 'pip' || item.style === 'num') return item.style;
+    if(item.style === 'tick') return 'num';   // an older saved value; a target always needs a widget
+    return guessCounterStyle(item);           // nothing chosen: read the unit, overridable
   }
   /* How many vessels, and how much each holds. The aim is a row you can count without counting:
      around eight, never fewer than three or more than twelve, and a size that divides the target
@@ -3893,14 +3933,28 @@
       + medStat(s.best, 'best run', '')
       + medStat(s.completed, 'full days', '')
       + medStat(s.banked, s.banked === 1 ? 'break day' : 'break days', s.banked > 0 ? 'warn' : '')
-      + medStat(Math.max(MEDIUM_DAYS - s.dayNumber, 0), 'days to go', '')
-      + '</div></div>';
+      + '</div>'
+      + (s.status === 'active' ? mediumBankLine(owner, s) : '')
+      + '</div>';
   }
 
   /* The one line that says where the run actually stands. Worth its own card, because "you have
      two days off in the bank" and "this attempt is over" are the two things you'd want shouted. */
+  // The everyday line, shown inside the hero under the numbers it is talking about.
+  function mediumBankLine(owner, s){
+    var mine = mediumIsMine(owner);
+    var need = MEDIUM_EARN_EVERY - s.toward;
+    var line = s.banked > 0
+      ? '<strong>' + s.banked + ' break day' + (s.banked === 1 ? '' : 's') + '</strong> banked'
+      : 'No break days yet';
+    line += ' &middot; ' + (need === MEDIUM_EARN_EVERY
+      ? MEDIUM_EARN_EVERY + ' in a row earns one'
+      : need + ' more in a row earns ' + (s.banked > 0 ? 'another' : 'one'));
+    return '<div class="med-note inline">' + line + '</div>';
+  }
+
   function mediumStatusHtml(owner, mine, s){
-    var who = mine ? 'you' : owner.name;
+    if(s.status === 'active') return '';   // that line lives in the hero now
     if(s.status === 'broken'){
       return '<div class="med-note broke">'
         + '<strong>This run ended on ' + escapeHtml(fmtDate(s.missedOn)) + '.</strong> '
@@ -3922,14 +3976,7 @@
         + (mine ? '<div class="med-note-row"><button type="button" class="btn-primary" id="med-restart">Start another 75</button></div>' : '')
         + '</div>';
     }
-    var need = MEDIUM_EARN_EVERY - s.toward;
-    var line = s.banked > 0
-      ? escapeHtml(mine ? 'You have ' : owner.name + ' has ') + '<strong>' + s.banked + ' break day' + (s.banked === 1 ? '' : 's') + '</strong> banked. '
-      : 'No break days banked yet. ';
-    line += need === MEDIUM_EARN_EVERY
-      ? 'A full day today starts the next nine.'
-      : need + ' more day' + (need === 1 ? '' : 's') + ' in a row earns another.';
-    return '<div class="med-note">' + line + '</div>';
+    return '';
   }
 
   /* One day's checklist. Usually today, but any day inside the run can be opened from the grid
@@ -3984,9 +4031,9 @@
           + '</span>'
           // A counter replaces the number box rather than joining it: two controls for the same
           // number is how they end up disagreeing.
-          + (counterStyleOf(i) !== 'tick'
+          + (counterStyleOf(i) === 'bottle' || counterStyleOf(i) === 'pip'
               ? vesselsHtml(i, typeof v === 'number' ? v : 0, !mine)
-              : (i.target > 0
+              : (counterStyleOf(i) === 'num'
                   ? '<span class="med-num">'
                     + '<input type="number" inputmode="numeric" min="0" step="1" data-med-num="' + escapeHtml(i.id) + '"'
                     + ' value="' + (typeof v === 'number' ? v : '') + '"' + (mine ? '' : ' disabled')
@@ -4231,17 +4278,21 @@
       root.innerHTML = ''
         + '<div class="scrim" id="scrim"><div class="modal">'
         + '<div class="modal-title-input" style="font-weight:700;">My 75 Medium list</div>'
-        + '<p class="med-edit-hint">One row per thing you\'ll do every day. Leave the number blank for a plain '
-        + 'tick, or set a target (20 pages, 8 glasses) and the tick waits until you reach it.</p>'
+        + '<p class="med-edit-hint">One row per thing you\'ll do every day, and how you finish it. '
+        + '<strong>Just a tick</strong> is a box you check &mdash; no number involved. The others need a '
+        + 'target (20 pages, 8 glasses) and stay unticked until you reach it.</p>'
         + draft.map(function(d, k){
-            return '<div class="med-edit-row" data-med-i="' + k + '">'
-              + '<input type="text" data-f="label" placeholder="Read" value="' + escapeHtml(d.label) + '">'
-              + '<input type="number" data-f="target" min="0" step="1" inputmode="numeric" placeholder="—" value="' + escapeHtml(d.target) + '">'
-              + '<input type="text" data-f="unit" placeholder="pages" value="' + escapeHtml(d.unit) + '" style="max-width:88px;flex:0 1 88px;">'
+            var plain = isPlainTick(d);
+            return '<div class="med-edit-row' + (plain ? ' plain' : '') + '" data-med-i="' + k + '">'
+              + '<input type="text" data-f="label" placeholder="Make my bed" value="' + escapeHtml(d.label) + '">'
+              + '<input type="number" data-f="target" min="0" step="1" inputmode="numeric" placeholder="—"'
+              + ' value="' + escapeHtml(plain ? '' : d.target) + '"' + (plain ? ' disabled' : '') + ' aria-label="How much">'
+              + '<input type="text" data-f="unit" placeholder="pages" value="' + escapeHtml(plain ? '' : d.unit) + '"'
+              + (plain ? ' disabled' : '') + ' aria-label="Unit" style="max-width:84px;flex:0 1 84px;">'
               // How you tick it off. "Auto" reads the unit: anything in glasses, bottles, ml or
               // oz gets bottles without anyone having to ask for them.
-              + '<select data-f="style" aria-label="How to tick this off">'
-              + [['','Auto'],['tick','Tick box'],['bottle','Bottles'],['pip','Dots']].map(function(o){
+              + '<select data-f="style" aria-label="How you finish this">'
+              + MEDIUM_STYLES.map(function(o){
                   return '<option value="' + o[0] + '"' + (d.style === o[0] ? ' selected' : '') + '>' + o[1] + '</option>';
                 }).join('')
               + '</select>'
@@ -4272,6 +4323,11 @@
         var rows = root.querySelectorAll('[data-med-i] [data-f="label"]');
         if(rows.length) rows[rows.length - 1].focus();
       });
+      // Choosing "Just a tick" has to grey the number out there and then, or the row goes on
+      // claiming a target it will never use.
+      root.querySelectorAll('[data-f="style"]').forEach(function(sel){
+        sel.addEventListener('change', function(){ readBack(); paint(); });
+      });
       root.querySelectorAll('[data-med-del]').forEach(function(btn){
         btn.addEventListener('click', function(){
           readBack();
@@ -4300,9 +4356,10 @@
       var keep = {};
       var rows = draft.filter(function(d){ return d.label.trim(); });
       rows.forEach(function(d, k){
-        var target = parseInt(d.target, 10);
+        var plain = isPlainTick(d);
+        var target = plain ? 0 : parseInt(d.target, 10);
         if(isNaN(target) || target < 0) target = 0;
-        var unit = d.unit.trim();
+        var unit = plain ? '' : d.unit.trim();
         var existing = d.id ? (state.trackItems || []).find(function(i){ return i.id === d.id; }) : null;
         if(existing){
           existing.label = d.label.trim();
