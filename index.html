@@ -642,6 +642,233 @@
     .mood-hist-month{min-width:96px;font-size:12px;}
   }
 
+  /* ---------- 75 Medium ----------
+     A 75-day challenge board. Three things, in the order you need them: where you are in the
+     75, what's left to tick today, and then how the whole run has actually been going. The
+     charts use the app's own palette rather than a new one -- green for a day you finished,
+     amber for a break day you spent, red for one you dropped. */
+  .med-wrap{max-width:760px;margin:18px auto 0;display:flex;flex-direction:column;gap:16px;padding-bottom:44px;}
+
+  /* Whose board you're looking at. The chip carries the day number, so this row doubles as the
+     family scoreboard instead of being a bare filter -- which is the whole point of everyone
+     being able to see everyone. */
+  .med-people{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 4px;scrollbar-width:none;}
+  .med-people::-webkit-scrollbar{display:none;}
+  .med-person{
+    flex:none;display:flex;align-items:center;gap:7px;cursor:pointer;
+    border:1.5px solid var(--hairline);background:var(--surface);color:var(--ink);
+    border-radius:var(--radius-pill);padding:5px 12px 5px 6px;font:inherit;font-size:13px;
+    font-weight:600;transition:border-color .12s,box-shadow .12s;
+  }
+  .med-person:hover{border-color:var(--hairline-strong);}
+  .med-person.on{border-color:var(--ink);box-shadow:var(--shadow-sm);}
+  .med-person .tc-avatars{display:inline-flex;}
+  .med-person-day{
+    font-size:11px;font-weight:700;color:var(--ink-faint);font-variant-numeric:tabular-nums;
+    white-space:nowrap;
+  }
+  .med-person.on .med-person-day{color:var(--ink-muted);}
+
+  /* the hero: day counter and the 75-day bar */
+  .med-hero{
+    background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius-panel);
+    padding:16px 18px;box-shadow:var(--shadow-sm);
+  }
+  .med-hero-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  .med-day{font-family:var(--font-serif);font-size:30px;font-weight:700;line-height:1;letter-spacing:-0.02em;}
+  .med-of{font-size:13px;font-weight:600;color:var(--ink-muted);}
+  .med-hero-right{margin-left:auto;font-size:12.5px;font-weight:600;color:var(--ink-muted);}
+  .med-track{
+    height:9px;border-radius:999px;background:var(--surface-2);overflow:hidden;margin:13px 0 11px;
+    border:1px solid var(--hairline);
+  }
+  .med-track-fill{display:block;height:100%;border-radius:999px;background:var(--eliminate);}
+  .med-stats{display:flex;gap:8px;flex-wrap:wrap;}
+  .med-stat{
+    flex:1 1 92px;background:var(--surface-2);border:1px solid var(--hairline);
+    border-radius:var(--radius-card);padding:9px 11px;
+  }
+  .med-stat-n{
+    display:block;font-family:var(--font-serif);font-size:20px;font-weight:700;line-height:1.1;
+    font-variant-numeric:tabular-nums;
+  }
+  .med-stat-k{
+    display:block;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--ink-faint);margin-top:2px;
+  }
+  .med-stat.good .med-stat-n{color:var(--eliminate);}
+  .med-stat.warn .med-stat-n{color:var(--due-today);}
+
+  /* the banner that explains where a run stands when it isn't simply ticking along */
+  .med-note{
+    border-radius:var(--radius-panel);padding:13px 16px;font-size:13.5px;line-height:1.5;
+    border:1px solid var(--hairline);background:var(--surface-2);
+  }
+  .med-note.broke{background:var(--overdue-bg);border-color:var(--overdue);}
+  .med-note.won{background:var(--eliminate-tint);border-color:var(--eliminate);}
+  .med-note strong{font-weight:700;}
+  .med-note-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:11px;}
+
+  /* today's list */
+  .med-panel{
+    background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius-panel);
+    padding:15px 16px;box-shadow:var(--shadow-sm);
+  }
+  .med-panel-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+  .med-panel h2{font-family:var(--font-serif);font-size:16px;font-weight:700;margin:0;}
+  .med-panel-sub{font-size:12px;color:var(--ink-muted);}
+  .med-panel-act{margin-left:auto;display:flex;align-items:center;gap:8px;}
+  .med-daynav{display:flex;align-items:center;gap:6px;}
+  .med-daynav button{
+    border:1px solid var(--hairline-strong);background:var(--surface);color:var(--ink);
+    border-radius:8px;width:28px;height:28px;font-size:16px;line-height:1;cursor:pointer;
+  }
+  .med-daynav button:disabled{opacity:.35;cursor:default;}
+
+  .med-items{display:flex;flex-direction:column;gap:8px;}
+  .med-item{
+    display:flex;align-items:center;gap:12px;
+    border:1.5px solid var(--hairline);border-radius:var(--radius-card);
+    background:var(--surface-2);padding:11px 13px;
+  }
+  .med-item.done{border-color:var(--eliminate);background:var(--eliminate-tint);}
+  .med-item.locked{opacity:.85;}
+  .med-tick{
+    flex:none;width:28px;height:28px;border-radius:9px;cursor:pointer;
+    border:2px solid var(--hairline-strong);background:var(--surface);
+    display:flex;align-items:center;justify-content:center;color:transparent;padding:0;
+    transition:background .12s,border-color .12s,color .12s;
+  }
+  .med-tick .ic{width:15px;height:15px;stroke-width:2.6;}
+  .med-item.done .med-tick{background:var(--eliminate);border-color:var(--eliminate);color:#fff;}
+  .med-tick:disabled{cursor:default;}
+  .med-tick:focus-visible{outline:2px solid var(--ink);outline-offset:2px;}
+  .med-item-body{min-width:0;flex:1;}
+  .med-item-label{display:block;font-size:14.5px;font-weight:600;line-height:1.3;overflow-wrap:anywhere;}
+  .med-item-target{display:block;font-size:11.5px;color:var(--ink-muted);margin-top:2px;}
+  .med-num{
+    flex:none;display:flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-muted);
+  }
+  .med-num input{
+    width:56px;box-sizing:border-box;text-align:center;font:inherit;font-size:14px;font-weight:700;
+    font-variant-numeric:tabular-nums;border:1.5px solid var(--hairline-strong);border-radius:9px;
+    padding:6px 4px;background:var(--surface);color:var(--ink);
+  }
+  .med-num input:focus{outline:none;border-color:var(--accent);}
+  .med-num input:disabled{opacity:.7;}
+
+  .med-empty{
+    text-align:center;color:var(--ink-muted);padding:30px 16px;
+    display:flex;flex-direction:column;align-items:center;gap:14px;
+  }
+  .med-empty p{margin:0;font-size:14px;line-height:1.5;max-width:40ch;}
+
+  /* the 75-day grid: eleven weeks of seven, so a week reads as a row and a cell stays big
+     enough to be a real tap target -- fixing a day you forgot to tick is a normal thing to
+     want, not an edge case */
+  /* Capped and centred: at full panel width the cells became 95px slabs and the grid ran a
+     thousand pixels down the page. */
+  .med-grid{display:flex;flex-direction:column;gap:5px;width:100%;max-width:470px;margin:0 auto;}
+  .med-grid-row{display:grid;grid-template-columns:26px repeat(7,minmax(0,1fr));gap:5px;align-items:center;}
+  .med-week-k{
+    font-size:9.5px;font-weight:700;color:var(--ink-faint);letter-spacing:.04em;
+    text-align:right;padding-right:2px;font-variant-numeric:tabular-nums;
+  }
+  .med-cell{
+    aspect-ratio:1/1;border-radius:8px;border:1.5px solid var(--hairline);
+    background:var(--surface-2);position:relative;padding:0;cursor:default;
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+  }
+  .med-cell-n{
+    font-size:10px;font-weight:700;color:var(--ink-faint);font-variant-numeric:tabular-nums;
+    position:relative;z-index:1;
+  }
+  .med-cell.tappable{cursor:pointer;}
+  .med-cell.tappable:hover{border-color:var(--ink);}
+  .med-cell.tappable:focus-visible{outline:2px solid var(--ink);outline-offset:1px;}
+  /* the fill is a separate layer so a partial day can show how far it got */
+  .med-fill{position:absolute;left:0;bottom:0;width:100%;background:var(--eliminate);opacity:.85;}
+  .med-cell.full{border-color:var(--eliminate);}
+  .med-cell.full .med-cell-n{color:#fff;}
+  .med-cell.part{border-color:var(--hairline-strong);}
+  .med-cell.miss{border-color:var(--overdue);background:var(--overdue-bg);}
+  .med-cell.miss .med-cell-n{color:var(--overdue);}
+  .med-cell.brk{border-color:var(--due-today);background:var(--due-today-bg);}
+  .med-cell.brk .med-cell-n{color:var(--due-today);}
+  .med-cell.void{border-style:dashed;background:none;}
+  .med-cell.after{opacity:.45;}
+  .med-cell.now{box-shadow:0 0 0 2px var(--ink);}
+  .med-legend{
+    display:flex;flex-wrap:wrap;gap:12px;margin-top:13px;
+    font-size:11px;font-weight:600;color:var(--ink-muted);
+  }
+  .med-legend span{display:inline-flex;align-items:center;gap:5px;}
+  .med-key{width:11px;height:11px;border-radius:3px;flex:none;border:1.5px solid var(--hairline);}
+  .med-key.full{background:var(--eliminate);border-color:var(--eliminate);}
+  .med-key.brk{background:var(--due-today-bg);border-color:var(--due-today);}
+  .med-key.miss{background:var(--overdue-bg);border-color:var(--overdue);}
+
+  /* weekly consistency, and per-item rates. Same bar, two questions. */
+  .med-weeks{display:flex;align-items:flex-end;gap:5px;height:104px;margin-top:4px;width:100%;max-width:520px;margin-left:auto;margin-right:auto;}
+  .med-wk{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px;height:100%;}
+  .med-wk-bar{
+    width:100%;border-radius:5px 5px 2px 2px;background:var(--eliminate);min-height:2px;
+    position:relative;
+  }
+  .med-wk-bar.none{background:var(--hairline);}
+  .med-wk-bar.ahead{background:var(--hairline);opacity:.45;}
+  .med-wk-k{font-size:9.5px;font-weight:700;color:var(--ink-faint);font-variant-numeric:tabular-nums;}
+  .med-wk-pct{font-size:9.5px;font-weight:700;color:var(--ink-muted);font-variant-numeric:tabular-nums;}
+
+  .med-rates{display:flex;flex-direction:column;gap:9px;}
+  .med-rate{display:flex;align-items:center;gap:10px;font-size:12.5px;}
+  .med-rate-k{width:126px;flex:none;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .med-rate-track{flex:1;height:8px;border-radius:999px;background:var(--surface-2);overflow:hidden;border:1px solid var(--hairline);}
+  .med-rate-fill{display:block;height:100%;border-radius:999px;background:var(--eliminate);}
+  .med-rate-n{width:44px;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-muted);font-weight:600;}
+  .med-foot{font-size:12px;color:var(--ink-muted);margin:13px 0 0;line-height:1.5;}
+
+  /* the list editor */
+  .med-edit-row{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+  .med-edit-row input[type="text"]{
+    flex:1;min-width:0;box-sizing:border-box;font:inherit;font-size:14px;
+    border:1px solid var(--hairline-strong);border-radius:10px;padding:9px 11px;
+    background:var(--surface-2);color:var(--ink);
+  }
+  .med-edit-row input[type="number"]{
+    width:66px;flex:none;box-sizing:border-box;font:inherit;font-size:14px;text-align:center;
+    border:1px solid var(--hairline-strong);border-radius:10px;padding:9px 4px;
+    background:var(--surface-2);color:var(--ink);font-variant-numeric:tabular-nums;
+  }
+  .med-edit-row input:focus{outline:none;border-color:var(--accent);}
+  .med-edit-del{
+    flex:none;border:0;background:none;padding:4px;color:var(--ink-faint);cursor:pointer;
+    border-radius:8px;line-height:0;
+  }
+  .med-edit-del:hover{color:var(--overdue);background:var(--surface-2);}
+  .med-edit-del .ic{width:16px;height:16px;}
+  .med-edit-hint{font-size:12px;color:var(--ink-muted);margin:0 0 13px;line-height:1.5;}
+
+  @media (max-width:760px){
+    .med-wrap{margin-top:12px;gap:13px;padding-bottom:96px;}
+    .med-hero{padding:14px 15px;}
+    .med-day{font-size:26px;}
+    .med-stats{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;}
+    .med-stat{grid-column:span 2;padding:8px 9px;}
+    .med-stat:nth-child(4),.med-stat:nth-child(5){grid-column:span 3;}
+    .med-stat-n{font-size:17px;}
+    .med-stat-k{font-size:9px;letter-spacing:.05em;}
+    .med-grid-row{grid-template-columns:20px repeat(7,minmax(0,1fr));gap:4px;}
+    .med-cell{border-radius:7px;}
+    .med-cell-n{font-size:9px;}
+    .med-rate-k{width:96px;}
+    .med-weeks{height:88px;gap:4px;}
+    .med-item-label{font-size:14px;}
+    .med-num input{width:52px;font-size:16px;}   /* 16px stops iOS zooming on focus */
+    .med-edit-row input[type="text"]{font-size:16px;}
+    .med-edit-row input[type="number"]{font-size:16px;width:60px;}
+  }
+
   /* ---------- Message board ----------
      A single column at reading width. Notes are short, so the card is quiet: the name and the
      time do the framing and the text carries the weight. */
@@ -1437,9 +1664,13 @@
           <button data-view="calendar">Calendar</button>
           <button data-view="messages">Messages</button>
           <button data-view="mood">Mood</button>
+          <button data-view="medium">75 Medium</button>
           <button data-view="dreams" class="hidden">Dreams</button>
-          <button data-view="compass">Compass</button>
-          <button data-view="list">List</button>
+          <!-- Compass and List are still built and still reachable by code; they're just not
+               offered as tabs any more. Hidden rather than deleted so nothing that references
+               them breaks and they can come back with one class change. -->
+          <button data-view="compass" class="hidden">Compass</button>
+          <button data-view="list" class="hidden">List</button>
           <button data-view="archive">Archive</button>
         </div>
         <button class="settings-gear only-phone" id="toggle-search" title="Search" aria-label="Search"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5L16.7 16.7"/></svg></button>
@@ -1718,6 +1949,19 @@
     // ---- Message board ----
     // [{id,text,authorId,createdAt,updatedAt,pinned}] -- one shared wall for the whole family
     messages: [],
+
+    // ---- 75 Medium ----
+    // The things a person tracks: [{id,ownerId,label,target,unit,order,startDate,archivedDate,createdAt,updatedAt}]
+    trackItems: [],
+    // One row per person per day: [{id:'<ownerId>|<date>',ownerId,date,marks:{itemId:true|number},createdAt,updatedAt}]
+    trackDays: [],
+    // An attempt at the 75: [{id,ownerId,startDate,createdAt,updatedAt}]. Whether a run is still
+    // alive, broken or finished is *derived* from the days (see runStats) rather than stored --
+    // that way filling in a day you forgot revives the run on every device at once, and no
+    // device ever has to write a judgement another device would disagree with.
+    trackRuns: [],
+    mediumWho: null,      // whose board is showing; null means "me"
+    mediumDate: null,     // which day's checklist is open; null means today
     // Event times are entered/stored as a naive wall-clock anchored to this zone (e.g. "6:00 PM"
     // means 6pm here). Each family member can have their own timezone (see family[].timezone) --
     // when displaying a time to someone in a different zone, it's converted from homeTimezone to
@@ -1814,7 +2058,9 @@
     leaf:      '<path d="M4.5 19.5C3 14 6.5 5.5 19.5 4.5c1 11-6 15.5-11.5 14.5"/><path d="M4.5 19.5c3-5.4 6.4-8.4 10.5-10.5"/>',
     mood:      '<rect x="3.2" y="3.2" width="7.6" height="7.6" rx="1.6"/><rect x="13.2" y="3.2" width="7.6" height="7.6" rx="1.6"/><rect x="3.2" y="13.2" width="7.6" height="7.6" rx="1.6"/><rect x="13.2" y="13.2" width="7.6" height="7.6" rx="1.6" fill="currentColor"/>',
     chat:      '<path d="M20.5 12.2c0 4-3.8 7.2-8.5 7.2a10 10 0 0 1-2.6-.33L4.5 20.5l1.2-3.4A6.8 6.8 0 0 1 3.5 12.2C3.5 8.2 7.3 5 12 5s8.5 3.2 8.5 7.2z"/>',
-    refresh:   '<path d="M20 11.5A8 8 0 1 0 18 17M20 5.5v6h-6"/>'
+    refresh:   '<path d="M20 11.5A8 8 0 1 0 18 17M20 5.5v6h-6"/>',
+    /* 75 Medium: a streak is the thing the program is about, so the tab wears a flame. */
+    flame:     '<path d="M12 2.6c3.4 3.1 5.6 5.9 5.6 9.4a5.6 5.6 0 0 1-11.2 0c0-1.6.6-2.9 1.6-4.2.5 1.3 1.4 2 2.3 2.2-.6-2.6-.3-5 1.7-7.4z"/><path d="M12 21.4a2.9 2.9 0 0 1-2.4-4.5c.6-.9 1.6-1.6 2.4-2.6.8 1 1.8 1.7 2.4 2.6a2.9 2.9 0 0 1-2.4 4.5z"/>'
   };
   function icon(name, extraClass){
     var p = ICON_PATHS[name] || ICON_PATHS.pin;
@@ -2088,7 +2334,12 @@
     profile:      { get: function(){ return state.compassProfiles; },    set: function(v){ state.compassProfiles = v; },    idOf: function(o){ return 'profile:' + o.ownerId; } },
     category:     { get: function(){ return state.eventCategories; },    set: function(v){ state.eventCategories = v; },    idOf: function(o){ return 'category:' + o.id; } },
     message:      { get: function(){ return state.messages; },           set: function(v){ state.messages = v; },           idOf: function(o){ return 'message:' + o.id; } },
-    mood:         { get: function(){ return state.moods; },              set: function(v){ state.moods = v; },              idOf: function(o){ return 'mood:' + o.id; } }
+    mood:         { get: function(){ return state.moods; },              set: function(v){ state.moods = v; },              idOf: function(o){ return 'mood:' + o.id; } },
+    // 75 Medium. Three shapes: the items you track, one row per tracked day, and one row per
+    // attempt at the 75.
+    trackitem:    { get: function(){ return state.trackItems; },         set: function(v){ state.trackItems = v; },         idOf: function(o){ return 'trackitem:' + o.id; } },
+    trackday:     { get: function(){ return state.trackDays; },          set: function(v){ state.trackDays = v; },          idOf: function(o){ return 'trackday:' + o.id; } },
+    trackrun:     { get: function(){ return state.trackRuns; },          set: function(v){ state.trackRuns = v; },          idOf: function(o){ return 'trackrun:' + o.id; } }
   };
 
   var sync = {
@@ -2132,17 +2383,18 @@
   function loadCalendarLocalOnly(){
     try{
       var raw = JSON.parse(localStorage.getItem(LS_CALENDAR) || 'null');
-      return { family: (raw && raw.family) || [], events: (raw && raw.events) || [], calendarSubscriptions: (raw && raw.calendarSubscriptions) || [], eventCategories: (raw && raw.eventCategories) || [], messages: (raw && raw.messages) || [], moods: (raw && raw.moods) || [], homeTimezone: (raw && raw.homeTimezone) || DEFAULT_TIMEZONE };
-    }catch(e){ return { family: [], events: [], calendarSubscriptions: [], eventCategories: [], messages: [], moods: [], homeTimezone: DEFAULT_TIMEZONE }; }
+      return { family: (raw && raw.family) || [], events: (raw && raw.events) || [], calendarSubscriptions: (raw && raw.calendarSubscriptions) || [], eventCategories: (raw && raw.eventCategories) || [], messages: (raw && raw.messages) || [], moods: (raw && raw.moods) || [], trackItems: (raw && raw.trackItems) || [], trackDays: (raw && raw.trackDays) || [], trackRuns: (raw && raw.trackRuns) || [], homeTimezone: (raw && raw.homeTimezone) || DEFAULT_TIMEZONE };
+    }catch(e){ return { family: [], events: [], calendarSubscriptions: [], eventCategories: [], messages: [], moods: [], trackItems: [], trackDays: [], trackRuns: [], homeTimezone: DEFAULT_TIMEZONE }; }
   }
   function loadCalendarLocal(){
     var c = loadCalendarLocalOnly();
     state.family = c.family; state.events = c.events; state.calendarSubscriptions = c.calendarSubscriptions;
     state.eventCategories = c.eventCategories; state.messages = c.messages; state.moods = c.moods || [];
+    state.trackItems = c.trackItems || []; state.trackDays = c.trackDays || []; state.trackRuns = c.trackRuns || [];
     state.homeTimezone = c.homeTimezone;
   }
   function cacheCalendarLocal(){
-    try{ localStorage.setItem(LS_CALENDAR, JSON.stringify({family: state.family, events: state.events, calendarSubscriptions: state.calendarSubscriptions, eventCategories: state.eventCategories, messages: state.messages, moods: state.moods, homeTimezone: state.homeTimezone})); }catch(e){}
+    try{ localStorage.setItem(LS_CALENDAR, JSON.stringify({family: state.family, events: state.events, calendarSubscriptions: state.calendarSubscriptions, eventCategories: state.eventCategories, messages: state.messages, moods: state.moods, trackItems: state.trackItems, trackDays: state.trackDays, trackRuns: state.trackRuns, homeTimezone: state.homeTimezone})); }catch(e){}
   }
   function loadDreamsLocalOnly(){
     try{
@@ -2635,7 +2887,14 @@
     expand: function(from, to){ return expandOccurrences(from, to); },
     // Re-runs the "who is this?" step the app does after Cloudflare Access answers. Handy for
     // checking what a different family member's app looks like without logging out.
-    whoami: function(){ resolveCurrentFamilyMember(); render(); return state.currentFamilyMember; }
+    whoami: function(){ resolveCurrentFamilyMember(); render(); return state.currentFamilyMember; },
+    // 75 Medium: the whole verdict on somebody's current run -- day number, streak, break days
+    // banked and spent -- without having to read it off the screen.
+    challenge: function(ownerId){
+      var id = ownerId || (state.currentFamilyMember && state.currentFamilyMember.id);
+      var run = id ? currentRun(id) : null;
+      return run ? runStats(run) : null;
+    }
   };
 
   function retrySyncNow(){
@@ -3198,6 +3457,725 @@
             + '<p class="mood-hist-note">' + total + ' check-in' + (total===1?'':'s') + ' this month. Only you can see this.</p>'
           : '<p class="mood-hist-empty">No check-ins this month.</p>')
       + '</section>';
+  }
+
+  /* ================= 75 MEDIUM =================
+     A 75-day run at a list you wrote yourself. You keep the run alive by doing everything on
+     the list, every day.
+
+     The rule for a missed day is the family's own: nine days in a row earns you one break day,
+     and a break day spent on a miss keeps the run alive (though it does reset the streak --
+     you don't earn the next break day partly on the back of a day off). Miss with none banked
+     and that attempt is over; the next one starts at Day 1, and the old one stays in the
+     history rather than being erased.
+
+     Whether a run is alive, broken or finished is *derived* from the days every time it's
+     asked, never written down. Two devices therefore can't disagree about it, and filling in
+     a day you forgot to tick revives the run everywhere at once instead of needing a repair.
+
+     Everybody can see everybody's board -- that's most of what keeps a family going at one of
+     these -- but only you can tick your own. */
+  var MEDIUM_DAYS = 75;
+  var MEDIUM_EARN_EVERY = 9;   // nine consecutive full days earns one break day
+  var MEDIUM_WEEKS = Math.ceil(MEDIUM_DAYS / 7);
+  // Offered as one-tap chips when a list is empty, because a blank box is where these things
+  // usually die. Nothing is prescribed -- they're only a starting point.
+  var MEDIUM_SUGGESTIONS = [
+    { label:'Read',           target:20, unit:'pages' },
+    { label:'Move my body',   target:0,  unit:'' },
+    { label:'Drink water',    target:8,  unit:'glasses' },
+    { label:'Tidy my room',   target:0,  unit:'' },
+    { label:'Practice',       target:30, unit:'min' },
+    { label:'No screens after 9', target:0, unit:'' }
+  ];
+
+  function mediumOwner(){
+    var who = state.mediumWho;
+    if(who){ var m = familyMember(who); if(m) return m; }
+    return state.currentFamilyMember;
+  }
+  function mediumIsMine(owner){
+    var me = state.currentFamilyMember;
+    return !!(me && owner && me.id === owner.id);
+  }
+
+  function trackItemsFor(ownerId){
+    return (state.trackItems || [])
+      .filter(function(i){ return i.ownerId === ownerId; })
+      .sort(function(a,b){ return (a.order||0) - (b.order||0); });
+  }
+  // What was being tracked on a particular day. Adding an item today must not retroactively
+  // fail every day before it existed, and dropping one must not keep failing the days after.
+  function itemsActiveOn(ownerId, date){
+    return trackItemsFor(ownerId).filter(function(i){
+      var from = i.startDate || (i.createdAt || '').slice(0,10);
+      if(from && date < from) return false;
+      if(i.archivedDate && date >= i.archivedDate) return false;
+      return true;
+    });
+  }
+  function trackDayId(ownerId, date){ return ownerId + '|' + date; }
+  function trackDayFor(ownerId, date){
+    var want = trackDayId(ownerId, date);
+    return (state.trackDays || []).find(function(d){ return d.id === want; }) || null;
+  }
+  function markOf(day, itemId){ return day && day.marks ? day.marks[itemId] : undefined; }
+  function itemDoneOn(item, day){
+    var v = markOf(day, item.id);
+    // An item with a target is done when you reach it; without one it's a plain tick.
+    if(item.target > 0) return typeof v === 'number' && v >= item.target;
+    return v === true || v === 1;
+  }
+  /* done/total for a day. complete:null means there was nothing to do -- an untracked day is
+     not a missed day, which matters on the days before someone set their list up. */
+  function dayScore(ownerId, date){
+    var items = itemsActiveOn(ownerId, date);
+    if(!items.length) return { total:0, done:0, complete:null };
+    var day = trackDayFor(ownerId, date);
+    var done = 0;
+    items.forEach(function(i){ if(itemDoneOn(i, day)) done++; });
+    return { total: items.length, done: done, complete: done === items.length };
+  }
+
+  function runsFor(ownerId){
+    return (state.trackRuns || [])
+      .filter(function(r){ return r.ownerId === ownerId; })
+      .sort(function(a,b){ return a.startDate < b.startDate ? -1 : (a.startDate > b.startDate ? 1 : 0); });
+  }
+  function currentRun(ownerId){
+    var all = runsFor(ownerId);
+    return all.length ? all[all.length - 1] : null;
+  }
+
+  /* The whole verdict on a run, walked day by day from its start. Pure -- it reads days and
+     returns a judgement, and writes nothing. */
+  function runStats(run){
+    var today = todayStr();
+    var out = {
+      run: run, ownerId: run.ownerId, start: run.startDate, days: [],
+      dayNumber: 0, completed: 0, missedOn: null, finishedOn: null,
+      streak: 0, best: 0, toward: 0, earned: 0, spent: 0, banked: 0, status: 'active'
+    };
+    var streak = 0, toward = 0, earned = 0, spent = 0, best = 0, full = 0, over = false;
+    for(var n = 1; n <= MEDIUM_DAYS; n++){
+      var date = dateAdd(run.startDate, n - 1);
+      var rec = { n:n, date:date, total:0, done:0, state:'future' };
+      if(over){ rec.state = 'void'; out.days.push(rec); continue; }
+      if(date > today){ out.days.push(rec); continue; }
+      var sc = dayScore(run.ownerId, date);
+      rec.total = sc.total; rec.done = sc.done;
+      if(sc.complete === null){
+        rec.state = (date === today) ? 'today' : 'none';
+        out.days.push(rec); continue;
+      }
+      if(sc.complete){
+        full++; streak++; toward++;
+        if(toward >= MEDIUM_EARN_EVERY){ earned++; toward = 0; }
+        if(streak > best) best = streak;
+        rec.state = 'done';
+      } else if(date === today){
+        rec.state = 'today';                // the day isn't over; nothing is decided yet
+      } else if(earned - spent > 0){
+        spent++; streak = 0; toward = 0;    // a break day saves the run, but not the streak
+        rec.state = 'break';
+      } else {
+        rec.state = 'missed';
+        out.missedOn = date;
+        over = true;
+      }
+      out.days.push(rec);
+    }
+    out.completed = full; out.streak = streak; out.best = best; out.toward = toward;
+    out.earned = earned; out.spent = spent; out.banked = earned - spent;
+
+    var last = dateAdd(run.startDate, MEDIUM_DAYS - 1);
+    out.dayNumber = Math.min(Math.max(dateDiffDays(run.startDate, today) + 1, 1), MEDIUM_DAYS);
+    if(out.missedOn) out.status = 'broken';
+    else if(today > last || (today === last && dayScore(run.ownerId, last).complete !== false)){
+      out.status = 'done';
+      out.finishedOn = last;
+    }
+    return out;
+  }
+
+  /* ---- writes ---- */
+  function persistTracking(){ queueChanges(); }
+
+  function ensureTrackDay(ownerId, date){
+    var d = trackDayFor(ownerId, date);
+    if(d) return d;
+    d = { id: trackDayId(ownerId, date), ownerId: ownerId, date: date, marks: {},
+          createdAt: nowISO(), updatedAt: nowISO() };
+    state.trackDays.push(d);
+    return d;
+  }
+  // The very first tick starts the clock, with no ceremony. Starting *again* after a run has
+  // broken or finished is deliberate, so a stray tap can't wipe the attempt you're reading.
+  function ensureRun(ownerId){
+    var run = currentRun(ownerId);
+    if(run) return run;
+    run = { id: uid(), ownerId: ownerId, startDate: todayStr(), createdAt: nowISO(), updatedAt: nowISO() };
+    state.trackRuns.push(run);
+    return run;
+  }
+  function startNewRun(ownerId){
+    state.trackRuns.push({ id: uid(), ownerId: ownerId, startDate: todayStr(),
+                           createdAt: nowISO(), updatedAt: nowISO() });
+    state.mediumDate = null;
+    persistTracking();
+    render();
+    showToast('Day 1 of 75. Here we go.', false, 2600);
+  }
+
+  function setTrackMark(ownerId, date, itemId, value){
+    var before = dayScore(ownerId, date);
+    var day = ensureTrackDay(ownerId, date);
+    if(value === false || value === null || value === undefined || value === 0) delete day.marks[itemId];
+    else day.marks[itemId] = value;
+    day.updatedAt = nowISO();
+    ensureRun(ownerId);
+    persistTracking();
+
+    var after = dayScore(ownerId, date);
+    render();
+    // Finishing a day is the thing worth celebrating, not ticking one box of six.
+    if(after.complete && !before.complete){
+      burstConfetti();
+      var run = currentRun(ownerId);
+      var s = run ? runStats(run) : null;
+      if(s && s.status === 'done' && s.finishedOn === date){
+        showToast('75 days. All of them.', false, 4000);
+      } else if(s && s.streak && s.streak % MEDIUM_EARN_EVERY === 0){
+        showToast(s.streak + ' days in a row — that\'s a break day earned', false, 3400);
+      } else {
+        showToast(fmtDate(date) + ' complete' + (s ? ' — day ' + s.dayNumber + ' of ' + MEDIUM_DAYS : ''), false, 2600);
+      }
+    }
+  }
+
+  /* ---- the screen ---- */
+  function renderMedium(){
+    var owner = mediumOwner();
+    if(!owner){
+      document.getElementById('view-root').innerHTML =
+        '<div class="med-wrap"><div class="settings-help" style="margin:30px 0 0;">We couldn\'t match your login to a family member yet, so there\'s no board to open. Ask an adult to add you in Family Settings with the email you log in with.</div></div>';
+      return;
+    }
+    var mine = mediumIsMine(owner);
+    var run = currentRun(owner.id);
+    var stats = run ? runStats(run) : null;
+
+    var html = '<div class="med-wrap">' + mediumPeopleHtml(owner);
+    if(!stats){
+      // No run yet. The intro explains the deal, and today's list sits right under it, because
+      // ticking the first thing on it is what starts the clock -- there is no "begin" button to
+      // hunt for.
+      html += mediumStartHtml(owner, mine) + mediumDayHtml(owner, mine, null);
+    } else {
+      html += mediumHeroHtml(owner, stats)
+            + mediumStatusHtml(owner, mine, stats)
+            + mediumDayHtml(owner, mine, stats)
+            + mediumGridHtml(owner, mine, stats)
+            + mediumWeeksHtml(stats)
+            + mediumRatesHtml(owner, stats)
+            + mediumPastRunsHtml(owner, stats);
+    }
+    document.getElementById('view-root').innerHTML = html + '</div>';
+    bindMedium(owner, mine, stats);
+  }
+
+  function mediumPeopleHtml(owner){
+    var me = state.currentFamilyMember;
+    // You first: it's your own board you came to tick.
+    var list = (state.family || []).slice().sort(function(a,b){
+      if(me && a.id === me.id) return -1;
+      if(me && b.id === me.id) return 1;
+      return 0;
+    });
+    if(list.length < 2) return '';
+    return '<div class="med-people">' + list.map(function(m){
+      var r = currentRun(m.id);
+      var s = r ? runStats(r) : null;
+      var tag;
+      if(!s) tag = 'not started';
+      else if(s.status === 'broken') tag = 'day ' + (dateDiffDays(s.start, s.missedOn) + 1) + ', ended';
+      else if(s.status === 'done') tag = 'finished';
+      else {
+        var t = dayScore(m.id, todayStr());
+        tag = 'D' + s.dayNumber + (t.total ? ' · ' + t.done + '/' + t.total : '');
+      }
+      return '<button type="button" class="med-person' + (m.id === owner.id ? ' on' : '') + '"'
+        + ' data-med-who="' + escapeHtml(m.id) + '">'
+        + avatarHtml([m.id])
+        + '<span>' + escapeHtml(m.name) + '</span>'
+        + '<span class="med-person-day">' + escapeHtml(tag) + '</span>'
+        + '</button>';
+    }).join('') + '</div>';
+  }
+
+  function mediumStartHtml(owner, mine){
+    var live = trackItemsFor(owner.id).filter(function(i){ return !i.archivedDate; });
+    if(!mine){
+      return '<div class="med-note">' + escapeHtml(owner.name) + ' hasn\'t started a 75 yet.</div>';
+    }
+    if(live.length){
+      return '<div class="med-note">'
+        + '<strong>Ready when you are.</strong> Tick the first thing on your list and today becomes day 1 of 75. '
+        + 'Every nine days in a row earns a break day; spend one on a day you miss and the run keeps going.'
+        + '</div>';
+    }
+    return '<div class="med-panel">'
+      + '<div class="med-panel-head"><h2>75 days, your list</h2></div>'
+      + '<div class="med-empty">'
+      + '<p>Write down the things you want to do <strong>every day</strong> for the next 75. '
+      + 'Ticking your first one starts the clock.</p>'
+      + '<p style="font-size:12.5px;">Every nine days in a row earns you a break day. Spend one on a day you '
+      + 'miss and the run keeps going; miss with none left and you start over at day 1.</p>'
+      + '<button type="button" class="btn-primary" data-med-edit="1">Set up my list</button>'
+      + '</div></div>';
+  }
+
+  function medStat(n, k, cls){
+    return '<div class="med-stat' + (cls ? ' ' + cls : '') + '">'
+      + '<span class="med-stat-n">' + n + '</span>'
+      + '<span class="med-stat-k">' + k + '</span></div>';
+  }
+
+  function mediumHeroHtml(owner, s){
+    var pct = Math.round((s.completed / MEDIUM_DAYS) * 100);
+    var t = dayScore(owner.id, todayStr());
+    var right = '';
+    if(s.status === 'active') right = t.total ? t.done + ' of ' + t.total + ' done today' : 'nothing on the list yet';
+    else if(s.status === 'done') right = 'finished ' + fmtDate(s.finishedOn);
+    else right = 'ended ' + fmtDate(s.missedOn);
+    var dayLabel = s.status === 'broken' ? (dateDiffDays(s.start, s.missedOn) + 1) : s.dayNumber;
+    return '<div class="med-hero">'
+      + '<div class="med-hero-top">'
+      + '<span class="med-day">Day ' + dayLabel + '</span>'
+      + '<span class="med-of">of ' + MEDIUM_DAYS + '</span>'
+      + '<span class="med-hero-right">' + escapeHtml(right) + '</span>'
+      + '</div>'
+      + '<div class="med-track"><span class="med-track-fill" style="width:' + pct + '%"></span></div>'
+      + '<div class="med-stats">'
+      + medStat(s.streak, 'streak', s.streak >= MEDIUM_EARN_EVERY ? 'good' : '')
+      + medStat(s.best, 'best run', '')
+      + medStat(s.completed, 'full days', '')
+      + medStat(s.banked, s.banked === 1 ? 'break day' : 'break days', s.banked > 0 ? 'warn' : '')
+      + medStat(Math.max(MEDIUM_DAYS - s.dayNumber, 0), 'days to go', '')
+      + '</div></div>';
+  }
+
+  /* The one line that says where the run actually stands. Worth its own card, because "you have
+     two days off in the bank" and "this attempt is over" are the two things you'd want shouted. */
+  function mediumStatusHtml(owner, mine, s){
+    var who = mine ? 'you' : owner.name;
+    if(s.status === 'broken'){
+      return '<div class="med-note broke">'
+        + '<strong>This run ended on ' + escapeHtml(fmtDate(s.missedOn)) + '.</strong> '
+        + escapeHtml(mine ? 'You had no break days left that day' : owner.name + ' had no break days left that day')
+        + ' — it made ' + (dateDiffDays(s.start, s.missedOn)) + ' day' + (dateDiffDays(s.start, s.missedOn) === 1 ? '' : 's') + '.'
+        + (mine
+            ? '<div class="med-note-row">'
+              + '<button type="button" class="btn-primary" id="med-restart">Start a new 75</button>'
+              + '<span class="med-panel-sub">Or fill in ' + escapeHtml(fmtDate(s.missedOn)) + ' below if you did it and forgot to tick.</span>'
+              + '</div>'
+            : '')
+        + '</div>';
+    }
+    if(s.status === 'done'){
+      return '<div class="med-note won">'
+        + '<strong>' + escapeHtml(mine ? 'You finished the 75.' : owner.name + ' finished the 75.') + '</strong> '
+        + s.completed + ' full days, ' + s.spent + ' break day' + (s.spent === 1 ? '' : 's') + ' used, '
+        + 'longest run ' + s.best + '.'
+        + (mine ? '<div class="med-note-row"><button type="button" class="btn-primary" id="med-restart">Start another 75</button></div>' : '')
+        + '</div>';
+    }
+    var need = MEDIUM_EARN_EVERY - s.toward;
+    var line = s.banked > 0
+      ? escapeHtml(mine ? 'You have ' : owner.name + ' has ') + '<strong>' + s.banked + ' break day' + (s.banked === 1 ? '' : 's') + '</strong> banked. '
+      : 'No break days banked yet. ';
+    line += need === MEDIUM_EARN_EVERY
+      ? 'A full day today starts the next nine.'
+      : need + ' more day' + (need === 1 ? '' : 's') + ' in a row earns another.';
+    return '<div class="med-note">' + line + '</div>';
+  }
+
+  /* One day's checklist. Usually today, but any day inside the run can be opened from the grid
+     below -- forgetting to tick is ordinary, and a tracker that won't let you fix it just
+     teaches people to stop trusting it. */
+  function mediumOpenDate(s){
+    var today = todayStr();
+    if(!s) return today;              // before a run exists there is only today
+    var date = state.mediumDate || today;
+    var last = dateAdd(s.start, MEDIUM_DAYS - 1);
+    if(date < s.start) date = s.start;
+    if(date > today) date = today;
+    if(date > last) date = last;
+    return date;
+  }
+
+  function mediumDayHtml(owner, mine, s){
+    var today = todayStr();
+    var date = mediumOpenDate(s);
+    var last = s ? dateAdd(s.start, MEDIUM_DAYS - 1) : today;
+    var upper = today < last ? today : last;
+    var items = itemsActiveOn(owner.id, date);
+    var day = trackDayFor(owner.id, date);
+    var n = s ? dateDiffDays(s.start, date) + 1 : 0;
+    // Before a run exists there's nothing yet to browse back through, and nothing to show for
+    // somebody who hasn't set a list up at all.
+    if(!s && !items.length) return '';
+
+    var body;
+    if(!items.length){
+      body = '<div class="med-empty"><p>'
+        + (mine
+            ? 'Nothing was on your list for this day. Add what you want to track and it shows up here from today onwards.'
+            : escapeHtml(owner.name) + ' wasn\'t tracking anything on this day.')
+        + '</p>'
+        + (mine ? '<button type="button" class="btn-primary" data-med-edit="1">Set up my list</button>' : '')
+        + '</div>';
+    } else {
+      body = '<div class="med-items">' + items.map(function(i){
+        var v = markOf(day, i.id);
+        var done = itemDoneOn(i, day);
+        return '<div class="med-item' + (done ? ' done' : '') + (mine ? '' : ' locked') + '">'
+          + '<button type="button" class="med-tick" data-med-tick="' + escapeHtml(i.id) + '"'
+          + (mine ? '' : ' disabled') + ' aria-pressed="' + (!!done) + '"'
+          + ' aria-label="' + escapeHtml((done ? 'Undo ' : 'Done: ') + i.label) + '">'
+          + icon('check') + '</button>'
+          + '<span class="med-item-body">'
+          + '<span class="med-item-label">' + escapeHtml(i.label) + '</span>'
+          + (i.target > 0
+              ? '<span class="med-item-target">Target ' + i.target + (i.unit ? ' ' + escapeHtml(i.unit) : '') + '</span>'
+              : '')
+          + '</span>'
+          + (i.target > 0
+              ? '<span class="med-num">'
+                + '<input type="number" inputmode="numeric" min="0" step="1" data-med-num="' + escapeHtml(i.id) + '"'
+                + ' value="' + (typeof v === 'number' ? v : '') + '"' + (mine ? '' : ' disabled')
+                + ' aria-label="' + escapeHtml(i.label) + ' amount">'
+                + (i.unit ? '<span>' + escapeHtml(i.unit) + '</span>' : '')
+                + '</span>'
+              : '')
+          + '</div>';
+      }).join('') + '</div>';
+    }
+
+    return '<div class="med-panel">'
+      + '<div class="med-panel-head">'
+      + '<h2>' + (date === today ? 'Today' : escapeHtml(fmtDate(date))) + '</h2>'
+      + '<span class="med-panel-sub">' + (n ? 'Day ' + n + (date === today ? '' : ' · ' + escapeHtml(fmtDate(date))) : 'Not started yet') + '</span>'
+      + '<span class="med-panel-act">'
+      + (s
+          ? '<span class="med-daynav">'
+            + '<button type="button" data-med-day="' + dateAdd(date, -1) + '"' + (date <= s.start ? ' disabled' : '') + ' aria-label="Previous day">&lsaquo;</button>'
+            + '<button type="button" data-med-day="' + dateAdd(date, 1) + '"' + (date >= upper ? ' disabled' : '') + ' aria-label="Next day">&rsaquo;</button>'
+            + '</span>'
+          : '')
+      + (mine ? '<button type="button" class="btn-sm" data-med-edit="1">Edit list</button>' : '')
+      + '</span></div>'
+      + body
+      + '</div>';
+  }
+
+  /* The 75 at a glance: eleven rows of seven, so a row is a week of the run and a cell stays a
+     real tap target. Partly-done days show how far they got rather than reading as failures. */
+  function mediumGridHtml(owner, mine, s){
+    var today = todayStr();
+    var open = mediumOpenDate(s);
+    var rows = '';
+    for(var w = 0; w < MEDIUM_WEEKS; w++){
+      var cells = '';
+      for(var c = 0; c < 7; c++){
+        var d = s.days[w * 7 + c];
+        if(!d){ cells += '<span class="med-cell void after" aria-hidden="true"></span>'; continue; }
+        var cls = 'med-cell', fill = 0, note = fmtDate(d.date);
+        if(d.state === 'done'){ cls += ' full'; fill = 100; note += ' — all done'; }
+        else if(d.state === 'break'){ cls += ' brk'; fill = d.total ? Math.round(d.done / d.total * 100) : 0; note += ' — break day used'; }
+        else if(d.state === 'missed'){ cls += ' miss'; note += ' — missed, no break day left'; }
+        else if(d.state === 'today'){ cls += ' part'; fill = d.total ? Math.round(d.done / d.total * 100) : 0; note += ' — ' + d.done + ' of ' + d.total; }
+        else if(d.state === 'future'){ cls += ' after'; note += ' — still ahead'; }
+        else if(d.state === 'none'){ cls += ' void'; note += ' — nothing tracked'; }
+        else { cls += ' void after'; note += ' — after the run ended'; }
+        if(d.date === today) cls += ' now';
+        var tappable = mine && d.date <= today && d.state !== 'void';
+        if(tappable) cls += ' tappable';
+        if(d.date === open) cls += ' now';
+        cells += '<' + (tappable ? 'button type="button"' : 'span') + ' class="' + cls + '"'
+          + (tappable ? ' data-med-day="' + d.date + '"' : '')
+          + ' title="' + escapeHtml('Day ' + d.n + ': ' + note) + '">'
+          + (fill ? '<span class="med-fill" style="height:' + fill + '%"></span>' : '')
+          + '<span class="med-cell-n">' + d.n + '</span>'
+          + '</' + (tappable ? 'button' : 'span') + '>';
+      }
+      rows += '<div class="med-grid-row"><span class="med-week-k">W' + (w+1) + '</span>' + cells + '</div>';
+    }
+    return '<div class="med-panel">'
+      + '<div class="med-panel-head"><h2>The 75</h2>'
+      + '<span class="med-panel-sub">' + (mine ? 'Tap any day to fix it' : 'Week by week') + '</span></div>'
+      + '<div class="med-grid">' + rows + '</div>'
+      + '<div class="med-legend">'
+      + '<span><i class="med-key full"></i>full day</span>'
+      + '<span><i class="med-key brk"></i>break day</span>'
+      + '<span><i class="med-key miss"></i>missed</span>'
+      + '<span><i class="med-key"></i>not tracked</span>'
+      + '</div></div>';
+  }
+
+  function mediumWeeksHtml(s){
+    var today = todayStr();
+    var any = false, rows = '';
+    for(var w = 0; w < MEDIUM_WEEKS; w++){
+      var past = 0, full = 0;
+      for(var c = 0; c < 7; c++){
+        var d = s.days[w * 7 + c];
+        if(!d || d.date > today) continue;
+        if(d.state === 'today' || d.state === 'none' || d.state === 'void') continue;
+        past++;
+        if(d.state === 'done') full++;
+      }
+      var pct = past ? Math.round(full / past * 100) : null;
+      if(pct !== null) any = true;
+      var h = pct === null ? 3 : Math.max(Math.round(pct / 100 * 76), 3);
+      rows += '<div class="med-wk" title="' + escapeHtml('Week ' + (w+1) + (pct === null ? ': nothing counted yet' : ': ' + full + ' of ' + past + ' days')) + '">'
+        + '<span class="med-wk-pct">' + (pct === null ? '' : pct + '%') + '</span>'
+        + '<span class="med-wk-bar' + (pct === null ? ' ahead' : (pct === 0 ? ' none' : '')) + '" style="height:' + h + 'px"></span>'
+        + '<span class="med-wk-k">' + (w+1) + '</span></div>';
+    }
+    if(!any) return '';
+    return '<div class="med-panel">'
+      + '<div class="med-panel-head"><h2>Week by week</h2>'
+      + '<span class="med-panel-sub">Share of the week\'s days finished in full</span></div>'
+      + '<div class="med-weeks">' + rows + '</div></div>';
+  }
+
+  function mediumRatesHtml(owner, s){
+    var today = todayStr();
+    var rows = trackItemsFor(owner.id).map(function(i){
+      var elig = 0, hit = 0;
+      s.days.forEach(function(d){
+        if(d.date > today || d.state === 'void' || d.state === 'today') return;
+        var on = itemsActiveOn(owner.id, d.date).some(function(x){ return x.id === i.id; });
+        if(!on) return;
+        elig++;
+        if(itemDoneOn(i, trackDayFor(owner.id, d.date))) hit++;
+      });
+      return { item:i, elig:elig, hit:hit, pct: elig ? Math.round(hit / elig * 100) : 0 };
+    }).filter(function(r){ return r.elig > 0; })
+      .sort(function(a,b){ return b.pct - a.pct; });
+    if(!rows.length) return '';
+    // Only worth calling one out when it is actually behind the others.
+    var worst = rows[rows.length - 1];
+    var spread = rows.length > 1 && rows[0].pct - worst.pct >= 10;
+    return '<div class="med-panel">'
+      + '<div class="med-panel-head"><h2>What\'s sticking</h2>'
+      + '<span class="med-panel-sub">Days finished, out of the days it counted</span></div>'
+      + '<div class="med-rates">' + rows.map(function(r){
+          return '<div class="med-rate">'
+            + '<span class="med-rate-k" title="' + escapeHtml(r.item.label) + '">' + escapeHtml(r.item.label)
+            + (r.item.archivedDate ? ' <span style="opacity:.6">(dropped)</span>' : '') + '</span>'
+            + '<span class="med-rate-track"><span class="med-rate-fill" style="width:' + r.pct + '%"></span></span>'
+            + '<span class="med-rate-n">' + r.hit + '/' + r.elig + '</span>'
+            + '</div>';
+        }).join('') + '</div>'
+      + (spread && worst.pct < 100
+          ? '<p class="med-foot">' + escapeHtml(worst.item.label) + ' is the one costing days — '
+            + (worst.elig - worst.hit) + ' of them so far.</p>'
+          : '')
+      + '</div>';
+  }
+
+  // Earlier attempts, kept rather than erased. Seeing that the last try got to day 22 is the
+  // reason to believe day 40 is possible.
+  function mediumPastRunsHtml(owner, current){
+    var past = runsFor(owner.id).filter(function(r){ return r.id !== current.run.id; });
+    if(!past.length) return '';
+    return '<div class="med-panel">'
+      + '<div class="med-panel-head"><h2>Earlier attempts</h2></div>'
+      + '<div class="med-rates">' + past.reverse().map(function(r){
+          var s = runStats(r);
+          var reached = s.missedOn ? dateDiffDays(s.start, s.missedOn) : s.completed;
+          return '<div class="med-rate">'
+            + '<span class="med-rate-k">' + escapeHtml(fmtDate(s.start)) + '</span>'
+            + '<span class="med-rate-track"><span class="med-rate-fill" style="width:'
+            + Math.round(reached / MEDIUM_DAYS * 100) + '%"></span></span>'
+            + '<span class="med-rate-n">' + reached + 'd</span>'
+            + '</div>';
+        }).join('') + '</div></div>';
+  }
+
+  function bindMedium(owner, mine, stats){
+    document.querySelectorAll('[data-med-who]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        state.mediumWho = btn.dataset.medWho;
+        state.mediumDate = null;
+        render();
+      });
+    });
+    document.querySelectorAll('[data-med-edit]').forEach(function(btn){
+      btn.addEventListener('click', openMediumItemsModal);
+    });
+    var restart = document.getElementById('med-restart');
+    if(restart) restart.addEventListener('click', function(){ startNewRun(owner.id); });
+    document.querySelectorAll('[data-med-day]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        state.mediumDate = btn.dataset.medDay;
+        render();
+        var panel = document.querySelector('.med-items, .med-empty');
+        if(panel) panel.scrollIntoView({ block:'nearest', behavior:'smooth' });
+      });
+    });
+    if(!mine) return;
+    var date = mediumOpenDate(stats);
+    document.querySelectorAll('[data-med-tick]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var item = (state.trackItems || []).find(function(i){ return i.id === btn.dataset.medTick; });
+        if(!item) return;
+        var day = trackDayFor(owner.id, date);
+        var done = itemDoneOn(item, day);
+        // Ticking an item that has a target fills the target in; that's what the tick means.
+        setTrackMark(owner.id, date, item.id, done ? false : (item.target > 0 ? item.target : true));
+      });
+    });
+    document.querySelectorAll('[data-med-num]').forEach(function(input){
+      input.addEventListener('change', function(){
+        var raw = input.value.trim();
+        var n = raw === '' ? 0 : parseInt(raw, 10);
+        if(isNaN(n) || n < 0) n = 0;
+        setTrackMark(owner.id, date, input.dataset.medNum, n);
+      });
+    });
+  }
+
+  /* The list editor. A sheet, so a sync landing mid-edit can't rewrite the rows under your
+     cursor. Dropping an item archives it from today rather than deleting it: the days it was
+     part of already happened, and rewriting them would make the history a lie. */
+  function openMediumItemsModal(){
+    var me = state.currentFamilyMember;
+    if(!me) return;
+    var draft = trackItemsFor(me.id)
+      .filter(function(i){ return !i.archivedDate; })
+      .map(function(i){ return { id:i.id, label:i.label || '', target:(i.target > 0 ? String(i.target) : ''), unit:i.unit || '' }; });
+    if(!draft.length) draft.push({ id:null, label:'', target:'', unit:'' });
+
+    var root = document.getElementById('modal-root');
+
+    function readBack(){
+      root.querySelectorAll('[data-med-i]').forEach(function(row){
+        var k = parseInt(row.dataset.medI, 10);
+        if(!draft[k]) return;
+        draft[k].label  = row.querySelector('[data-f="label"]').value;
+        draft[k].target = row.querySelector('[data-f="target"]').value;
+        draft[k].unit   = row.querySelector('[data-f="unit"]').value;
+      });
+    }
+
+    function paint(){
+      var used = {};
+      draft.forEach(function(d){ used[d.label.trim().toLowerCase()] = true; });
+      var chips = MEDIUM_SUGGESTIONS.filter(function(s){ return !used[s.label.toLowerCase()]; });
+      root.innerHTML = ''
+        + '<div class="scrim" id="scrim"><div class="modal">'
+        + '<div class="modal-title-input" style="font-weight:700;">My 75 Medium list</div>'
+        + '<p class="med-edit-hint">One row per thing you\'ll do every day. Leave the number blank for a plain '
+        + 'tick, or set a target (20 pages, 8 glasses) and the tick waits until you reach it.</p>'
+        + draft.map(function(d, k){
+            return '<div class="med-edit-row" data-med-i="' + k + '">'
+              + '<input type="text" data-f="label" placeholder="Read" value="' + escapeHtml(d.label) + '">'
+              + '<input type="number" data-f="target" min="0" step="1" inputmode="numeric" placeholder="—" value="' + escapeHtml(d.target) + '">'
+              + '<input type="text" data-f="unit" placeholder="pages" value="' + escapeHtml(d.unit) + '" style="max-width:88px;flex:0 1 88px;">'
+              + '<button type="button" class="med-edit-del" data-med-del="' + k + '" aria-label="Remove this row">' + icon('close') + '</button>'
+              + '</div>';
+          }).join('')
+        + '<div class="med-note-row" style="margin-top:2px;">'
+        + '<button type="button" class="btn-sm" id="med-add-row">Add another</button>'
+        + '</div>'
+        + (chips.length
+            ? '<p class="med-edit-hint" style="margin:15px 0 7px;">Or start from one of these:</p>'
+              + '<div class="cat-row">' + chips.map(function(s, n){
+                  return '<button type="button" class="btn-sm" data-med-sug="' + n + '">' + escapeHtml(s.label) + '</button>';
+                }).join('') + '</div>'
+            : '')
+        + '<div class="modal-footer"><span></span><div style="display:flex;gap:10px;">'
+        + '<button class="btn-sm" id="med-cancel">Cancel</button>'
+        + '<button class="btn-close" id="med-save">Save list</button>'
+        + '</div></div></div></div>';
+
+      document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id === 'scrim') close(); });
+      document.getElementById('med-cancel').addEventListener('click', close);
+      document.getElementById('med-save').addEventListener('click', save);
+      document.getElementById('med-add-row').addEventListener('click', function(){
+        readBack();
+        draft.push({ id:null, label:'', target:'', unit:'' });
+        paint();
+        var rows = root.querySelectorAll('[data-med-i] [data-f="label"]');
+        if(rows.length) rows[rows.length - 1].focus();
+      });
+      root.querySelectorAll('[data-med-del]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          readBack();
+          draft.splice(parseInt(btn.dataset.medDel, 10), 1);
+          if(!draft.length) draft.push({ id:null, label:'', target:'', unit:'' });
+          paint();
+        });
+      });
+      root.querySelectorAll('[data-med-sug]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          readBack();
+          var s = chips[parseInt(btn.dataset.medSug, 10)];
+          // An empty first row is a placeholder, not a row someone wanted.
+          if(draft.length === 1 && !draft[0].label.trim() && !draft[0].id) draft.length = 0;
+          draft.push({ id:null, label:s.label, target:(s.target ? String(s.target) : ''), unit:s.unit });
+          paint();
+        });
+      });
+    }
+
+    function close(){ root.innerHTML = ''; applyDeferred(); }
+
+    function save(){
+      readBack();
+      var today = todayStr();
+      var keep = {};
+      var rows = draft.filter(function(d){ return d.label.trim(); });
+      rows.forEach(function(d, k){
+        var target = parseInt(d.target, 10);
+        if(isNaN(target) || target < 0) target = 0;
+        var unit = d.unit.trim();
+        var existing = d.id ? (state.trackItems || []).find(function(i){ return i.id === d.id; }) : null;
+        if(existing){
+          existing.label = d.label.trim();
+          existing.target = target;
+          existing.unit = unit;
+          existing.order = k;
+          existing.archivedDate = null;
+          existing.updatedAt = nowISO();
+          keep[existing.id] = true;
+        } else {
+          var made = { id: uid(), ownerId: me.id, label: d.label.trim(), target: target, unit: unit,
+                       order: k, startDate: today, archivedDate: null,
+                       createdAt: nowISO(), updatedAt: nowISO() };
+          state.trackItems.push(made);
+          keep[made.id] = true;
+        }
+      });
+      // Anything the person took off the list stops counting from today. The days it was part
+      // of keep their verdict.
+      trackItemsFor(me.id).forEach(function(i){
+        if(keep[i.id] || i.archivedDate) return;
+        i.archivedDate = today;
+        i.updatedAt = nowISO();
+      });
+      close();
+      persistTracking();
+      render();
+      showToast(rows.length ? 'List saved — ' + rows.length + ' to do each day' : 'List cleared', false, 2600);
+    }
+
+    paint();
+    var first = root.querySelector('[data-f="label"]');
+    if(first) first.focus();
   }
 
   function renderMessages(){
@@ -4193,7 +5171,8 @@
     var isCompass = state.view === 'compass';
     var isMessages = state.view === 'messages';
     var isMood = state.view === 'mood';
-    var isTaskView = !isCal && !isDreams && !isCompass && !isMessages && !isMood;
+    var isMedium = state.view === 'medium';
+    var isTaskView = !isCal && !isDreams && !isCompass && !isMessages && !isMood && !isMedium;
     document.getElementById('task-toolbar').classList.toggle('hidden', !isTaskView);
     document.getElementById('calendar-toolbar').classList.toggle('hidden', !isCal);
     document.getElementById('dream-toolbar').classList.toggle('hidden', !isDreams);
@@ -4271,6 +5250,12 @@
     }
     if(state.view === 'mood'){
       renderMood();
+      syncChromeHeight();
+    applyFillHeights();
+      return;
+    }
+    if(state.view === 'medium'){
+      renderMedium();
       syncChromeHeight();
     applyFillHeights();
       return;
@@ -7128,8 +8113,7 @@
     { view:'calendar', label:'Calendar', icon:'calendar' },
     { view:'messages', label:'Messages', icon:'chat'     },
     { view:'mood',     label:'Mood',     icon:'mood'     },
-    { view:'compass',  label:'Compass',  icon:'compass'  },
-    { view:'list',     label:'List',     icon:'list'     },
+    { view:'medium',   label:'75',       icon:'flame'    },
     { view:'archive',  label:'Archive',  icon:'archive'  }
   ];
 
@@ -7142,7 +8126,7 @@
     render();
   }
 
-  var VIEW_ICONS = { matrix:'matrix', calendar:'calendar', messages:'chat', mood:'mood', compass:'compass', list:'list', archive:'archive', dreams:'star' };
+  var VIEW_ICONS = { matrix:'matrix', calendar:'calendar', messages:'chat', mood:'mood', medium:'flame', compass:'compass', list:'list', archive:'archive', dreams:'star' };
   function decorateViewSwitcher(){
     document.querySelectorAll('#view-switcher button[data-view]').forEach(function(b){
       if(b.querySelector('svg')) return;
@@ -7180,6 +8164,10 @@
       ? { label:'New message', run:function(){ openMessageModal(null); } }
       : null;
     if(state.view === 'mood')     return null;   // the grid itself is the action
+    // Only on your own board -- there is nothing to add to somebody else's.
+    if(state.view === 'medium')   return mediumIsMine(mediumOwner())
+      ? { label:'Edit my list', run:openMediumItemsModal }
+      : null;
     if(state.view === 'archive')  return null;
     return { label:'New task', run:openAddTaskModal };
   }
