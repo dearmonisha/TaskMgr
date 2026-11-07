@@ -10,7 +10,13 @@ export const KINDS = new Set([
   // One Mood Meter check-in per person per day.
   'mood',
   // 75 Medium: the items a person tracks, one row per tracked day, one row per attempt.
-  'trackitem', 'trackday', 'trackrun'
+  'trackitem', 'trackday', 'trackrun',
+  // Gift lists. Two kinds on purpose: a 'gift' is written only by the person whose list it is,
+  // a 'giftclaim' only by the person giving it. Keeping them apart is what makes the secret
+  // keepable -- the server can withhold every claim from the list's owner without ever
+  // withholding part of a row that the owner also writes to (which would round-trip their
+  // redacted copy straight back over the top of the real one).
+  'gift', 'giftclaim'
 ]);
 
 export const META_KEYS = new Set(['homeTimezone', 'appTitle', 'appSubtitle']);
@@ -47,6 +53,39 @@ export function identify(request, env) {
   if (email) return { email: email.toLowerCase(), source: 'access' };
   if (env && env.DEV_IDENTITY) return { email: String(env.DEV_IDENTITY).toLowerCase(), source: 'dev' };
   return { email: null, source: 'anonymous' };
+}
+
+/**
+ * Who is this request, as a family member rather than an email.
+ *
+ * The roster lives in the same items table (kind 'member'), so one small read resolves it.
+ * Returns null when the email matches nobody -- in which case there is no list of theirs to
+ * protect, and the caller treats them as seeing everything they'd normally see.
+ */
+export async function resolveMember(db, email) {
+  if (!email) return null;
+  const want = String(email).toLowerCase();
+  const rows = await db.prepare("SELECT id, data FROM items WHERE kind = 'member' AND gone = 0").all();
+  for (const r of rows.results || []) {
+    let m;
+    try { m = JSON.parse(r.data); } catch (e) { continue; }
+    if (m && m.email && String(m.email).toLowerCase() === want) return m;
+  }
+  return null;
+}
+
+/**
+ * The one rule the gift module rests on: you never receive a claim against your own list.
+ *
+ * It applies to everybody, adults included -- Shiva and Monisha asked to be kept in the dark
+ * about their own lists too, and a rule with no exceptions is a rule that can't be got wrong.
+ * Tombstones carry no data, so they are always passed through: "claim 4f2a is gone" says
+ * nothing about which gift it was for.
+ */
+export function claimIsVisibleTo(row, memberId) {
+  if (row.kind !== 'giftclaim') return true;
+  if (!memberId || !row.data) return true;
+  return row.data.giftOwnerId !== memberId;
 }
 
 export function requireDb(env) {

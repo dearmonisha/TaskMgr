@@ -5,7 +5,7 @@
 // think you are. The old sync had exactly one failure signal — a red banner — so
 // "token expired", "offline" and "someone else wrote first" all looked identical.
 
-import { handle, json, identify, currentSeq } from './_shared.js';
+import { handle, json, identify, currentSeq, resolveMember } from './_shared.js';
 
 export async function onRequestGet(context) {
   return handle(async () => {
@@ -29,6 +29,22 @@ export async function onRequestGet(context) {
       const counts = await env.DB.prepare('SELECT kind, COUNT(*) AS n FROM items WHERE gone = 0 GROUP BY kind').all();
       const byKind = {};
       for (const r of counts.results || []) byKind[r.kind] = r.n;
+      // The client compares these counts against what it holds and re-reads the whole store
+      // if the server claims more. Claims against your own list are deliberately withheld, so
+      // the honest number to report *to you* is the number you can actually have -- otherwise
+      // every poll looks like a device that has fallen behind, and it resyncs forever.
+      if (byKind.giftclaim) {
+        const meMember = await resolveMember(env.DB, me.email);
+        if (meMember) {
+          const rows = await env.DB.prepare("SELECT data FROM items WHERE kind = 'giftclaim' AND gone = 0").all();
+          let visible = 0;
+          for (const r of rows.results || []) {
+            let c; try { c = JSON.parse(r.data); } catch (e) { continue; }
+            if (c && c.giftOwnerId !== meMember.id) visible++;
+          }
+          byKind.giftclaim = visible;
+        }
+      }
       return json({ ok: true, seq, items: byKind, identity: me });
     } catch (err) {
       const msg = err && err.message ? err.message : String(err);

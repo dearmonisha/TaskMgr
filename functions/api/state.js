@@ -4,7 +4,7 @@
 // it returns just what changed, which is what makes 30-second polling cheap
 // enough to leave running all day on six devices.
 
-import { handle, json, identify, requireDb, currentSeq, HttpError } from './_shared.js';
+import { handle, json, identify, requireDb, currentSeq, HttpError, resolveMember, claimIsVisibleTo } from './_shared.js';
 
 export async function onRequestGet(context) {
   return handle(async () => {
@@ -31,7 +31,7 @@ export async function onRequestGet(context) {
       .bind(since, LIMIT)
       .all();
 
-    const items = (itemRows.results || []).map((r) => ({
+    const all = (itemRows.results || []).map((r) => ({
       id: r.id,
       kind: r.kind,
       seq: r.seq,
@@ -41,16 +41,29 @@ export async function onRequestGet(context) {
       data: r.gone ? null : safeParse(r.data)
     }));
 
+    // THE LOCK.
+    //
+    // Gift claims against your own list never leave the database. Not hidden in the client,
+    // not sent and ignored -- never put on the wire, so there is nothing to find in the page
+    // source, the network tab, or a cached response. This is the whole reason the module has
+    // a server change at all.
+    const meMember = await resolveMember(db, me.email);
+    const meId = meMember ? meMember.id : null;
+    const items = meId ? all.filter((row) => claimIsVisibleTo(row, meId)) : all;
+
     const meta = {};
     for (const r of metaRows.results || []) meta[r.key] = safeParse(r.value);
 
     const head = await currentSeq(db);
     // The furthest we can honestly claim to have delivered. If either query hit
     // the limit we only advance to the last row actually returned.
+    // Measured on the unfiltered page: a row we deliberately withheld is still a row we have
+    // dealt with, and if the cursor stopped short of it the client would ask for it again on
+    // every single poll.
     let delivered = head;
-    const lastItem = items.length ? items[items.length - 1].seq : 0;
+    const lastItem = all.length ? all[all.length - 1].seq : 0;
     const lastMeta = (metaRows.results || []).length ? metaRows.results[metaRows.results.length - 1].seq : 0;
-    const truncated = items.length >= LIMIT || (metaRows.results || []).length >= LIMIT;
+    const truncated = all.length >= LIMIT || (metaRows.results || []).length >= LIMIT;
     if (truncated) delivered = Math.max(lastItem, lastMeta);
 
     return json({
