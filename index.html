@@ -988,6 +988,7 @@
   .gift-card.mine-claim{border-color:var(--accent);background:var(--schedule-tint);}
   .gift-card.withdrawn{opacity:.75;border-style:dashed;background:none;}
   .gift-body{min-width:0;flex:1;}
+  .gift-card > .gift-rank + .gift-body{padding-top:1px;}
   .gift-title{display:block;font-size:14.5px;font-weight:600;line-height:1.3;overflow-wrap:anywhere;}
   .gift-card.withdrawn .gift-title{text-decoration:line-through;}
   .gift-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:5px;}
@@ -1003,9 +1004,10 @@
   .gift-link .ic{width:12px;height:12px;}
   .gift-notes{display:block;font-size:12.5px;color:var(--ink-muted);margin-top:5px;line-height:1.45;overflow-wrap:anywhere;}
   .gift-who{
-    font-size:11.5px;font-weight:700;margin-top:7px;display:flex;align-items:center;gap:6px;
-    flex-wrap:wrap;color:var(--eliminate);
+    font-size:11.5px;font-weight:700;margin-top:7px;display:flex;align-items:flex-start;gap:6px;
+    color:var(--eliminate);line-height:1.35;
   }
+  .gift-who .ic{flex:none;margin-top:1px;}
   .gift-card.mine-claim .gift-who{color:var(--accent);}
   .gift-side{flex:none;display:flex;flex-direction:column;gap:6px;align-items:stretch;}
   .gift-btn{
@@ -1037,6 +1039,83 @@
     color:var(--ink-faint);margin:18px 0 9px;
   }
   .gift-group-k:first-of-type{margin-top:6px;}
+
+  /* rank: the owner's order of preference, which everyone else can see */
+  .gift-rank{
+    flex:none;display:flex;flex-direction:column;align-items:center;gap:1px;width:26px;
+    padding-top:1px;
+  }
+  .gift-rank-n{
+    font-family:var(--font-serif);font-size:15px;font-weight:700;line-height:1.1;
+    color:var(--ink-muted);font-variant-numeric:tabular-nums;
+  }
+  .gift-rank.static{justify-content:flex-start;padding-top:2px;}
+  .gift-nudge{
+    border:0;background:none;padding:0;cursor:pointer;color:var(--ink-faint);
+    width:22px;height:16px;display:flex;align-items:center;justify-content:center;border-radius:5px;
+  }
+  .gift-nudge .ic{width:13px;height:13px;stroke-width:2.4;}
+  .gift-nudge:hover:not(:disabled){color:var(--ink);background:var(--hairline);}
+  .gift-nudge:disabled{opacity:.25;cursor:default;}
+  .gift-nudge:focus-visible{outline:2px solid var(--ink);outline-offset:1px;}
+  .gift-rank-hint{font-size:12px;color:var(--ink-muted);margin:0 0 12px;line-height:1.5;}
+  .gift-rank-move{display:flex;gap:2px;}
+
+  /* list / tiles */
+  .gift-view-toggle{
+    display:inline-flex;gap:2px;background:var(--surface-2);border:1px solid var(--hairline);
+    border-radius:var(--radius-pill);padding:3px;margin-right:8px;vertical-align:middle;
+  }
+  .gift-view-toggle button{
+    border:0;background:none;color:var(--ink-faint);cursor:pointer;border-radius:var(--radius-pill);
+    width:30px;height:26px;display:flex;align-items:center;justify-content:center;padding:0;
+  }
+  .gift-view-toggle .ic{width:15px;height:15px;}
+  .gift-view-toggle button.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-sm);}
+  .gift-view-toggle button:hover:not(.on){color:var(--ink);}
+
+  /* The tile view exists for one reason: a picture answers "which one did she mean?" faster
+     than any amount of text. When there is no picture the tile still has to look deliberate,
+     so the placeholder is a proper panel rather than a hole. */
+  .gift-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(166px,1fr));gap:12px;}
+  .gift-tile{
+    position:relative;display:flex;flex-direction:column;overflow:hidden;
+    border:1.5px solid var(--hairline);border-radius:var(--radius-card);background:var(--surface-2);
+  }
+  .gift-tile.taken{border-color:var(--eliminate);background:var(--eliminate-tint);}
+  .gift-tile.mine-claim{border-color:var(--accent);background:var(--schedule-tint);}
+  .gift-pic{
+    display:block;aspect-ratio:1/1;background:#fff;position:relative;overflow:hidden;
+    border-bottom:1px solid var(--hairline);
+  }
+  .gift-pic-img{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;display:block;}
+  .gift-pic.broken .gift-pic-img{display:none;}
+  .gift-pic-none{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:var(--surface-2);color:var(--hairline-strong);
+  }
+  .gift-pic-none .ic{width:34%;height:34%;stroke-width:1.2;}
+  .gift-tile-rank{
+    position:absolute;top:7px;left:7px;z-index:1;
+    background:var(--ink);color:var(--paper);border-radius:var(--radius-pill);
+    min-width:20px;height:20px;padding:0 6px;display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;
+  }
+  .gift-tile-body{display:flex;flex-direction:column;gap:5px;padding:10px 11px 11px;flex:1;}
+  .gift-tile-body .gift-title{font-size:13.5px;}
+  .gift-tile-foot{margin-top:auto;padding-top:9px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .gift-tile-foot .gift-btn{padding:6px 12px;font-size:12px;}
+  .gift-tile-foot .gift-row-act{margin-top:0;margin-left:auto;gap:10px;}
+  .gift-tile .gift-who{font-size:11px;}
+
+  @media (max-width:760px){
+    .gift-tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+    .gift-tile-body{padding:9px 10px 10px;}
+    .gift-tile-body .gift-title{font-size:13px;}
+    .gift-tile-foot{gap:7px;}
+    .gift-tile-foot .gift-row-act{flex:1 1 100%;margin-left:0;}
+    .gift-rank{width:24px;}
+  }
 
   /* the add/edit sheet */
   .gift-field{display:block;margin-bottom:12px;}
@@ -1232,6 +1311,10 @@
     .m-blue{background:#4a82c7;}
     .m-green{background:#3f9c5f;}
     .mood-cell.chosen,.mood-cell.open{box-shadow:0 0 0 3px #f2ece4;}
+
+    /* Product photos assume a light ground, so the tile keeps one -- just not a glaring one. */
+    .gift-pic{background:#e6e1d9;}
+    .gift-tile-rank{background:var(--paper);color:var(--ink);}
 
     /* Emoji-free UI still uses a couple of colour-on-colour chips; keep them legible. */
     .banner{background:var(--due-today-bg);border-color:#5a4520;color:var(--due-today);}
@@ -2241,6 +2324,9 @@
     checksq:   '<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M8 12.3l2.6 2.6 5.4-5.6"/>',
     clock:     '<circle cx="12" cy="12" r="8.6"/><path d="M12 7.4V12l3 1.8"/>',
     download:  '<path d="M12 3.5v11M7.8 10.4L12 14.6l4.2-4.2M4.5 19.5h15"/>',
+    chevup:    '<path d="M5.5 14.5L12 8l6.5 6.5"/>',
+    chevdown:  '<path d="M5.5 9.5L12 16l6.5-6.5"/>',
+    image:     '<rect x="3" y="4.5" width="18" height="15" rx="2.2"/><circle cx="8.6" cy="10" r="1.7"/><path d="M3.4 17l4.8-4.5a1.8 1.8 0 0 1 2.4 0l3.1 2.9a1.8 1.8 0 0 0 2.4 0l1.6-1.4a1.8 1.8 0 0 1 2.4 0l1.5 1.4"/>',
     chevleft:  '<path d="M14.5 5.5L8 12l6.5 6.5"/>',
     chevright: '<path d="M9.5 5.5L16 12l-6.5 6.5"/>',
     close:     '<path d="M6 6l12 12M18 6L6 18"/>',
@@ -4627,6 +4713,69 @@
 
   function persistGifts(){ queueChanges(); }
 
+  /* ---- rank ----
+     The owner puts their list in the order they want it. Everyone sees that order, and the
+     number, so a giver can tell "the thing she actually wants" from "the thing she'd take".
+     Rank is just the `order` field, kept dense (0,1,2...) so a swap is always a swap. */
+  function normaliseGiftOrder(ownerId){
+    giftsFor(ownerId).forEach(function(g, i){
+      if(g.order !== i){ g.order = i; g.updatedAt = nowISO(); }
+    });
+  }
+  function moveGift(id, delta){
+    var g = giftById(id);
+    if(!g || !giftIsMine(g)) return;
+    var list = giftsFor(g.ownerId);
+    var at = list.findIndex(function(x){ return x.id === id; });
+    var to = at + delta;
+    if(at < 0 || to < 0 || to >= list.length) return;
+    list.splice(to, 0, list.splice(at, 1)[0]);
+    list.forEach(function(x, i){ if(x.order !== i){ x.order = i; x.updatedAt = nowISO(); } });
+    persistGifts();
+    render();
+  }
+
+  /* ---- how the list is shown ----
+     A per-device preference, not family data: it is how you like to look at the list, not
+     something the others need to agree with. */
+  var LS_GIFT_VIEW = 'tm_gift_view_v1';
+  function giftViewMode(){
+    try{ return localStorage.getItem(LS_GIFT_VIEW) === 'tiles' ? 'tiles' : 'list'; }
+    catch(e){ return 'list'; }
+  }
+  function setGiftViewMode(m){
+    try{ localStorage.setItem(LS_GIFT_VIEW, m); }catch(e){}
+    render();
+  }
+  function giftViewToggleHtml(){
+    var m = giftViewMode();
+    return '<span class="gift-view-toggle">'
+      + '<button type="button" data-gift-view="list" class="' + (m === 'list' ? 'on' : '') + '"'
+      + ' aria-label="Show as a list" title="List">' + icon('list') + '</button>'
+      + '<button type="button" data-gift-view="tiles" class="' + (m === 'tiles' ? 'on' : '') + '"'
+      + ' aria-label="Show as tiles with pictures" title="Tiles">' + icon('image') + '</button>'
+      + '</span>';
+  }
+
+  /* ---- the picture ----
+     Fetched once, when a link is saved, and remembered on the row so every other device gets
+     it without asking again. The edge does the fetching because a browser cannot read another
+     site's page. Plenty of shops answer bots with a captcha, so this fails often -- when it
+     does, the tile shows the name and the owner can paste a picture link instead. */
+  function refreshGiftImage(g){
+    var u = safeLinkUrl(g.url);
+    if(!u || g.imageManual) return;
+    apiFetch('/api/link-preview?url=' + encodeURIComponent(u)).then(function(res){
+      var live = giftById(g.id);
+      if(!live || !giftIsMine(live) || live.url !== g.url || live.imageManual) return;
+      live.imageUrl = (res && res.image) || '';
+      live.imageSource = (res && res.source) || 'none';
+      live.updatedAt = nowISO();
+      persistGifts();
+      render();
+    }).catch(function(){ /* offline, or the shop said no -- the tile copes */ });
+  }
+
   /* ---- the screen ---- */
   function renderGifts(){
     var me = state.currentFamilyMember;
@@ -4672,31 +4821,133 @@
     return '<div class="gift-people">' + chips + '</div>';
   }
 
+  /* ---- one item, in either shape ----
+     Both views are rendered from the same facts so they can never disagree about what is
+     claimed -- which, on this screen, is the thing that must never go wrong. `mine` means
+     this is your own list, and in that case no claim state is even consulted. */
+  function giftFacts(g, mine){
+    var claims = mine ? [] : claimsForGift(g.id);
+    var myClaim = mine ? null : myClaimOn(g.id);
+    var names = claims.slice().sort(function(a, b){
+      if(myClaim && a.id === myClaim.id) return -1;
+      if(myClaim && b.id === myClaim.id) return 1;
+      return 0;
+    }).map(function(c){
+      if(myClaim && c.id === myClaim.id) return 'you';
+      var m = familyMember(c.claimerId);
+      return m ? m.name : 'someone';
+    });
+    return { claims:claims, myClaim:myClaim, names:names,
+             cls: myClaim ? 'mine-claim' : (claims.length ? 'taken' : '') };
+  }
+  function giftWhoLine(f){
+    if(!f.names.length) return '';
+    var verb = (f.names.length > 1 || f.names[0] === 'you') ? ' are giving this' : ' is giving this';
+    return '<span class="gift-who">' + icon('check')
+      + '<span>' + escapeHtml(sentenceList(f.names) + verb) + '</span></span>';
+  }
+  function giftClaimBtn(g, f){
+    return f.myClaim
+      ? '<button type="button" class="gift-btn quiet" data-gift-unclaim="' + escapeHtml(f.myClaim.id) + '">Let go</button>'
+      : '<button type="button" class="gift-btn' + (f.claims.length ? '' : ' primary') + '" data-gift-claim="' + escapeHtml(g.id) + '">'
+        + (f.claims.length ? 'Go in together' : 'I\'ll get this') + '</button>';
+  }
+  function giftRankHtml(g, rank, total, mine){
+    if(!mine) return '<span class="gift-rank static"><span class="gift-rank-n">' + rank + '</span></span>';
+    return '<span class="gift-rank">'
+      + '<button type="button" class="gift-nudge" data-gift-up="' + escapeHtml(g.id) + '"'
+      + (rank === 1 ? ' disabled' : '') + ' aria-label="Move up">' + icon('chevup') + '</button>'
+      + '<span class="gift-rank-n">' + rank + '</span>'
+      + '<button type="button" class="gift-nudge" data-gift-down="' + escapeHtml(g.id) + '"'
+      + (rank === total ? ' disabled' : '') + ' aria-label="Move down">' + icon('chevdown') + '</button>'
+      + '</span>';
+  }
+  function giftPicHtml(g){
+    var img = safeLinkUrl(g.imageUrl);
+    // The placeholder is always there, underneath. A shop that refuses to serve its picture
+    // to another site is common, and when that happens the tile should quietly fall back
+    // rather than show a broken-image glyph.
+    return '<span class="gift-pic' + (img ? '' : ' nopic') + '">'
+      + (img ? '<img class="gift-pic-img" src="' + escapeHtml(img) + '" alt="" loading="lazy" referrerpolicy="no-referrer">' : '')
+      + '<span class="gift-pic-none">' + icon('gift') + '</span>'
+      + '</span>';
+  }
+
+  function giftRowHtml(g, rank, total, mine){
+    var f = giftFacts(g, mine);
+    return '<div class="gift-card ' + f.cls + '" data-gift="' + escapeHtml(g.id) + '">'
+      + giftRankHtml(g, rank, total, mine)
+      + '<span class="gift-body">'
+      + '<span class="gift-title">' + escapeHtml(g.title) + '</span>'
+      + '<span class="gift-meta">'
+      + (g.price ? '<span class="gift-price">' + escapeHtml(g.price) + '</span>' : '')
+      + giftLinkHtml(g)
+      + '</span>'
+      + (g.notes ? '<span class="gift-notes">' + escapeHtml(g.notes) + '</span>' : '')
+      + giftWhoLine(f)
+      + (mine
+          ? '<span class="gift-row-act">'
+            + '<button type="button" data-gift-edit="' + escapeHtml(g.id) + '">Edit</button>'
+            + '<button type="button" class="danger" data-gift-del="' + escapeHtml(g.id) + '">Remove</button>'
+            + '</span>'
+          : '')
+      + '</span>'
+      + (mine ? '' : '<span class="gift-side">' + giftClaimBtn(g, f) + '</span>')
+      + '</div>';
+  }
+
+  function giftTileHtml(g, rank, total, mine){
+    var f = giftFacts(g, mine);
+    return '<div class="gift-tile ' + f.cls + '" data-gift="' + escapeHtml(g.id) + '">'
+      + giftPicHtml(g)
+      + '<span class="gift-tile-rank">' + rank + '</span>'
+      + '<span class="gift-tile-body">'
+      + '<span class="gift-title">' + escapeHtml(g.title) + '</span>'
+      + '<span class="gift-meta">'
+      + (g.price ? '<span class="gift-price">' + escapeHtml(g.price) + '</span>' : '')
+      + giftLinkHtml(g)
+      + '</span>'
+      + giftWhoLine(f)
+      + '<span class="gift-tile-foot">'
+      + (mine
+          ? '<span class="gift-rank-move">'
+            + '<button type="button" class="gift-nudge" data-gift-up="' + escapeHtml(g.id) + '"'
+            + (rank === 1 ? ' disabled' : '') + ' aria-label="Move up">' + icon('chevup') + '</button>'
+            + '<button type="button" class="gift-nudge" data-gift-down="' + escapeHtml(g.id) + '"'
+            + (rank === total ? ' disabled' : '') + ' aria-label="Move down">' + icon('chevdown') + '</button>'
+            + '</span>'
+            + '<span class="gift-row-act">'
+            + '<button type="button" data-gift-edit="' + escapeHtml(g.id) + '">Edit</button>'
+            + '<button type="button" class="danger" data-gift-del="' + escapeHtml(g.id) + '">Remove</button>'
+            + '</span>'
+          : giftClaimBtn(g, f))
+      + '</span></span></div>';
+  }
+
+  function giftItemsHtml(list, mine){
+    var tiles = giftViewMode() === 'tiles';
+    var body = list.map(function(g, i){
+      return tiles ? giftTileHtml(g, i + 1, list.length, mine) : giftRowHtml(g, i + 1, list.length, mine);
+    }).join('');
+    return '<div class="' + (tiles ? 'gift-tiles' : 'gift-list') + '">' + body + '</div>';
+  }
+
   /* Your own list. No claim state anywhere on this screen, because none ever reached the
      device. The note says so out loud -- the point of the feature is that you trust it. */
   function giftOwnListHtml(me){
     var mine = giftsFor(me.id);
     return '<div class="gift-panel">'
       + '<div class="gift-head"><h2>My list</h2>'
-      + '<span class="gift-head-act"><button type="button" class="gift-btn primary" data-gift-add="1">Add something</button></span>'
+      + '<span class="gift-head-act">' + (mine.length > 1 ? giftViewToggleHtml() : '')
+      + '<button type="button" class="gift-btn primary" data-gift-add="1">Add something</button></span>'
       + '</div>'
       + '<p class="gift-promise">' + icon('check')
       + '<span>Everyone else can see this list and tick off what they\'re buying. You can\'t, and neither can we show you by accident &mdash; your own list\'s claims never leave the server.</span></p>'
       + (mine.length
-          ? '<div class="gift-list">' + mine.map(function(g){
-              return '<div class="gift-card" data-gift="' + escapeHtml(g.id) + '">'
-                + '<span class="gift-body">'
-                + '<span class="gift-title">' + escapeHtml(g.title) + '</span>'
-                + '<span class="gift-meta">'
-                + (g.price ? '<span class="gift-price">' + escapeHtml(g.price) + '</span>' : '')
-                + giftLinkHtml(g)
-                + '</span>'
-                + (g.notes ? '<span class="gift-notes">' + escapeHtml(g.notes) + '</span>' : '')
-                + '<span class="gift-row-act">'
-                + '<button type="button" data-gift-edit="' + escapeHtml(g.id) + '">Edit</button>'
-                + '<button type="button" class="danger" data-gift-del="' + escapeHtml(g.id) + '">Remove</button>'
-                + '</span></span></div>';
-            }).join('') + '</div>'
+          ? (mine.length > 1
+              ? '<p class="gift-rank-hint">Top of the list is what you\'d most like. Use the arrows to reorder &mdash; everyone else sees the order you choose.</p>'
+              : '')
+            + giftItemsHtml(mine, true)
           : '<div class="gift-empty"><p>Nothing on your list yet. Add the things you\'d like &mdash; a link helps whoever\'s buying find the right one.</p>'
             + '<button type="button" class="gift-btn primary" data-gift-add="1">Add something</button></div>')
       + '</div>';
@@ -4711,46 +4962,12 @@
     }
     return '<div class="gift-panel">'
       + '<div class="gift-head"><h2>' + escapeHtml(owner.name) + '</h2>'
-      + '<span class="gift-sub">Claim what you\'re buying so nobody doubles up</span></div>'
+      + '<span class="gift-sub">In their order of preference &mdash; 1 is what they\'d most like</span>'
+      + '<span class="gift-head-act">' + (list.length > 1 ? giftViewToggleHtml() : '') + '</span></div>'
       + '<p class="gift-promise">' + icon('check')
       + '<span>' + escapeHtml(owner.name) + ' can\'t see any of this &mdash; not what\'s claimed, not who claimed it.</span></p>'
-      + '<div class="gift-list">' + list.map(function(g){
-          var claims = claimsForGift(g.id);
-          var mine = myClaimOn(g.id);
-          var others = claims.filter(function(c){ return !mine || c.id !== mine.id; });
-          var cls = mine ? ' mine-claim' : (claims.length ? ' taken' : '');
-          var whoLine = '';
-          if(claims.length){
-            // You lead the sentence -- "Aadi and you are giving this" reads like a translation.
-            var names = claims.slice().sort(function(a, b){
-              if(mine && a.id === mine.id) return -1;
-              if(mine && b.id === mine.id) return 1;
-              return 0;
-            }).map(function(c){
-              var m = familyMember(c.claimerId);
-              return (mine && c.id === mine.id) ? 'you' : (m ? m.name : 'someone');
-            });
-            whoLine = '<span class="gift-who">' + icon('check')
-              + escapeHtml(sentenceList(names) + (names.length > 1 ? ' are giving this' : (names[0] === 'you' ? ' are giving this' : ' is giving this')))
-              + '</span>';
-          }
-          return '<div class="gift-card' + cls + '" data-gift="' + escapeHtml(g.id) + '">'
-            + '<span class="gift-body">'
-            + '<span class="gift-title">' + escapeHtml(g.title) + '</span>'
-            + '<span class="gift-meta">'
-            + (g.price ? '<span class="gift-price">' + escapeHtml(g.price) + '</span>' : '')
-            + giftLinkHtml(g)
-            + '</span>'
-            + (g.notes ? '<span class="gift-notes">' + escapeHtml(g.notes) + '</span>' : '')
-            + whoLine
-            + '</span>'
-            + '<span class="gift-side">'
-            + (mine
-                ? '<button type="button" class="gift-btn quiet" data-gift-unclaim="' + escapeHtml(mine.id) + '">Let go</button>'
-                : '<button type="button" class="gift-btn' + (claims.length ? '' : ' primary') + '" data-gift-claim="' + escapeHtml(g.id) + '">'
-                  + (claims.length ? 'Go in together' : 'I\'ll get this') + '</button>')
-            + '</span></div>';
-        }).join('') + '</div></div>';
+      + giftItemsHtml(list, false)
+      + '</div>';
   }
 
   function sentenceList(names){
@@ -4862,6 +5079,22 @@
     document.querySelectorAll('[data-gift-unclaim]').forEach(function(b){
       b.addEventListener('click', function(){ unclaimGift(b.dataset.giftUnclaim); });
     });
+    document.querySelectorAll('[data-gift-up]').forEach(function(b){
+      b.addEventListener('click', function(){ moveGift(b.dataset.giftUp, -1); });
+    });
+    document.querySelectorAll('[data-gift-down]').forEach(function(b){
+      b.addEventListener('click', function(){ moveGift(b.dataset.giftDown, 1); });
+    });
+    document.querySelectorAll('[data-gift-view]').forEach(function(b){
+      b.addEventListener('click', function(){ setGiftViewMode(b.dataset.giftView); });
+    });
+    // A picture the shop will not serve to us is a broken image, which looks like a bug.
+    // Swap it for the placeholder instead.
+    document.querySelectorAll('.gift-pic-img').forEach(function(im){
+      im.addEventListener('error', function(){
+        if(im.parentNode) im.parentNode.classList.add('broken');
+      });
+    });
     document.querySelectorAll('[data-gift-del]').forEach(function(b){
       b.addEventListener('click', function(){
         var g = giftById(b.dataset.giftDel);
@@ -4895,6 +5128,14 @@
       + '<input type="url" id="gf-url" inputmode="url" autocapitalize="off" spellcheck="false"'
       + ' placeholder="https://..." value="' + escapeHtml(existing ? (existing.url || '') : '') + '">'
       + '<span class="gift-field-hint" id="gf-url-hint">So whoever\'s buying can see exactly which one, and what it costs.</span></label>'
+      + '<label class="gift-field"><span>Picture <span style="text-transform:none;letter-spacing:0;font-weight:600;">(optional &mdash; found from the link if the shop allows it)</span></span>'
+      + '<input type="url" id="gf-img" inputmode="url" autocapitalize="off" spellcheck="false"'
+      + ' placeholder="https://...jpg" value="' + escapeHtml(existing ? (existing.imageManual ? (existing.imageUrl || '') : '') : '') + '">'
+      + '<span class="gift-field-hint">' + (existing && existing.imageUrl && !existing.imageManual
+          ? 'A picture was found from the link. Paste one here to use your own instead.'
+          : (existing && existing.imageSource === 'blocked'
+              ? 'That shop wouldn\'t give us a picture. Paste a link to one if you want a tile.'
+              : 'Leave blank and we\'ll try to find one from the link.')) + '</span></label>'
       + '<label class="gift-field"><span>Roughly how much</span>'
       + '<input type="text" id="gf-price" placeholder="$60" value="' + escapeHtml(existing ? (existing.price || '') : '') + '"></label>'
       + '<label class="gift-field"><span>Anything else</span>'
@@ -4928,19 +5169,35 @@
       var url = safeLinkUrl(raw) || (raw && safeLinkUrl('https://' + raw)) || '';
       var price = document.getElementById('gf-price').value.trim();
       var notes = document.getElementById('gf-notes').value.trim();
+      var rawImg = document.getElementById('gf-img').value.trim();
+      var manualImg = safeLinkUrl(rawImg) || (rawImg && safeLinkUrl('https://' + rawImg)) || '';
+      var saved;
       if(existing){
+        var urlChanged = existing.url !== url;
         existing.title = title; existing.url = url; existing.price = price;
         existing.notes = notes; existing.updatedAt = nowISO();
+        if(manualImg){
+          existing.imageUrl = manualImg; existing.imageManual = true; existing.imageSource = 'manual';
+        } else if(existing.imageManual || urlChanged){
+          // They cleared their own picture, or pointed the item somewhere else: start again.
+          existing.imageManual = false; existing.imageUrl = ''; existing.imageSource = null;
+        }
+        saved = existing;
       } else {
-        state.gifts.push({
+        saved = {
           id: uid(), ownerId: me.id, title: title, url: url, price: price, notes: notes,
+          imageUrl: manualImg, imageManual: !!manualImg, imageSource: manualImg ? 'manual' : null,
           order: giftsFor(me.id).length, createdAt: nowISO(), updatedAt: nowISO()
-        });
+        };
+        state.gifts.push(saved);
       }
       close();
       persistGifts();
       state.giftWho = me.id;
       render();
+      // Off to the edge for a picture, in the background. The save has already happened; if
+      // the shop says no, nothing here changes.
+      if(!saved.imageManual) refreshGiftImage(saved);
       showToast(existing ? 'Saved' : 'Added to your list', false, 2200);
     }
     document.getElementById('gf-save').addEventListener('click', save);
