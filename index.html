@@ -993,8 +993,11 @@
   .gift-card.withdrawn .gift-title{text-decoration:line-through;}
   .gift-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:5px;}
   .gift-price{
-    font-size:12px;font-weight:700;color:var(--ink-muted);font-variant-numeric:tabular-nums;
+    font-size:12.5px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;
+    background:var(--hairline);border-radius:var(--radius-pill);padding:2px 8px;
+    white-space:nowrap;
   }
+  .gift-tile .gift-price{font-size:12px;padding:2px 7px;}
   .gift-link{
     display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;
     color:var(--accent);text-decoration:none;max-width:100%;overflow:hidden;
@@ -1061,6 +1064,21 @@
   .gift-rank-hint{font-size:12px;color:var(--ink-muted);margin:0 0 12px;line-height:1.5;}
   .gift-rank-move{display:flex;gap:2px;}
 
+  .gift-rank-in{
+    width:30px;box-sizing:border-box;text-align:center;font:inherit;
+    font-family:var(--font-serif);font-size:14px;font-weight:700;
+    font-variant-numeric:tabular-nums;color:var(--ink-muted);
+    border:1px solid var(--hairline-strong);border-radius:6px;background:var(--surface);padding:2px 0;
+    -moz-appearance:textfield;appearance:textfield;
+  }
+  .gift-rank-in::-webkit-outer-spin-button,
+  .gift-rank-in::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  .gift-rank-in:hover{border-color:var(--ink-faint);color:var(--ink);}
+  .gift-rank-in:focus{outline:none;border-color:var(--accent);background:var(--surface);color:var(--ink);}
+  .gift-tile-rank.editable{padding:0 3px;background:var(--paper);color:var(--ink);}
+  .gift-tile-rank.editable .gift-rank-in{width:26px;font-size:12px;color:var(--ink);}
+  .gift-tile-rank.editable .gift-rank-in:focus{border-color:var(--accent);}
+
   /* list / tiles */
   .gift-view-toggle{
     display:inline-flex;gap:2px;background:var(--surface-2);border:1px solid var(--hairline);
@@ -1114,7 +1132,8 @@
     .gift-tile-body .gift-title{font-size:13px;}
     .gift-tile-foot{gap:7px;}
     .gift-tile-foot .gift-row-act{flex:1 1 100%;margin-left:0;}
-    .gift-rank{width:24px;}
+    .gift-rank{width:26px;}
+    .gift-rank-in{font-size:16px;width:28px;}  /* 16px stops iOS zooming on focus */
   }
 
   /* the add/edit sheet */
@@ -2250,6 +2269,7 @@
     gifts: [],
     giftClaims: [],
     giftWho: null,        // whose list is showing; null means mine, 'giving' means my roll-up
+    giftRankFocus: null,  // id whose rank box should regain the cursor after a reorder
     mediumDate: null,     // which day's checklist is open; null means today
     // Event times are entered/stored as a naive wall-clock anchored to this zone (e.g. "6:00 PM"
     // means 6pm here). Each family member can have their own timezone (see family[].timezone) --
@@ -4722,6 +4742,32 @@
       if(g.order !== i){ g.order = i; g.updatedAt = nowISO(); }
     });
   }
+  /* Typing a rank beats nudging an item up eleven times. The arrows stay for the one-step
+     case; this is for "that one's actually my favourite". */
+  function rankGift(id, wanted){
+    var g = giftById(id);
+    if(!g || !giftIsMine(g)) return;
+    var list = giftsFor(g.ownerId);
+    var at = list.findIndex(function(x){ return x.id === id; });
+    if(at < 0) return;
+    var n = parseInt(wanted, 10);
+    var to = isNaN(n) ? at : Math.max(0, Math.min(list.length - 1, n - 1));  // 0 and 99 both mean "the nearest end"
+    if(to === at){
+      // Nothing to do -- but the box may be showing "99" or an empty string, so put the real
+      // number back. Deliberately NOT a re-render: rebuilding the list here would throw away
+      // the cursor, and this path runs on every stray change event the browser sends.
+      var box = document.querySelector('[data-gift-rank="' + id + '"]');
+      if(box) box.value = at + 1;
+      return;
+    }
+    list.splice(to, 0, list.splice(at, 1)[0]);
+    list.forEach(function(x, i){ if(x.order !== i){ x.order = i; x.updatedAt = nowISO(); } });
+    // Keep the cursor with the item that moved, so a second change needs no hunting.
+    state.giftRankFocus = id;
+    persistGifts();
+    render();
+  }
+
   function moveGift(id, delta){
     var g = giftById(id);
     if(!g || !giftIsMine(g)) return;
@@ -4731,6 +4777,7 @@
     if(at < 0 || to < 0 || to >= list.length) return;
     list.splice(to, 0, list.splice(at, 1)[0]);
     list.forEach(function(x, i){ if(x.order !== i){ x.order = i; x.updatedAt = nowISO(); } });
+    state.giftRankFocus = id;
     persistGifts();
     render();
   }
@@ -4852,16 +4899,35 @@
       : '<button type="button" class="gift-btn' + (f.claims.length ? '' : ' primary') + '" data-gift-claim="' + escapeHtml(g.id) + '">'
         + (f.claims.length ? 'Go in together' : 'I\'ll get this') + '</button>';
   }
+  function giftRankInput(g, rank, total){
+    return '<input class="gift-rank-in" type="number" inputmode="numeric" min="1" max="' + total + '"'
+      + ' value="' + rank + '" data-gift-rank="' + escapeHtml(g.id) + '"'
+      + ' aria-label="Position in the list, 1 to ' + total + '">';
+  }
   function giftRankHtml(g, rank, total, mine){
     if(!mine) return '<span class="gift-rank static"><span class="gift-rank-n">' + rank + '</span></span>';
     return '<span class="gift-rank">'
       + '<button type="button" class="gift-nudge" data-gift-up="' + escapeHtml(g.id) + '"'
       + (rank === 1 ? ' disabled' : '') + ' aria-label="Move up">' + icon('chevup') + '</button>'
-      + '<span class="gift-rank-n">' + rank + '</span>'
+      + giftRankInput(g, rank, total)
       + '<button type="button" class="gift-nudge" data-gift-down="' + escapeHtml(g.id) + '"'
       + (rank === total ? ' disabled' : '') + ' aria-label="Move down">' + icon('chevdown') + '</button>'
       + '</span>';
   }
+  /* A bare number is money and should look like it: typing "60" and seeing "60" is what made
+     the price easy to miss. Anything the owner wrote with a symbol or words of their own
+     ("about 60", "£25", "20-30") is left exactly as they wrote it -- guessing a currency onto
+     someone's words is worse than leaving them alone. */
+  function giftMoney(raw){
+    var t = String(raw == null ? '' : raw).trim();
+    if(!t) return '';
+    return /^\d{1,3}(,\d{3})*(\.\d{1,2})?$|^\d+(\.\d{1,2})?$/.test(t) ? '$' + t : t;
+  }
+  function giftPriceHtml(g){
+    var money = giftMoney(g.price);
+    return money ? '<span class="gift-price">' + escapeHtml(money) + '</span>' : '';
+  }
+
   function giftPicHtml(g){
     var img = safeLinkUrl(g.imageUrl);
     // The placeholder is always there, underneath. A shop that refuses to serve its picture
@@ -4880,7 +4946,7 @@
       + '<span class="gift-body">'
       + '<span class="gift-title">' + escapeHtml(g.title) + '</span>'
       + '<span class="gift-meta">'
-      + (g.price ? '<span class="gift-price">' + escapeHtml(g.price) + '</span>' : '')
+      + giftPriceHtml(g)
       + giftLinkHtml(g)
       + '</span>'
       + (g.notes ? '<span class="gift-notes">' + escapeHtml(g.notes) + '</span>' : '')
@@ -4888,6 +4954,7 @@
       + (mine
           ? '<span class="gift-row-act">'
             + '<button type="button" data-gift-edit="' + escapeHtml(g.id) + '">Edit</button>'
+            + '<button type="button" data-gift-dup="' + escapeHtml(g.id) + '">Duplicate</button>'
             + '<button type="button" class="danger" data-gift-del="' + escapeHtml(g.id) + '">Remove</button>'
             + '</span>'
           : '')
@@ -4900,11 +4967,12 @@
     var f = giftFacts(g, mine);
     return '<div class="gift-tile ' + f.cls + '" data-gift="' + escapeHtml(g.id) + '">'
       + giftPicHtml(g)
-      + '<span class="gift-tile-rank">' + rank + '</span>'
+      + (mine ? '<span class="gift-tile-rank editable">' + giftRankInput(g, rank, total) + '</span>'
+              : '<span class="gift-tile-rank">' + rank + '</span>')
       + '<span class="gift-tile-body">'
       + '<span class="gift-title">' + escapeHtml(g.title) + '</span>'
       + '<span class="gift-meta">'
-      + (g.price ? '<span class="gift-price">' + escapeHtml(g.price) + '</span>' : '')
+      + giftPriceHtml(g)
       + giftLinkHtml(g)
       + '</span>'
       + giftWhoLine(f)
@@ -4918,6 +4986,7 @@
             + '</span>'
             + '<span class="gift-row-act">'
             + '<button type="button" data-gift-edit="' + escapeHtml(g.id) + '">Edit</button>'
+            + '<button type="button" data-gift-dup="' + escapeHtml(g.id) + '">Duplicate</button>'
             + '<button type="button" class="danger" data-gift-del="' + escapeHtml(g.id) + '">Remove</button>'
             + '</span>'
           : giftClaimBtn(g, f))
@@ -4945,7 +5014,7 @@
       + '<span>Everyone else can see this list and tick off what they\'re buying. You can\'t, and neither can we show you by accident &mdash; your own list\'s claims never leave the server.</span></p>'
       + (mine.length
           ? (mine.length > 1
-              ? '<p class="gift-rank-hint">Top of the list is what you\'d most like. Use the arrows to reorder &mdash; everyone else sees the order you choose.</p>'
+              ? '<p class="gift-rank-hint">Top of the list is what you\'d most like. Type a number to move something straight there, or nudge it with the arrows &mdash; everyone else sees the order you choose.</p>'
               : '')
             + giftItemsHtml(mine, true)
           : '<div class="gift-empty"><p>Nothing on your list yet. Add the things you\'d like &mdash; a link helps whoever\'s buying find the right one.</p>'
@@ -5001,7 +5070,7 @@
               + '<span class="gift-title">' + escapeHtml(g ? g.title : (c.giftTitle || 'An item')) + '</span>'
               + (g
                   ? '<span class="gift-meta">'
-                    + (g.price ? '<span class="gift-price">' + escapeHtml(g.price) + '</span>' : '')
+                    + giftPriceHtml(g)
                     + giftLinkHtml(g) + '</span>'
                   : '')
               + (others.length
@@ -5073,6 +5142,9 @@
     document.querySelectorAll('[data-gift-edit]').forEach(function(b){
       b.addEventListener('click', function(){ openGiftModal(b.dataset.giftEdit); });
     });
+    document.querySelectorAll('[data-gift-dup]').forEach(function(b){
+      b.addEventListener('click', function(){ openGiftModal(null, b.dataset.giftDup); });
+    });
     document.querySelectorAll('[data-gift-claim]').forEach(function(b){
       b.addEventListener('click', function(){ claimGift(b.dataset.giftClaim); });
     });
@@ -5085,6 +5157,26 @@
     document.querySelectorAll('[data-gift-down]').forEach(function(b){
       b.addEventListener('click', function(){ moveGift(b.dataset.giftDown, 1); });
     });
+    document.querySelectorAll('[data-gift-rank]').forEach(function(inp){
+      // change covers Enter and tabbing away; the explicit Enter handler stops the keypress
+      // reaching anything else and makes the result immediate on a phone keyboard.
+      var apply = function(){
+        var id = inp.dataset.giftRank, v = inp.value;
+        setTimeout(function(){ rankGift(id, v); }, 0);
+      };
+      inp.addEventListener('change', apply);
+      inp.addEventListener('keydown', function(e){
+        if(e.key === 'Enter'){ e.preventDefault(); apply(); }
+      });
+      inp.addEventListener('focus', function(){ inp.select(); });
+    });
+    // After a move the list is rebuilt, so put the cursor back on the item that moved --
+    // otherwise reordering three things means three trips back to the right box.
+    if(state.giftRankFocus){
+      var back = document.querySelector('[data-gift-rank="' + state.giftRankFocus + '"]');
+      state.giftRankFocus = null;
+      if(back){ back.focus(); back.select(); }
+    }
     document.querySelectorAll('[data-gift-view]').forEach(function(b){
       b.addEventListener('click', function(){ setGiftViewMode(b.dataset.giftView); });
     });
@@ -5112,37 +5204,47 @@
 
   /* The add/edit sheet. A sheet rather than inline fields, so a sync landing mid-edit can't
      rewrite the row under the cursor. */
-  function openGiftModal(id){
+  /* `dupeOfId` makes this the "same thing, different colour" sheet: every field arrives
+     filled in from the original and nothing is created until Save, so backing out leaves no
+     stray copy behind. The copy lands directly under the item it came from, because that is
+     where its rank belongs -- two sizes of the same jumper are not first and eleventh. */
+  function openGiftModal(id, dupeOfId){
     var me = state.currentFamilyMember;
     if(!me) return;
     var existing = id ? giftById(id) : null;
     if(id && (!existing || !giftIsMine(existing))) return;
+    var dupeOf = dupeOfId ? giftById(dupeOfId) : null;
+    if(dupeOfId && (!dupeOf || !giftIsMine(dupeOf))) return;
+    var src = existing || dupeOf;      // what the fields start out holding
     var root = document.getElementById('modal-root');
 
     root.innerHTML = ''
       + '<div class="scrim" id="scrim"><div class="modal">'
-      + '<div class="modal-title-input" style="font-weight:700;">' + (existing ? 'Edit' : 'Add to my list') + '</div>'
+      + '<div class="modal-title-input" style="font-weight:700;">'
+      + (existing ? 'Edit' : (dupeOf ? 'Duplicate' : 'Add to my list')) + '</div>'
+      + (dupeOf ? '<p class="med-edit-hint">A copy of &ldquo;' + escapeHtml(dupeOf.title)
+          + '&rdquo;. Change whatever is different &mdash; the colour, the size &mdash; and save.</p>' : '')
       + '<label class="gift-field"><span>What is it</span>'
-      + '<input type="text" id="gf-title" placeholder="Lego Botanicals" value="' + escapeHtml(existing ? existing.title : '') + '"></label>'
+      + '<input type="text" id="gf-title" placeholder="Lego Botanicals" value="' + escapeHtml(src ? src.title : '') + '"></label>'
       + '<label class="gift-field"><span>Link</span>'
       + '<input type="url" id="gf-url" inputmode="url" autocapitalize="off" spellcheck="false"'
-      + ' placeholder="https://..." value="' + escapeHtml(existing ? (existing.url || '') : '') + '">'
+      + ' placeholder="https://..." value="' + escapeHtml(src ? (src.url || '') : '') + '">'
       + '<span class="gift-field-hint" id="gf-url-hint">So whoever\'s buying can see exactly which one, and what it costs.</span></label>'
       + '<label class="gift-field"><span>Picture <span style="text-transform:none;letter-spacing:0;font-weight:600;">(optional &mdash; found from the link if the shop allows it)</span></span>'
       + '<input type="url" id="gf-img" inputmode="url" autocapitalize="off" spellcheck="false"'
-      + ' placeholder="https://...jpg" value="' + escapeHtml(existing ? (existing.imageManual ? (existing.imageUrl || '') : '') : '') + '">'
-      + '<span class="gift-field-hint">' + (existing && existing.imageUrl && !existing.imageManual
+      + ' placeholder="https://...jpg" value="' + escapeHtml(src && src.imageManual ? (src.imageUrl || '') : '') + '">'
+      + '<span class="gift-field-hint">' + (src && src.imageUrl && !src.imageManual
           ? 'A picture was found from the link. Paste one here to use your own instead.'
-          : (existing && existing.imageSource === 'blocked'
+          : (src && src.imageSource === 'blocked'
               ? 'That shop wouldn\'t give us a picture. Paste a link to one if you want a tile.'
               : 'Leave blank and we\'ll try to find one from the link.')) + '</span></label>'
       + '<label class="gift-field"><span>Roughly how much</span>'
-      + '<input type="text" id="gf-price" placeholder="$60" value="' + escapeHtml(existing ? (existing.price || '') : '') + '"></label>'
+      + '<input type="text" id="gf-price" placeholder="$60" value="' + escapeHtml(src ? (src.price || '') : '') + '"></label>'
       + '<label class="gift-field"><span>Anything else</span>'
-      + '<textarea id="gf-notes" placeholder="Size 7, and the blue one if there\'s a choice">' + escapeHtml(existing ? (existing.notes || '') : '') + '</textarea></label>'
+      + '<textarea id="gf-notes" placeholder="Size 7, and the blue one if there\'s a choice">' + escapeHtml(src ? (src.notes || '') : '') + '</textarea></label>'
       + '<div class="modal-footer"><span></span><div style="display:flex;gap:10px;">'
       + '<button class="btn-sm" id="gf-cancel">Cancel</button>'
-      + '<button class="btn-close" id="gf-save">' + (existing ? 'Save' : 'Add') + '</button>'
+      + '<button class="btn-close" id="gf-save">' + (existing ? 'Save' : (dupeOf ? 'Add the copy' : 'Add')) + '</button>'
       + '</div></div></div></div>';
 
     function close(){ root.innerHTML = ''; applyDeferred(); }
@@ -5189,7 +5291,23 @@
           imageUrl: manualImg, imageManual: !!manualImg, imageSource: manualImg ? 'manual' : null,
           order: giftsFor(me.id).length, createdAt: nowISO(), updatedAt: nowISO()
         };
+        // A copy keeps the original's picture, so it doesn't have to be fetched again for
+        // what is the same product in another colour.
+        if(dupeOf && !manualImg && dupeOf.url === url && dupeOf.imageUrl){
+          saved.imageUrl = dupeOf.imageUrl;
+          saved.imageManual = !!dupeOf.imageManual;
+          saved.imageSource = dupeOf.imageSource || null;
+        }
         state.gifts.push(saved);
+        if(dupeOf){
+          var order = giftsFor(me.id);
+          var from = order.findIndex(function(x){ return x.id === saved.id; });
+          var after = order.findIndex(function(x){ return x.id === dupeOf.id; });
+          if(from > -1 && after > -1){
+            order.splice(after + 1, 0, order.splice(from, 1)[0]);
+            order.forEach(function(x, i){ if(x.order !== i){ x.order = i; x.updatedAt = nowISO(); } });
+          }
+        }
       }
       close();
       persistGifts();
@@ -5197,8 +5315,8 @@
       render();
       // Off to the edge for a picture, in the background. The save has already happened; if
       // the shop says no, nothing here changes.
-      if(!saved.imageManual) refreshGiftImage(saved);
-      showToast(existing ? 'Saved' : 'Added to your list', false, 2200);
+      if(!saved.imageManual && !saved.imageUrl) refreshGiftImage(saved);
+      showToast(existing ? 'Saved' : (dupeOf ? 'Copy added below it' : 'Added to your list'), false, 2200);
     }
     document.getElementById('gf-save').addEventListener('click', save);
     document.getElementById('gf-title').focus();
