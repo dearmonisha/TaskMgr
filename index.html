@@ -1784,7 +1784,7 @@
     .quick-add input{flex:1 1 auto;min-width:0;padding:11px 16px;font-size:16px;}
     .quick-add button{padding:11px 18px;min-height:var(--tap);}
     .quick-add .btn-add-detail{display:none;}   /* the FAB does this now */
-    #open-my-calendars{display:none;}           /* reachable from the settings sheet */
+    #open-my-calendars{display:none;}           /* reachable from Settings → My calendars */
     #add-goal-btn,#add-dream-btn{display:none;} /* the FAB does these now */
     #add-event-btn{display:none;}               /* the FAB does this now */
     /* Its only child is "Add Task…", which the FAB already covers -- an empty flex row would
@@ -9255,6 +9255,15 @@
     });
   }
 
+  // "2 imported" beside the button says whether there is anything to manage before you open it.
+  function mediumCalCountLabel(){
+    var me = state.currentFamilyMember;
+    var n = me ? (state.calendarSubscriptions || []).filter(function(sub){
+      return sub.ownerFamilyMemberId === me.id;
+    }).length : 0;
+    return n ? (n + ' imported') : 'None yet';
+  }
+
   function openSettingsModal(){
     var cfg = getMigrationConfig();
     var html = ''
@@ -9273,6 +9282,17 @@
 
       // Collapsed by default: fifteen rows would push Sync and everything under it off the
       // screen, and this is a list you set up once and rarely open again.
+      // This used to live only in the Calendar toolbar, which is hidden at phone width -- so
+      // on a phone there was no way to reach it at all unless you already had an imported
+      // event to open. Settings is reachable from every screen, which is where a setup step
+      // like this belongs.
+      + '<div class="field-label">My calendars</div>'
+      + '<div class="settings-help" style="margin-top:0;">Bring in a school, sports or Google calendar by link (its .ics or webcal address), or from an exported file. Imported events show on the Family Calendar tagged to you.</div>'
+      + '<div class="settings-actions">'
+      + '<button class="btn-sm" id="s-my-calendars">Manage my calendars\u2026</button>'
+      + '<span class="settings-help" style="margin:0;">' + mediumCalCountLabel() + '</span>'
+      + '</div>'
+
       + '<div class="field-label">Event categories</div>'
       + '<div class="settings-help" style="margin-top:0;">The labels on the Add Event screen. Everyone in the family sees the same list.</div>'
       + '<div class="settings-actions"><button class="btn-sm" id="cat-toggle" aria-expanded="false"></button></div>'
@@ -9316,6 +9336,8 @@
     }
     document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id==='scrim') close(); });
     document.getElementById('s-cancel').addEventListener('click', close);
+    var myCals = document.getElementById('s-my-calendars');
+    if(myCals) myCals.addEventListener('click', function(){ openMyCalendarsModal(); });
     document.getElementById('s-refresh').addEventListener('click', function(){ retrySyncNow(); refreshHealth(); });
     document.getElementById('s-refetch').addEventListener('click', function(){
       var btn = document.getElementById('s-refetch');
