@@ -5,7 +5,7 @@
 // think you are. The old sync had exactly one failure signal — a red banner — so
 // "token expired", "offline" and "someone else wrote first" all looked identical.
 
-import { handle, json, identify, currentSeq, resolveMember } from './_shared.js';
+import { handle, json, identify, currentSeq, resolveMember, UNSYNCED_KINDS } from './_shared.js';
 
 export async function onRequestGet(context) {
   return handle(async () => {
@@ -33,6 +33,10 @@ export async function onRequestGet(context) {
       // if the server claims more. Claims against your own list are deliberately withheld, so
       // the honest number to report *to you* is the number you can actually have -- otherwise
       // every poll looks like a device that has fallen behind, and it resyncs forever.
+      // The client compares these counts with what it holds and re-reads the whole store if
+      // the server claims more. It is never given photo rows, so reporting them would put
+      // every device into a permanent resync.
+      for (const k of UNSYNCED_KINDS) delete byKind[k];
       if (byKind.giftclaim) {
         const meMember = await resolveMember(env.DB, me.email);
         if (meMember) {

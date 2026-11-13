@@ -16,7 +16,10 @@ export const KINDS = new Set([
   // keepable -- the server can withhold every claim from the list's owner without ever
   // withholding part of a row that the owner also writes to (which would round-trip their
   // redacted copy straight back over the top of the real one).
-  'gift', 'giftclaim'
+  'gift', 'giftclaim',
+  // Photo proof for a 75 Medium item. Deliberately its own kind: see state.js for why these
+  // rows are the one thing the sync does NOT hand out.
+  'trackphoto'
 ]);
 
 export const META_KEYS = new Set(['homeTimezone', 'appTitle', 'appSubtitle']);
@@ -87,6 +90,17 @@ export function claimIsVisibleTo(row, memberId) {
   if (!memberId || !row.data) return true;
   return row.data.giftOwnerId !== memberId;
 }
+
+/**
+ * Photos are the one kind that never rides the polling cursor.
+ *
+ * Every other row is small and every device wants all of them. A photo is ~80KB after the
+ * app shrinks it, and six people ticking a handful of items for 75 days would push tens of
+ * megabytes through every pull, onto every phone, forever -- to show pictures that are
+ * looked at once. So the day row carries a tiny index of which photos exist, and the bytes
+ * are fetched one at a time from /api/photo only when something is actually on screen.
+ */
+export const UNSYNCED_KINDS = new Set(['trackphoto']);
 
 export function requireDb(env) {
   if (!env || !env.DB) {

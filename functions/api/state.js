@@ -4,7 +4,7 @@
 // it returns just what changed, which is what makes 30-second polling cheap
 // enough to leave running all day on six devices.
 
-import { handle, json, identify, requireDb, currentSeq, HttpError, resolveMember, claimIsVisibleTo } from './_shared.js';
+import { handle, json, identify, requireDb, currentSeq, HttpError, resolveMember, claimIsVisibleTo, UNSYNCED_KINDS } from './_shared.js';
 
 export async function onRequestGet(context) {
   return handle(async () => {
@@ -49,7 +49,12 @@ export async function onRequestGet(context) {
     // a server change at all.
     const meMember = await resolveMember(db, me.email);
     const meId = meMember ? meMember.id : null;
-    const items = meId ? all.filter((row) => claimIsVisibleTo(row, meId)) : all;
+    const items = all.filter((row) => {
+      // Photo bytes are fetched on demand from /api/photo, never pushed to every device.
+      // Tombstones still go through, so a deleted photo stops being referenced everywhere.
+      if (UNSYNCED_KINDS.has(row.kind) && !row.gone) return false;
+      return meId ? claimIsVisibleTo(row, meId) : true;
+    });
 
     const meta = {};
     for (const r of metaRows.results || []) meta[r.key] = safeParse(r.value);
