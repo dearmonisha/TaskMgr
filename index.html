@@ -898,10 +898,87 @@
   .med-edit-del .ic{width:16px;height:16px;}
   .med-edit-hint{font-size:12px;color:var(--ink-muted);margin:0 0 13px;line-height:1.5;}
 
+  /* ---- rings ----
+     Three arcs: how today is going, how far into the 75, and how long the streak is. The
+     streak ring fills toward nine, because nine in a row is what earns a break day. */
+  .med-rings{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:12px;}
+  .med-ring-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;flex:none;width:66px;}
+  .med-ring{position:relative;width:64px;height:64px;}
+  .med-ring svg{width:64px;height:64px;transform:rotate(-90deg);display:block;}
+  .med-ring-track{fill:none;stroke:var(--surface-2);stroke-width:6;}
+  .med-ring-fill{
+    fill:none;stroke-width:6;stroke-linecap:round;stroke:var(--eliminate);
+    transition:stroke-dashoffset .45s cubic-bezier(.3,.8,.4,1);
+  }
+  .med-ring-wrap.day .med-ring-fill{stroke:var(--accent);}
+  .med-ring-wrap.streak .med-ring-fill{stroke:var(--due-today);}
+  .med-ring-mid{
+    position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
+    font-family:var(--font-serif);font-size:18px;font-weight:700;line-height:1;
+    font-variant-numeric:tabular-nums;color:var(--ink);
+  }
+  .med-ring-k{
+    font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--ink-faint);white-space:nowrap;
+  }
+  .med-rings-note{font-size:12.5px;font-weight:600;color:var(--ink-muted);margin-left:auto;padding-top:22px;}
+  .med-avg{
+    font-family:var(--font-serif);font-size:19px;font-weight:700;color:var(--eliminate);
+    font-variant-numeric:tabular-nums;display:inline-flex;align-items:baseline;gap:5px;
+  }
+  .med-avg small{
+    font-family:var(--font-sans);font-size:9.5px;font-weight:700;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--ink-faint);
+  }
+  .med-wk-bar.perfect{background:var(--eliminate);}
+  .med-wk-bar.low{background:var(--due-today);}
+
+  /* ---- photo proof ---- */
+  .med-cam{
+    flex:none;width:34px;height:34px;border-radius:10px;cursor:pointer;padding:0;
+    border:1.5px dashed var(--hairline-strong);background:none;color:var(--ink-faint);
+    display:flex;align-items:center;justify-content:center;transition:color .12s,border-color .12s;
+  }
+  .med-cam .ic{width:16px;height:16px;}
+  .med-cam:hover{color:var(--ink);border-color:var(--ink-faint);}
+  .med-cam:focus-visible{outline:2px solid var(--ink);outline-offset:2px;}
+  .med-shot{position:relative;flex:none;width:38px;height:38px;}
+  .med-shot-btn{
+    width:38px;height:38px;border-radius:10px;overflow:hidden;padding:0;cursor:pointer;
+    border:1.5px solid var(--hairline-strong);background:var(--surface-2);display:block;
+  }
+  .med-shot-btn img{width:100%;height:100%;object-fit:cover;display:block;}
+  .med-shot.missing .med-shot-btn{border-style:dashed;border-color:var(--hairline-strong);}
+  .med-shot.missing img{display:none;}
+  .med-shot.missing .med-shot-btn::after{
+    content:'';display:block;width:100%;height:100%;background:var(--surface-2);
+  }
+  .med-shot-btn:hover{border-color:var(--ink);}
+  .med-shot-x{
+    position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;
+    border:1.5px solid var(--paper);background:var(--ink);color:var(--paper);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;
+  }
+  .med-shot-x .ic{width:10px;height:10px;stroke-width:3;}
+  .med-photo-modal{max-width:520px;}
+  .med-photo-head{font-size:14px;font-weight:700;margin-bottom:12px;}
+  .med-photo-big{
+    display:block;width:100%;max-height:62vh;object-fit:contain;border-radius:var(--radius-card);
+    background:var(--surface-2);
+  }
+
   @media (max-width:760px){
     .med-wrap{margin-top:12px;gap:13px;padding-bottom:96px;}
     .med-hero{padding:12px 14px;}
     .med-day{font-size:23px;}
+    /* The rings are the headline on a phone, but they still may not eat the screen. */
+    .med-rings{gap:13px;margin-bottom:9px;}
+    .med-ring-wrap{width:48px;gap:3px;}
+    .med-ring,.med-ring svg{width:46px;height:46px;}
+    .med-ring-mid{font-size:14.5px;}
+    .med-ring-k{font-size:8px;}
+    .med-rings-note{flex:1 1 100%;margin-left:0;padding-top:2px;font-size:12px;}
+    .med-cam,.med-shot,.med-shot-btn{width:36px;height:36px;}
     .med-hero-right{font-size:11.5px;}
     .med-track{margin:9px 0 8px;height:8px;}
     .med-note{padding:10px 13px;font-size:12.5px;}
@@ -911,10 +988,10 @@
       background:var(--surface-2);border:1px solid var(--hairline);
       border-radius:var(--radius-card);overflow:hidden;
     }
-    .med-stat{background:none;border:0;border-radius:0;padding:6px 2px;text-align:center;}
+    .med-stat{background:none;border:0;border-radius:0;padding:5px 2px;text-align:center;}
     .med-stat + .med-stat{border-left:1px solid var(--hairline);}
-    .med-stat-n{font-size:16px;}
-    .med-stat-k{font-size:8.5px;letter-spacing:.04em;margin-top:1px;}
+    .med-stat-n{font-size:15px;}
+    .med-stat-k{font-size:8px;letter-spacing:.04em;margin-top:0;}
     .med-stat-n{font-size:17px;}
     .med-stat-k{font-size:9px;letter-spacing:.05em;}
     .med-grid-row{grid-template-columns:20px repeat(7,minmax(0,1fr));gap:4px;}
@@ -927,6 +1004,10 @@
        its own line, indented past the tick so it still reads as belonging to that item. */
     .med-item{flex-wrap:wrap;}
     .med-vessels{flex:1 1 100%;justify-content:flex-start;padding-left:40px;margin-top:2px;}
+    /* Proof always sits in the same corner, whatever shape the row's counter is. Letting it
+       flow meant it dropped onto a line of its own under a wrapped row of bottles. */
+    .med-item{position:relative;padding-right:52px;}
+    .med-item .med-cam,.med-item .med-shot{position:absolute;top:11px;right:12px;}
     .med-bottle{width:21px;height:35px;}
     .med-pip{width:19px;height:19px;}
     .med-num input{width:52px;font-size:16px;}   /* 16px stops iOS zooming on focus */
@@ -2372,6 +2453,7 @@
     chat:      '<path d="M20.5 12.2c0 4-3.8 7.2-8.5 7.2a10 10 0 0 1-2.6-.33L4.5 20.5l1.2-3.4A6.8 6.8 0 0 1 3.5 12.2C3.5 8.2 7.3 5 12 5s8.5 3.2 8.5 7.2z"/>',
     refresh:   '<path d="M20 11.5A8 8 0 1 0 18 17M20 5.5v6h-6"/>',
     /* 75 Medium: a streak is the thing the program is about, so the tab wears a flame. */
+    camera:    '<path d="M3.2 8.6a2 2 0 0 1 2-2h2.1l1.3-2.1h6.8l1.3 2.1h2.1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5.2a2 2 0 0 1-2-2z"/><circle cx="12" cy="12.8" r="3.6"/>',
     link:      '<path d="M10.1 13.9a4.2 4.2 0 0 0 6.2.3l2.4-2.4a4.2 4.2 0 0 0-5.9-5.9l-1.4 1.4"/><path d="M13.9 10.1a4.2 4.2 0 0 0-6.2-.3l-2.4 2.4a4.2 4.2 0 0 0 5.9 5.9l1.4-1.4"/>',
     gift:      '<path d="M3.4 11.4h17.2v9.1a1.5 1.5 0 0 1-1.5 1.5H4.9a1.5 1.5 0 0 1-1.5-1.5z"/><path d="M2.4 7.8h19.2v3.6H2.4zM12 7.8V22"/><path d="M12 7.8S10.9 2.6 8.3 2.6a2.6 2.6 0 0 0 0 5.2zM12 7.8s1.1-5.2 3.7-5.2a2.6 2.6 0 0 1 0 5.2z"/>',
     flame:     '<path d="M12 2.6c3.4 3.1 5.6 5.9 5.6 9.4a5.6 5.6 0 0 1-11.2 0c0-1.6.6-2.9 1.6-4.2.5 1.3 1.4 2 2.3 2.2-.6-2.6-.3-5 1.7-7.4z"/><path d="M12 21.4a2.9 2.9 0 0 1-2.4-4.5c.6-.9 1.6-1.6 2.4-2.6.8 1 1.8 1.7 2.4 2.6a2.9 2.9 0 0 1-2.4 4.5z"/>'
@@ -4095,6 +4177,163 @@
     }
   }
 
+
+  /* ================= PHOTO PROOF =================
+     A picture of the thing actually done. Tamanna's idea, and a good one: a tick is a claim,
+     a photo is evidence.
+
+     Where the bytes live matters more than it looks. Every other row in this app is small and
+     every device wants all of them, so the sync hands out everything. A photo is not like
+     that: six people photographing a few items a day for 75 days is tens of megabytes that
+     would be pulled onto every phone, forever, to show pictures that get looked at once. So:
+
+       * the picture is shrunk here, on the device, before it is ever sent;
+       * it is pushed as its own row, straight onto the sync queue, and never kept in app
+         state or the local cache -- otherwise the diff would re-send it and localStorage
+         would fill up within a week;
+       * the day row keeps only the photo's id, a few bytes, which syncs normally;
+       * the bytes come back one at a time from /api/photo, only when one is on screen, and
+         the browser caches them from there.
+
+     The id is random rather than derived from the day and item, because a retaken photo must
+     get a new URL -- /api/photo tells the browser to cache hard, and a reused id would show
+     yesterday's picture forever. */
+  var PHOTO_STEPS = [   // tried in order until the result is small enough to store
+    { px: 1000, q: 0.74 },
+    { px: 760,  q: 0.64 },
+    { px: 560,  q: 0.54 },
+    { px: 420,  q: 0.45 }
+  ];
+  var PHOTO_MAX_CHARS = 150 * 1024;   // the server refuses a row over 256KB; leave headroom
+  var photoLocal = {};                // id -> data URL, for showing one before it has synced
+
+  function shrinkPhoto(file){
+    return new Promise(function(resolve, reject){
+      if(!file || !/^image\//.test(file.type || '')) return reject(new Error('That is not a picture.'));
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function(){
+        try{
+          var best = null;
+          for(var i = 0; i < PHOTO_STEPS.length; i++){
+            var step = PHOTO_STEPS[i];
+            var scale = Math.min(1, step.px / Math.max(img.width, img.height));
+            var w = Math.max(1, Math.round(img.width * scale));
+            var h = Math.max(1, Math.round(img.height * scale));
+            var c = document.createElement('canvas');
+            c.width = w; c.height = h;
+            var ctx = c.getContext('2d');
+            // A photo of a tidy room on a white wall looks wrong on a transparent canvas.
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, w, h);
+            ctx.drawImage(img, 0, 0, w, h);
+            best = c.toDataURL('image/jpeg', step.q);
+            if(best.length <= PHOTO_MAX_CHARS) break;
+          }
+          URL.revokeObjectURL(url);
+          if(!best || best.length > PHOTO_MAX_CHARS) return reject(new Error('That picture is too big to save.'));
+          resolve(best);
+        }catch(e){ URL.revokeObjectURL(url); reject(e); }
+      };
+      img.onerror = function(){ URL.revokeObjectURL(url); reject(new Error('That picture could not be read.')); };
+      img.src = url;
+    });
+  }
+
+  /* Straight onto the queue rather than through queueChanges: these rows are deliberately not
+     part of app state, so the normal state-versus-shadow diff would never see them. */
+  function queuePhotoOp(op){
+    if(!serverKnowsKind('trackphoto')) return;
+    sync.queue.push(Object.assign({ opId: uid() }, op));
+    saveSyncLocal();
+    updateSyncStatus(sync.online ? 'busy' : 'offline');
+    flushQueue();
+  }
+
+  function photoIdOn(ownerId, date, itemId){
+    var day = trackDayFor(ownerId, date);
+    return (day && day.photos && day.photos[itemId]) || null;
+  }
+  function photoSrc(id){
+    return photoLocal[id] || ('/api/photo?id=' + encodeURIComponent(id));
+  }
+
+  function attachPhoto(ownerId, date, itemId, file){
+    shrinkPhoto(file).then(function(dataUrl){
+      var day = ensureTrackDay(ownerId, date);
+      var old = (day.photos && day.photos[itemId]) || null;
+      var id = uid();
+      photoLocal[id] = dataUrl;
+      queuePhotoOp({ kind:'trackphoto', id: id,
+                     data: { id:id, ownerId:ownerId, date:date, itemId:itemId,
+                             dataUrl:dataUrl, createdAt:nowISO() } });
+      if(old){
+        queuePhotoOp({ kind:'trackphoto', id: old, gone: true });
+        delete photoLocal[old];
+      }
+      day.photos = day.photos || {};
+      day.photos[itemId] = id;
+      day.updatedAt = nowISO();
+      ensureRun(ownerId);
+      persistTracking();
+      render();
+      showToast('Photo saved', false, 2000);
+    }).catch(function(err){
+      showToast(err && err.message ? err.message : 'That picture could not be saved.', false, 3200);
+    });
+  }
+
+  function removePhoto(ownerId, date, itemId){
+    var day = trackDayFor(ownerId, date);
+    var id = day && day.photos && day.photos[itemId];
+    if(!id) return;
+    queuePhotoOp({ kind:'trackphoto', id: id, gone: true });
+    delete photoLocal[id];
+    delete day.photos[itemId];
+    day.updatedAt = nowISO();
+    persistTracking();
+    render();
+  }
+
+  // One input, retargeted, rather than one per row: a file picker per item is a lot of DOM
+  // for something only ever used once at a time.
+  var photoPending = null;
+  function photoInput(){
+    var el = document.getElementById('med-photo-input');
+    if(el) return el;
+    el = document.createElement('input');
+    el.type = 'file';
+    el.accept = 'image/*';
+    el.setAttribute('capture', 'environment');   // phones open the camera rather than the gallery
+    el.id = 'med-photo-input';
+    el.style.cssText = 'position:fixed;left:-9999px;width:1px;height:1px;opacity:0;';
+    el.addEventListener('change', function(){
+      var f = el.files && el.files[0];
+      var t = photoPending;
+      el.value = '';          // so picking the same file twice still fires
+      photoPending = null;
+      if(f && t) attachPhoto(t.ownerId, t.date, t.itemId, f);
+    });
+    document.body.appendChild(el);
+    return el;
+  }
+  function askForPhoto(ownerId, date, itemId){
+    photoPending = { ownerId:ownerId, date:date, itemId:itemId };
+    photoInput().click();
+  }
+
+  function openPhotoModal(id, label){
+    document.getElementById('modal-root').innerHTML = ''
+      + '<div class="scrim" id="scrim"><div class="modal med-photo-modal">'
+      + '<div class="med-photo-head">' + escapeHtml(label || 'Proof') + '</div>'
+      + '<img class="med-photo-big" src="' + escapeHtml(photoSrc(id)) + '" alt="' + escapeHtml(label || '') + '">'
+      + '<div class="modal-footer"><span></span>'
+      + '<button class="btn-close" id="mp-close">Close</button></div></div></div>';
+    function close(){ document.getElementById('modal-root').innerHTML = ''; applyDeferred(); }
+    document.getElementById('scrim').addEventListener('click', function(e){ if(e.target.id === 'scrim') close(); });
+    document.getElementById('mp-close').addEventListener('click', close);
+  }
+
   /* ---- the screen ---- */
   function renderMedium(){
     var owner = mediumOwner();
@@ -4118,7 +4357,7 @@
             + mediumStatusHtml(owner, mine, stats)
             + mediumDayHtml(owner, mine, stats)
             + mediumGridHtml(owner, mine, stats)
-            + mediumWeeksHtml(stats)
+            + mediumDisciplineHtml(stats)
             + mediumRatesHtml(owner, stats)
             + mediumPastRunsHtml(owner, stats);
     }
@@ -4183,23 +4422,43 @@
       + '<span class="med-stat-k">' + k + '</span></div>';
   }
 
+  /* A ring: one arc drawn with a dash offset. Three of them say where you are faster than any
+     row of numbers -- which is the whole reason Tamanna asked for them. */
+  function medRing(frac, big, small, tone){
+    var R = 26, C = 2 * Math.PI * R;
+    var f = Math.max(0, Math.min(1, frac || 0));
+    return '<div class="med-ring-wrap ' + (tone || '') + '">'
+      + '<div class="med-ring">'
+      + '<svg viewBox="0 0 64 64" aria-hidden="true">'
+      + '<circle class="med-ring-track" cx="32" cy="32" r="' + R + '"></circle>'
+      + '<circle class="med-ring-fill" cx="32" cy="32" r="' + R + '"'
+      + ' stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - f)).toFixed(1) + '"></circle>'
+      + '</svg>'
+      + '<span class="med-ring-mid">' + big + '</span>'
+      + '</div>'
+      + '<span class="med-ring-k">' + escapeHtml(small) + '</span>'
+      + '</div>';
+  }
+
   function mediumHeroHtml(owner, s){
-    var pct = Math.round((s.completed / MEDIUM_DAYS) * 100);
     var t = dayScore(owner.id, todayStr());
     var right = '';
     if(s.status === 'active') right = t.total ? t.done + ' of ' + t.total + ' done today' : 'nothing on the list yet';
     else if(s.status === 'done') right = 'finished ' + fmtDate(s.finishedOn);
     else right = 'ended ' + fmtDate(s.missedOn);
     var dayLabel = s.status === 'broken' ? (dateDiffDays(s.start, s.missedOn) + 1) : s.dayNumber;
+    // The streak ring fills toward the next break day, because nine in a row is what the
+    // streak is actually *for* in this app.
+    var toNext = s.streak % MEDIUM_EARN_EVERY;
+    var streakFrac = s.streak && toNext === 0 ? 1 : toNext / MEDIUM_EARN_EVERY;
     return '<div class="med-hero">'
-      + '<div class="med-hero-top">'
-      + '<span class="med-day">Day ' + dayLabel + '</span>'
-      + '<span class="med-of">of ' + MEDIUM_DAYS + '</span>'
-      + '<span class="med-hero-right">' + escapeHtml(right) + '</span>'
+      + '<div class="med-rings">'
+      + medRing(t.total ? t.done / t.total : 0, (t.total ? t.done + '/' + t.total : '\u2013'), 'today', 'today')
+      + medRing(dayLabel / MEDIUM_DAYS, dayLabel, 'of ' + MEDIUM_DAYS, 'day')
+      + medRing(streakFrac, s.streak, 'streak', 'streak')
+      + (s.status === 'active' ? '' : '<span class="med-rings-note">' + escapeHtml(right) + '</span>')
       + '</div>'
-      + '<div class="med-track"><span class="med-track-fill" style="width:' + pct + '%"></span></div>'
       + '<div class="med-stats">'
-      + medStat(s.streak, 'streak', s.streak >= MEDIUM_EARN_EVERY ? 'good' : '')
       + medStat(s.best, 'best run', '')
       + medStat(s.completed, 'full days', '')
       + medStat(s.banked, s.banked === 1 ? 'break day' : 'break days', s.banked > 0 ? 'warn' : '')
@@ -4263,6 +4522,28 @@
     return date;
   }
 
+  /* Proof, on the row it belongs to. A thumbnail once there is one, a camera button when
+     there isn't -- and nothing at all on somebody else's board unless they took one, because
+     a camera button there would just be a dead end. */
+  function mediumPhotoCellHtml(item, owner, date, mine){
+    var id = photoIdOn(owner.id, date, item.id);
+    if(!id && !mine) return '';
+    if(!id){
+      return '<button type="button" class="med-cam" data-med-photo="' + escapeHtml(item.id) + '"'
+        + ' aria-label="Add a photo for ' + escapeHtml(item.label) + '" title="Add a photo">'
+        + icon('camera') + '</button>';
+    }
+    return '<span class="med-shot">'
+      + '<button type="button" class="med-shot-btn" data-med-photo-view="' + escapeHtml(id) + '"'
+      + ' data-med-photo-label="' + escapeHtml(item.label) + '"'
+      + ' aria-label="See the photo for ' + escapeHtml(item.label) + '">'
+      + '<img src="' + escapeHtml(photoSrc(id)) + '" alt="" loading="lazy">'
+      + '</button>'
+      + (mine ? '<button type="button" class="med-shot-x" data-med-photo-del="' + escapeHtml(item.id) + '"'
+        + ' aria-label="Remove the photo">' + icon('close') + '</button>' : '')
+      + '</span>';
+  }
+
   function mediumDayHtml(owner, mine, s){
     var today = todayStr();
     var date = mediumOpenDate(s);
@@ -4311,6 +4592,7 @@
                     + (i.unit ? '<span>' + escapeHtml(i.unit) + '</span>' : '')
                     + '</span>'
                   : ''))
+          + mediumPhotoCellHtml(i, owner, date, mine)
           + '</div>';
       }).join('') + '</div>';
     }
@@ -4376,31 +4658,49 @@
       + '</div></div>';
   }
 
-  function mediumWeeksHtml(s){
+  /* Discipline, in nine-day blocks.
+     Nine because that is the app's own cycle: nine days in a row earns a break day. And it
+     counts *ticks*, not whole days -- four items out of five is a bad day by the run's rules
+     but it is not nothing, and a chart that scores it zero teaches you to give up at lunchtime. */
+  function disciplineBlocks(s){
     var today = todayStr();
-    var any = false, rows = '';
-    for(var w = 0; w < MEDIUM_WEEKS; w++){
-      var past = 0, full = 0;
-      for(var c = 0; c < 7; c++){
-        var d = s.days[w * 7 + c];
-        if(!d || d.date > today) continue;
-        if(d.state === 'today' || d.state === 'none' || d.state === 'void') continue;
-        past++;
+    var blocks = [];
+    for(var b = 0; b * MEDIUM_EARN_EVERY < MEDIUM_DAYS; b++){
+      var from = b * MEDIUM_EARN_EVERY;
+      var done = 0, possible = 0, days = 0, full = 0;
+      for(var k = 0; k < MEDIUM_EARN_EVERY; k++){
+        var d = s.days[from + k];
+        if(!d || d.date > today || d.state === 'void' || d.state === 'today' || !d.total) continue;
+        done += d.done; possible += d.total; days++;
         if(d.state === 'done') full++;
       }
-      var pct = past ? Math.round(full / past * 100) : null;
-      if(pct !== null) any = true;
-      var h = pct === null ? 3 : Math.max(Math.round(pct / 100 * 76), 3);
-      rows += '<div class="med-wk" title="' + escapeHtml('Week ' + (w+1) + (pct === null ? ': nothing counted yet' : ': ' + full + ' of ' + past + ' days')) + '">'
-        + '<span class="med-wk-pct">' + (pct === null ? '' : pct + '%') + '</span>'
-        + '<span class="med-wk-bar' + (pct === null ? ' ahead' : (pct === 0 ? ' none' : '')) + '" style="height:' + h + 'px"></span>'
-        + '<span class="med-wk-k">' + (w+1) + '</span></div>';
+      blocks.push({ n: b + 1, from: from + 1, to: Math.min(from + MEDIUM_EARN_EVERY, MEDIUM_DAYS),
+                    days: days, full: full, done: done, possible: possible,
+                    pct: possible ? Math.round(done / possible * 100) : null });
     }
-    if(!any) return '';
+    var d = 0, p = 0;
+    blocks.forEach(function(x){ d += x.done; p += x.possible; });
+    return { blocks: blocks, average: p ? Math.round(d / p * 100) : null };
+  }
+
+  function mediumDisciplineHtml(s){
+    var r = disciplineBlocks(s);
+    if(r.average === null) return '';
+    var bars = r.blocks.map(function(b){
+      var h = b.pct === null ? 3 : Math.max(Math.round(b.pct / 100 * 74), 3);
+      var tone = b.pct === null ? ' ahead' : (b.pct === 100 ? ' perfect' : (b.pct < 50 ? ' low' : ''));
+      return '<div class="med-wk" title="' + escapeHtml('Days ' + b.from + '\u2013' + b.to
+          + (b.pct === null ? ': not started' : ': ' + b.pct + '% \u2014 ' + b.done + ' of ' + b.possible
+             + ' ticks, ' + b.full + ' full day' + (b.full === 1 ? '' : 's'))) + '">'
+        + '<span class="med-wk-pct">' + (b.pct === null ? '' : b.pct + '%') + '</span>'
+        + '<span class="med-wk-bar' + tone + '" style="height:' + h + 'px"></span>'
+        + '<span class="med-wk-k">' + b.n + '</span></div>';
+    }).join('');
     return '<div class="med-panel">'
-      + '<div class="med-panel-head"><h2>Week by week</h2>'
-      + '<span class="med-panel-sub">Share of the week\'s days finished in full</span></div>'
-      + '<div class="med-weeks">' + rows + '</div></div>';
+      + '<div class="med-panel-head"><h2>Discipline</h2>'
+      + '<span class="med-panel-sub">Every nine days \u2014 the same nine that earn a break day</span>'
+      + '<span class="med-panel-act"><span class="med-avg">' + r.average + '%<small>average</small></span></span></div>'
+      + '<div class="med-weeks">' + bars + '</div></div>';
   }
 
   function mediumRatesHtml(owner, s){
@@ -4479,6 +4779,18 @@
         if(panel) panel.scrollIntoView({ block:'nearest', behavior:'smooth' });
       });
     });
+    document.querySelectorAll('[data-med-photo-view]').forEach(function(b){
+      b.addEventListener('click', function(){
+        openPhotoModal(b.dataset.medPhotoView, b.dataset.medPhotoLabel);
+      });
+      // Offline, or a photo that never finished syncing: a broken-image glyph reads as a bug,
+      // so the cell goes back to looking like somewhere a photo could go.
+      var im = b.querySelector('img');
+      if(im) im.addEventListener('error', function(){
+        var cell = b.closest('.med-shot');
+        if(cell) cell.classList.add('missing');
+      });
+    });
     if(!mine) return;
     var date = mediumOpenDate(stats);
     document.querySelectorAll('[data-med-tick]').forEach(function(btn){
@@ -4506,6 +4818,12 @@
         setTrackMark(owner.id, date, item.id,
           isLastFull ? k * split.chunk : Math.min((k + 1) * split.chunk, item.target));
       });
+    });
+    document.querySelectorAll('[data-med-photo]').forEach(function(b){
+      b.addEventListener('click', function(){ askForPhoto(owner.id, date, b.dataset.medPhoto); });
+    });
+    document.querySelectorAll('[data-med-photo-del]').forEach(function(b){
+      b.addEventListener('click', function(){ removePhoto(owner.id, date, b.dataset.medPhotoDel); });
     });
     document.querySelectorAll('[data-med-num]').forEach(function(input){
       input.addEventListener('change', function(){
