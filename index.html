@@ -447,6 +447,28 @@
     border-radius:var(--radius-pill);padding:5px 12px;font-size:11.5px;font-weight:600;cursor:pointer;
   }
   .color-reset:hover{color:var(--ink);}
+  /* The full palette: a wheel's worth of chips that reflow to whatever width they're given,
+     and a native colour well underneath for anything that isn't on it. */
+  .color-grid{
+    flex:1 1 100%;display:grid;gap:6px;
+    grid-template-columns:repeat(15,1fr);
+  }
+  .color-grid .color-chip{width:100%;height:22px;border-radius:6px;}
+  @media (max-width: 640px){
+    /* Half a band per line on a phone, so the chips stay big enough to hit. */
+    .color-grid{grid-template-columns:repeat(8,1fr);}
+    .color-grid .color-chip{height:26px;}
+  }
+  .color-custom{
+    flex:1 1 100%;display:flex;align-items:center;gap:9px;margin-top:4px;
+    font-size:11.5px;font-weight:600;color:var(--ink-muted);cursor:pointer;
+  }
+  .color-custom input[type="color"]{
+    width:34px;height:26px;padding:0;border:1.5px solid var(--hairline);
+    border-radius:7px;background:var(--surface);cursor:pointer;
+  }
+  .color-custom.on{color:var(--ink);}
+  .color-custom.on input[type="color"]{border-color:var(--ink);border-width:2px;}
   .meta-pill.repeats{background:var(--accent-soft, rgba(0,143,160,0.1));color:var(--accent, #0b6b78);}
   .event-chip.future,.agenda-card.future{opacity:.62;}
   .src-dot{width:7px;height:7px;border-radius:50%;flex:none;display:inline-block;margin-right:6px;vertical-align:1px;}
@@ -1124,6 +1146,11 @@
   }
   .fl-km{font-size:11px;font-weight:700;color:var(--ink-faint);}
   .fl-who{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink-muted);font-weight:600;margin-top:2px;}
+  /* Marks the traveller whose colour the globe uses, so it isn't a rule you have to remember. */
+  .fl-lead-dot{
+    width:6px;height:6px;border-radius:50%;background:currentColor;
+    display:inline-block;margin-right:6px;vertical-align:1px;
+  }
   .fl-add{display:flex;justify-content:center;}
 
   .fl-two{display:flex;gap:10px;}
@@ -2735,6 +2762,52 @@
     return fallbackCategory();
   }
   var FAMILY_COLOR_PALETTE = ['#13808a','#955c82','#bc5460','#008fa0','#8765be','#3e8f44','#c9922f','#a8372e'];
+
+  function hslHex(h, s, l){
+    h = ((h % 360) + 360) % 360;
+    var c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2;
+    var r = 0, g = 0, b = 0;
+    if(h < 60){ r = c; g = x; }
+    else if(h < 120){ r = x; g = c; }
+    else if(h < 180){ g = c; b = x; }
+    else if(h < 240){ g = x; b = c; }
+    else if(h < 300){ r = x; b = c; }
+    else { r = c; b = x; }
+    var hex = function(v){ var n = Math.round((v + m) * 255); return (n < 16 ? '0' : '') + n.toString(16); };
+    return '#' + hex(r) + hex(g) + hex(b);
+  }
+  /* The whole wheel, not eight fixed options.
+     Fourteen hues in three bands -- deep, mid and bright -- so there is a version of every
+     colour that still reads against the cream page and the dark one, a row of greys because
+     somebody always wants one, and a custom well underneath for anything not here at all. */
+  var FULL_COLOR_ROWS = (function(){
+    var hues = [354, 12, 26, 40, 54, 78, 108, 144, 168, 188, 206, 228, 262, 300, 328];
+    var rows = [[0.50, 0.28], [0.54, 0.40], [0.56, 0.54]].map(function(b){
+      return hues.map(function(h){ return hslHex(h, b[0], b[1]); });
+    });
+    // Kept as its own row rather than tacked onto the end of the brights, so a band of the
+    // palette never ends halfway through a line of greys.
+    rows.push([0.20, 0.32, 0.46, 0.62, 0.76].map(function(l){ return hslHex(28, 0.05, l); }));
+    return rows;
+  })();
+  var FULL_COLOR_PALETTE = FULL_COLOR_ROWS.reduce(function(a, r){ return a.concat(r); }, []);
+  function normHex(c){
+    var s = String(c || '').trim();
+    if(/^#[0-9a-f]{6}$/i.test(s)) return s.toLowerCase();
+    if(/^#[0-9a-f]{3}$/i.test(s)) return ('#' + s[1] + s[1] + s[2] + s[2] + s[3] + s[3]).toLowerCase();
+    return '';
+  }
+  function sameColor(a, b){ return !!normHex(a) && normHex(a) === normHex(b); }
+  /* Opening the palette up means somebody will eventually pick pale yellow, and every place
+     that prints a name or an initial on top of their colour assumed white text. Pick the ink
+     from the colour instead, so a light choice stays readable rather than disappearing. */
+  function inkOn(c){
+    var h = normHex(c);
+    if(!h) return '#fff';
+    var lin = function(v){ v = parseInt(v, 16) / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+    var L = 0.2126 * lin(h.slice(1, 3)) + 0.7152 * lin(h.slice(3, 5)) + 0.0722 * lin(h.slice(5, 7));
+    return L > 0.42 ? '#241c14' : '#fff';
+  }
   // Chip backgrounds carry white text, so every one of these is dark enough to stay legible.
   var CALENDAR_COLOR_PALETTE = [
     '#3b6ea5','#0e7c86','#3e8f44','#6d8b3a','#c9922f','#d9822b',
@@ -3601,7 +3674,7 @@
     var list = (assignees||[]).map(familyMember).filter(Boolean);
     if(!list.length) return '<span class="tc-avatars"><span class="avatar" style="background:var(--ink-muted)">?</span></span>';
     return '<span class="tc-avatars">'+list.slice(0,4).map(function(m,i){
-      return '<span class="avatar" style="background:'+m.color+';'+(i>0?'margin-left:-8px;':'')+'">'+escapeHtml((m.name||'?')[0])+'</span>';
+      return '<span class="avatar" style="background:'+m.color+';color:'+inkOn(m.color)+';'+(i>0?'margin-left:-8px;':'')+'">'+escapeHtml((m.name||'?')[0])+'</span>';
     }).join('')+'</span>';
   }
   function metaPillsHtml(t){
@@ -5966,6 +6039,13 @@
       ? Object.assign({}, existing, { travellerIds: (existing.travellerIds || []).slice() })
       : { travellerIds:[me.id], airline:'', number:'', from:'', to:'',
           departDate: todayStr(), departTime:'', arriveDate:'', arriveTime:'', confirmation:'', notes:'' };
+    /* The globe draws a trip in the first traveller's colour, and on a new flight the first
+       traveller is whoever happens to be logged in -- which is not a choice anybody made. So
+       the pre-tick is held as "automatic" until a person is actually picked, and that person
+       goes to the front of the list. Adding a trip for Tamanna therefore draws it in hers,
+       not in yours, without you having to untick yourself first. The flag is a local, not a
+       field on the draft: it must not end up on the saved flight or ride the sync. */
+    var autoWho = !existing;
 
     loadAirports().then(paint);
 
@@ -5982,6 +6062,13 @@
         + '</span></label>';
     }
 
+    function leadHintHtml(){
+      var lead = draft.travellerIds.length ? familyMember(draft.travellerIds[0]) : null;
+      if(!lead) return 'Pick whoever is going — the first one sets the colour of the line on the globe.';
+      return 'The globe draws this trip in <b style="color:' + escapeHtml(lead.color) + '">'
+        + escapeHtml(lead.name) + '</b>’s colour. Tap someone else first to change it.';
+    }
+
     function paint(){
       root.innerHTML = ''
         + '<div class="scrim" id="scrim"><div class="modal">'
@@ -5989,10 +6076,13 @@
         + '<div class="gift-field"><span style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:5px;">Who\'s travelling</span>'
         + '<div class="cat-row">' + (state.family || []).map(function(m){
             var on = draft.travellerIds.indexOf(m.id) !== -1;
-            return '<button type="button" class="btn-sm' + (on ? ' on' : '') + '" data-fl-who="' + escapeHtml(m.id) + '"'
-              + (on ? ' style="background:' + escapeHtml(m.color) + ';color:#fff;border-color:' + escapeHtml(m.color) + '"' : '')
-              + '>' + escapeHtml(m.name) + '</button>';
-          }).join('') + '</div></div>'
+            var lead = on && draft.travellerIds[0] === m.id;
+            return '<button type="button" class="btn-sm' + (on ? ' on' : '') + (lead ? ' fl-lead' : '') + '" data-fl-who="' + escapeHtml(m.id) + '"'
+              + (on ? ' style="background:' + escapeHtml(m.color) + ';color:' + inkOn(m.color) + ';border-color:' + escapeHtml(m.color) + '"' : '')
+              + (lead ? ' title="The globe draws this trip in this colour"' : '')
+              + '>' + (lead ? '<span class="fl-lead-dot"></span>' : '') + escapeHtml(m.name) + '</button>';
+          }).join('') + '</div>'
+        + '<span class="gift-field-hint">' + leadHintHtml() + '</span></div>'
         + airportField('from', 'From')
         + airportField('to', 'To')
         + '<div class="fl-two">'
@@ -6021,7 +6111,14 @@
         b.addEventListener('click', function(){
           readDraft();
           var mid = b.dataset.flWho, at = draft.travellerIds.indexOf(mid);
-          if(at === -1) draft.travellerIds.push(mid); else draft.travellerIds.splice(at, 1);
+          if(at === -1){
+            // First real pick on a new flight wins the colour, over the automatic pre-tick.
+            if(autoWho && mid !== me.id) draft.travellerIds.unshift(mid);
+            else draft.travellerIds.push(mid);
+          } else {
+            draft.travellerIds.splice(at, 1);
+          }
+          autoWho = false;
           paint();
         });
       });
@@ -7056,7 +7153,7 @@
     var att = occ.attendees || ['all'];
     var members = (att.indexOf('all') !== -1) ? state.family.slice(0,4) : att.map(familyMember).filter(Boolean);
     return members.map(function(m){
-      return '<span class="avatar" style="background:'+m.color+';margin-left:-6px;" title="'+escapeHtml(m.name)+'">'+escapeHtml((m.name||'?')[0])+'</span>';
+      return '<span class="avatar" style="background:'+m.color+';color:'+inkOn(m.color)+';margin-left:-6px;" title="'+escapeHtml(m.name)+'">'+escapeHtml((m.name||'?')[0])+'</span>';
     }).join('');
   }
 
@@ -7141,7 +7238,7 @@
   function taskAssigneeAvatarsHtml(occ){
     var members = (occ.attendees||[]).map(familyMember).filter(Boolean);
     return members.map(function(m){
-      return '<span class="avatar" style="background:'+m.color+';margin-left:-6px;" title="'+escapeHtml(m.name)+'">'+escapeHtml((m.name||'?')[0])+'</span>';
+      return '<span class="avatar" style="background:'+m.color+';color:'+inkOn(m.color)+';margin-left:-6px;" title="'+escapeHtml(m.name)+'">'+escapeHtml((m.name||'?')[0])+'</span>';
     }).join('');
   }
   function taskChipHtml(occ){
@@ -10651,6 +10748,22 @@
         return '<option value="'+tz.value+'"'+(tz.value===selected?' selected':'')+'>'+escapeHtml(tz.label)+'</option>';
       }).join('');
     }
+    function colorPopHtml(i, current){
+      var hex = normHex(current) || FAMILY_COLOR_PALETTE[0];
+      var custom = FULL_COLOR_PALETTE.some(function(c){ return sameColor(c, hex); }) ? '' : ' on';
+      return '<div class="color-pop hidden" data-fampop="'+i+'">'
+        + FULL_COLOR_ROWS.map(function(row){
+            return '<div class="color-grid">' + row.map(function(c){
+              return '<button type="button" class="color-chip'+(sameColor(c, hex)?' on':'')+'"'
+                + ' data-fam-color="'+i+'" data-color="'+c+'" style="background:'+c+'"'
+                + ' title="'+c+'" aria-label="Use '+c+'"></button>';
+            }).join('') + '</div>';
+          }).join('')
+        + '<label class="color-custom'+custom+'">'
+        + '<input type="color" data-fam-custom="'+i+'" value="'+hex+'" aria-label="Any other colour">'
+        + '<span>Any colour…</span></label>'
+        + '</div>';
+    }
 
     var html = ''
       + '<div class="scrim" id="scrim">'
@@ -10674,7 +10787,7 @@
     function renderFamilyList(){
       var rows = draft.map(function(m, i){
         return '<div class="family-row" data-idx="'+i+'">'
-          + '<button type="button" class="color-swatch" data-idx="'+i+'" style="background:'+m.color+'" title="Click to change color"></button>'
+          + '<button type="button" class="color-swatch" data-fam-pop="'+i+'" data-idx="'+i+'" style="background:'+m.color+'" title="Pick a colour" aria-label="Pick a colour"></button>'
           + '<input class="text-input fam-name" data-idx="'+i+'" placeholder="Name" value="'+escapeHtml(m.name||'')+'">'
           + '<input class="text-input fam-email" data-idx="'+i+'" placeholder="email@example.com" value="'+escapeHtml(m.email||'')+'">'
           + '<div class="seg3 fam-role" data-idx="'+i+'">'
@@ -10687,17 +10800,41 @@
           + '</div>'
           + '<select class="text-input fam-timezone" data-idx="'+i+'" title="Their timezone">'+tzOptionsHtml(m.timezone || homeTzDraft)+'</select>'
           + '<button type="button" class="rm fam-remove" data-idx="'+i+'" title="Remove" aria-label="Remove">'+icon('close')+'</button>'
+          + colorPopHtml(i, m.color)
           + '</div>';
       }).join('');
       document.getElementById('family-list').innerHTML = rows || '<div class="list-empty">No family members yet — add one below.</div>';
 
-      document.querySelectorAll('.color-swatch').forEach(function(btn){
+      /* The swatch used to be a one-step cycle through eight fixed colours, which meant six
+         clicks to get back to the one you'd just passed. It opens the whole palette now. */
+      document.querySelectorAll('[data-fam-pop]').forEach(function(btn){
         btn.addEventListener('click', function(){
-          var i = parseInt(btn.dataset.idx,10);
-          var idx = FAMILY_COLOR_PALETTE.indexOf(draft[i].color);
-          draft[i].color = FAMILY_COLOR_PALETTE[(idx+1+FAMILY_COLOR_PALETTE.length) % FAMILY_COLOR_PALETTE.length];
-          renderFamilyList();
+          var pop = document.querySelector('[data-fampop="'+btn.dataset.famPop+'"]');
+          if(!pop) return;
+          var opening = pop.classList.contains('hidden');
+          document.querySelectorAll('#family-list .color-pop').forEach(function(el){ el.classList.add('hidden'); });
+          if(opening) pop.classList.remove('hidden');
         });
+      });
+      // Set the colour without rebuilding the list: a re-render here would tear the open
+      // palette out from under the pointer, and would shut the native picker mid-drag.
+      function applyFamColor(i, hex){
+        var c = normHex(hex);
+        if(!c) return;
+        draft[i].color = c;
+        var sw = document.querySelector('[data-fam-pop="'+i+'"]');
+        if(sw) sw.style.background = c;
+        document.querySelectorAll('[data-fam-color="'+i+'"]').forEach(function(chip){
+          chip.classList.toggle('on', sameColor(chip.dataset.color, c));
+        });
+        var well = document.querySelector('[data-fam-custom="'+i+'"]');
+        if(well && well.value !== c) well.value = c;
+      }
+      document.querySelectorAll('[data-fam-color]').forEach(function(chip){
+        chip.addEventListener('click', function(){ applyFamColor(parseInt(chip.dataset.famColor,10), chip.dataset.color); });
+      });
+      document.querySelectorAll('[data-fam-custom]').forEach(function(inp){
+        inp.addEventListener('input', function(){ applyFamColor(parseInt(inp.dataset.famCustom,10), inp.value); });
       });
       document.querySelectorAll('.fam-name').forEach(function(inp){
         inp.addEventListener('input', function(){ draft[parseInt(inp.dataset.idx,10)].name = inp.value; });
