@@ -1040,9 +1040,26 @@
     display:flex;align-items:center;justify-content:center;
   }
   .globe-host:active{cursor:grabbing;}
+  .globe-clip{
+    position:relative;border-radius:50%;overflow:hidden;
+    /* The window the globe is seen through. Zooming grows the sphere, not this. */
+  }
+  .globe-zoom{
+    position:absolute;right:2px;bottom:2px;z-index:2;display:flex;flex-direction:column;gap:4px;
+  }
+  .globe-zoom button{
+    width:28px;height:28px;border-radius:9px;cursor:pointer;padding:0;line-height:1;
+    border:1px solid var(--hairline-strong);background:var(--surface);color:var(--ink-muted);
+    font:inherit;font-size:14px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);
+  }
+  .globe-zoom button:hover{color:var(--ink);border-color:var(--ink-faint);}
+  .globe-zoom button:focus-visible{outline:2px solid var(--ink);outline-offset:1px;}
+  .globe-host.zoomed .globe-zoom #globe-reset{border-color:var(--accent);color:var(--accent);}
+
   .globe-canvas{display:block;border-radius:50%;}
   .globe-overlay{position:absolute;inset:0;pointer-events:none;}
-  .globe-svg{width:100%;height:100%;display:block;overflow:visible;}
+  .globe-svg{width:100%;height:100%;display:block;overflow:hidden;}
   .globe-arc{
     fill:none;stroke-width:2.2;stroke-linecap:round;opacity:.95;pointer-events:stroke;cursor:pointer;
   }
@@ -1057,6 +1074,28 @@
   .globe-plane{pointer-events:auto;cursor:pointer;}
   .globe-hint{font-size:11.5px;color:var(--ink-faint);margin:0;}
   .globe-credit{font-size:9.5px;color:var(--ink-faint);opacity:.75;margin:0;text-align:center;}
+
+  .globe-tip{
+    position:absolute;left:0;top:0;z-index:3;pointer-events:none;opacity:0;
+    transition:opacity .12s ease;max-width:230px;
+    background:var(--surface);border:1px solid var(--hairline-strong);
+    border-radius:var(--radius-card);box-shadow:var(--shadow-md);
+    padding:9px 11px;display:flex;flex-direction:column;gap:3px;
+  }
+  .globe-tip.on{opacity:1;}
+  .gt-route{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;font-size:14px;}
+  .gt-route b{font-family:var(--font-serif);font-weight:700;}
+  .gt-route i{
+    font-style:normal;font-size:10.5px;font-weight:700;color:var(--ink-muted);
+    background:var(--hairline);border-radius:var(--radius-pill);padding:1px 7px;
+  }
+  .gt-line{font-size:11.5px;color:var(--ink-muted);line-height:1.35;}
+  .gt-when{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;}
+  .gt-who{font-size:11.5px;font-weight:700;color:var(--ink);}
+  .gt-air{
+    display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--accent);
+  }
+  .gt-air .ic{width:12px;height:12px;}
 
   .fl-list{display:flex;flex-direction:column;gap:9px;}
   .fl-row{
@@ -3419,11 +3458,14 @@
     projectForTest: function(lon, lat, view){ return project(lon, lat, view); },
     globeViewForTest: function(){ return globe.view; },
     globeSpinningForTest: function(){ return !!globe.spin; },
+    globeZoomForTest: function(){ return globe.zoom; },
+    paintGlobeForTest: function(){ paintGlobe(); },
     flightProgressForTest: function(id){
       var f = (state.flights || []).find(function(x){ return x.id === id; });
       return f ? flightProgress(f) : null;
     },
     flightOccurrencesForTest: function(from, to){ return flightOccurrencesInRange(from, to); },
+    flightBowsForTest: function(){ return flightBows(globeFlights()); },
     challenge: function(ownerId){
       var id = ownerId || (state.currentFamilyMember && state.currentFamilyMember.id);
       var run = id ? currentRun(id) : null;
@@ -5185,6 +5227,37 @@
     }
     return out;
   }
+  /* The same path, bowed sideways.
+     Out and back over the same pair is the identical great circle, so the return flight draws
+     exactly on top of the outbound and you see one line instead of two. This lifts the path
+     off its own plane: every point is rotated toward the circle's pole by a little, most in
+     the middle and nothing at the ends, so both ends still meet their airports.
+
+     The pole of A-to-B is the opposite of the pole of B-to-A, so the same positive amount
+     bows the two directions apart on its own -- no bookkeeping about which is which. */
+  function bowedCircle(a, b, steps, bow){
+    var pts = greatCircle(a, b, steps);
+    if(!bow) return pts;
+    var toVec = function(p){
+      var la = p.lat * DEG, lo = p.lon * DEG;
+      return [Math.cos(la) * Math.cos(lo), Math.cos(la) * Math.sin(lo), Math.sin(la)];
+    };
+    var A = toVec(a), B = toVec(b);
+    var N = [A[1]*B[2] - A[2]*B[1], A[2]*B[0] - A[0]*B[2], A[0]*B[1] - A[1]*B[0]];
+    var len = Math.sqrt(N[0]*N[0] + N[1]*N[1] + N[2]*N[2]);
+    if(!len) return pts;                      // the same airport, or antipodal: nothing to bow
+    N = [N[0]/len, N[1]/len, N[2]/len];
+    return pts.map(function(p, i){
+      var f = i / (pts.length - 1);
+      var t = bow * Math.sin(Math.PI * f);    // nothing at the ends, most in the middle
+      var P = toVec(p);
+      var c = Math.cos(t), s2 = Math.sin(t);
+      var v = [P[0]*c + N[0]*s2, P[1]*c + N[1]*s2, P[2]*c + N[2]*s2];
+      var m = Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]) || 1;
+      return { lat: Math.asin(v[2]/m) / DEG, lon: Math.atan2(v[1], v[0]) / DEG };
+    });
+  }
+
   function greatCircleKm(a, b){
     var la1 = a.lat * DEG, la2 = b.lat * DEG;
     var dla = (b.lat - a.lat) * DEG, dlo = (b.lon - a.lon) * DEG;
@@ -5192,8 +5265,8 @@
     return Math.round(6371 * 2 * Math.asin(Math.min(1, Math.sqrt(h))));
   }
   // One point along the route, 0 at the origin and 1 at the destination.
-  function alongRoute(a, b, f){
-    var pts = greatCircle(a, b, 100);
+  function alongRoute(a, b, f, bow){
+    var pts = bowedCircle(a, b, 100, bow || 0);
     return pts[Math.max(0, Math.min(pts.length - 1, Math.round(f * (pts.length - 1))))];
   }
 
@@ -5268,9 +5341,30 @@
       return ka < kb ? -1 : (ka > kb ? 1 : 0);
     });
   }
-  function flightEnds(f){ return (f.arriveDate || f.departDate || '') + 'T' + (f.arriveTime || '23:59'); }
-  function flightStarts(f){ return (f.departDate || '') + 'T' + (f.departTime || '00:00'); }
-  function flightIsPast(f){ return flightEnds(f) < nowISO().slice(0, 16); }
+  /* "Been there" is a scrapbook, not a live status, and it answers a question about days:
+     a trip belongs to the past once its arrival date is behind us. It stays under Upcoming
+     for the whole of the day it lands -- you are still travelling on the day you land, even
+     if you touched down at six in the morning -- and moves across the next day.
+
+     Compared as local calendar dates, deliberately. The first version of this compared a
+     local wall-clock against nowISO(), which is UTC: six hours ahead in Chicago, so an
+     overnight flight landing at 1am was filed under "Been there" two hours before it took
+     off. Dates only, same clock on both sides, nothing to get wrong. */
+  function flightIsPast(f){
+    var landed = f.arriveDate || f.departDate || '';
+    return !!landed && landed < todayStr();
+  }
+
+  /* A different question with a different answer: has the aircraft actually come down yet?
+     That decides which trip the countdown is about, so it has to be an instant rather than a
+     date -- and it is measured on the arrival airport's own clock, which the airport record
+     carries. Without that record (the list has not loaded) it falls back to the day rule. */
+  function flightHasLanded(f, nowMs){
+    var leg = flightLeg(f);
+    var end = leg ? localToInstant(f.arriveDate || f.departDate, f.arriveTime || '23:59', leg.b.tz) : null;
+    if(end == null) return flightIsPast(f);
+    return (nowMs == null ? Date.now() : nowMs) > end;
+  }
   function flightLeg(f){
     var a = airport(f.from), b = airport(f.to);
     return (a && b) ? { a:a, b:b } : null;
@@ -5315,7 +5409,8 @@
   function persistFlights(){ queueChanges(); }
 
   /* ---- the globe ---- */
-  var globe = { view:{cx:0, cy:0, r:0, lon:0, lat:20}, spin:true, raf:null, drag:null, lastTick:0 };
+  var globe = { view:{cx:0, cy:0, r:0, lon:0, lat:20}, spin:true, raf:null, drag:null,
+                lastTick:0, hovering:false, userStopped:false, tipFor:null, zoom:1 };
 
   function globeFlights(){
     var who = state.flightWho;
@@ -5325,9 +5420,31 @@
       return true;
     });
   }
+  /* How far each route is pushed off its true path. A lone flight is drawn exactly as it is
+     flown; a pair that is flown more than once -- there and back, or the same hop twice --
+     gets fanned apart so every leg is visible and tappable. */
+  function flightBows(list){
+    var groups = {}, bows = {};
+    list.forEach(function(f){
+      var key = [f.from, f.to].sort().join('>');       // unordered: out and back share it
+      (groups[key] = groups[key] || []).push(f);
+    });
+    Object.keys(groups).forEach(function(key){
+      var g = groups[key];
+      if(g.length < 2){ bows[g[0].id] = 0; return; }
+      // Count each direction separately, so two outbounds fan rather than sit on each other.
+      var seen = {};
+      g.forEach(function(f){
+        var dir = f.from + '>' + f.to;
+        var n = (seen[dir] = (seen[dir] || 0) + 1) - 1;
+        bows[f.id] = 0.055 + n * 0.045;
+      });
+    });
+    return bows;
+  }
+
   function nextFlight(){
-    var now = nowISO().slice(0, 16);
-    return globeFlights().find(function(f){ return flightEnds(f) >= now; }) || null;
+    return globeFlights().find(function(f){ return !flightHasLanded(f); }) || null;
   }
 
   function drawGlobeLand(){
@@ -5343,16 +5460,24 @@
     g.clearRect(0, 0, v.size, v.size);
 
     var dark = prefersDarkNow();
-    // The ocean disc, so the sphere reads as a solid body rather than a wireframe.
+    /* Quieter than it was. The first palette put a saturated blue sea against a warm cream
+       page and fought it; these are desaturated and pulled toward the app's own warmth. The
+       first try at calming them went too far -- sea and land were so close that zooming in
+       gave you a featureless disc -- so there is just enough separation to read a coastline,
+       and no more. The arcs are the only saturated thing on the globe, which is the point. */
+    var sea  = dark ? '#1e2f36' : '#d9e6ea';
+    var land = dark ? '#364a3f' : '#c3d0b5';
+    var rim  = dark ? '#3a5059' : '#aec0c7';
+
     g.beginPath(); g.arc(v.cx, v.cy, v.r, 0, Math.PI * 2);
-    g.fillStyle = dark ? '#172b33' : '#dbe9ee'; g.fill();
-    g.lineWidth = 1; g.strokeStyle = dark ? '#2b4752' : '#b9d2da'; g.stroke();
+    g.fillStyle = sea; g.fill();
 
     // Everything below stays inside the sphere.
     g.save();
     g.beginPath(); g.arc(v.cx, v.cy, v.r, 0, Math.PI * 2); g.clip();
 
-    g.fillStyle = dark ? '#2f4a3a' : '#cfdcc6';
+
+    g.fillStyle = land;
     landRings().forEach(function(ring){
       // A ring entirely round the back would otherwise be smeared along the rim as a sliver.
       var visible = false;
@@ -5368,11 +5493,22 @@
       g.closePath();
       g.fill();
     });
+    /* A little shading, which is what stops it reading as a flat disc with countries on it.
+       Light falls from the upper left, and the limb darkens the way the edge of a lit ball
+       does -- cheap to draw and it does more for the look than any amount of colour choosing. */
+    var shade = g.createRadialGradient(
+      v.cx - v.r * 0.35, v.cy - v.r * 0.38, v.r * 0.08,
+      v.cx, v.cy, v.r);
+    shade.addColorStop(0, dark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.26)');
+    shade.addColorStop(0.55, 'rgba(0,0,0,0)');
+    shade.addColorStop(1, dark ? 'rgba(0,0,0,0.42)' : 'rgba(42,56,62,0.22)');
+    g.beginPath(); g.arc(v.cx, v.cy, v.r, 0, Math.PI * 2);
+    g.fillStyle = shade; g.fill();
     g.restore();
 
     // The rim last, over the clipped land, so the sphere keeps a clean edge.
     g.beginPath(); g.arc(v.cx, v.cy, v.r, 0, Math.PI * 2);
-    g.lineWidth = 1; g.strokeStyle = dark ? '#3c5c68' : '#aac7d0'; g.stroke();
+    g.lineWidth = 1; g.strokeStyle = rim; g.stroke();
   }
 
   /* The arcs, the airports and the aircraft, as SVG over the canvas. A path that crosses the
@@ -5383,12 +5519,13 @@
     var list = globeFlights();
     var now = Date.now();
     var parts = [], pins = {}, planes = '';
+    var bows = flightBows(list);
 
     list.forEach(function(f){
       var leg = flightLeg(f);
       var past = flightIsPast(f);
       var col = flightColor(f);
-      var pts = greatCircle(leg.a, leg.b, 64);
+      var pts = bowedCircle(leg.a, leg.b, 64, bows[f.id] || 0);
       var seg = [], segs = [];
       pts.forEach(function(p){
         var s2 = project(p.lon, p.lat, v);
@@ -5411,7 +5548,7 @@
       if(!past){
         var prog = flightProgress(f, now);
         if(prog !== null && prog > 0 && prog < 1){
-          var at = alongRoute(leg.a, leg.b, prog);
+          var at = alongRoute(leg.a, leg.b, prog, bows[f.id] || 0);
           var ps = project(at.lon, at.lat, v);
           if(ps){
             planes += '<g class="globe-plane" data-globe-flight="' + escapeHtml(f.id) + '">'
@@ -5440,12 +5577,86 @@
     var o = document.getElementById('globe-overlay');
     if(o) o.innerHTML = globeOverlayHtml();
     bindGlobeHits();
+    // The overlay has just been rebuilt, so the card is pointing at an element that no longer
+    // exists. Put it back if a tap asked for it, otherwise take it down.
+    if(globe.tipFor){
+      var keep = (state.flights || []).find(function(x){ return x.id === globe.tipFor.id; });
+      if(keep) showGlobeTip(keep, globe.tipFor.x, globe.tipFor.y);
+      else globe.tipFor = null;
+    } else if(!globe.hovering){
+      hideGlobeTip();
+    }
+  }
+
+  function globeTipHtml(f){
+    var leg = flightLeg(f);
+    var who = flightTravellers(f).map(function(m){ return m.name; });
+    var airborne = flightAirborne(f);
+    return '<span class="gt-route"><b>' + escapeHtml(f.from) + '</b> \u2192 <b>' + escapeHtml(f.to) + '</b>'
+      + (f.airline || f.number
+          ? '<i>' + escapeHtml(((f.airline || '') + ' ' + (f.number || '')).trim()) + '</i>' : '')
+      + '</span>'
+      + (leg ? '<span class="gt-line">' + escapeHtml(leg.a.name + ' \u2192 ' + leg.b.name) + '</span>' : '')
+      + '<span class="gt-line gt-when">'
+      + escapeHtml(fmtDate(f.departDate) + (f.departTime ? ' ' + formatTime12(f.departTime) : ''))
+      + (f.arriveTime ? escapeHtml(' \u2192 ' + (f.arriveDate && f.arriveDate !== f.departDate
+          ? fmtDate(f.arriveDate) + ' ' : '') + formatTime12(f.arriveTime)) : '')
+      + '</span>'
+      + (leg ? '<span class="gt-line">' + greatCircleKm(leg.a, leg.b).toLocaleString() + ' km</span>' : '')
+      + (who.length ? '<span class="gt-who">' + escapeHtml(sentenceList(who)) + '</span>' : '')
+      + (airborne ? '<span class="gt-air">' + icon('plane') + 'In the air now</span>' : '');
+  }
+
+  function showGlobeTip(f, clientX, clientY){
+    var tip = document.getElementById('globe-tip');
+    var host = document.getElementById('globe-host');
+    if(!tip || !host || !f) return;
+    tip.innerHTML = globeTipHtml(f);
+    tip.classList.add('on');
+    var hb = host.getBoundingClientRect();
+    var tb = tip.getBoundingClientRect();
+    // Keep it inside the card, and out from under the pointer.
+    var x = Math.max(4, Math.min(hb.width - tb.width - 4, clientX - hb.left + 14));
+    var y = Math.max(4, Math.min(hb.height - tb.height - 4, clientY - hb.top - tb.height - 12));
+    tip.style.left = Math.round(x) + 'px';
+    tip.style.top = Math.round(y) + 'px';
+  }
+  function hideGlobeTip(){
+    var tip = document.getElementById('globe-tip');
+    if(tip){ tip.classList.remove('on'); }
   }
 
   function bindGlobeHits(){
     document.querySelectorAll('[data-globe-flight]').forEach(function(el){
-      el.addEventListener('click', function(){
-        state.globeFocus = el.getAttribute('data-globe-flight');
+      var find = function(){
+        var id = el.getAttribute('data-globe-flight');
+        return (state.flights || []).find(function(x){ return x.id === id; });
+      };
+      // Hovering pauses the drift as well as showing the card: a line that keeps sliding out
+      // from under the pointer is not something you can read.
+      el.addEventListener('mouseenter', function(e){
+        globe.hovering = true; globe.spin = false;
+        showGlobeTip(find(), e.clientX, e.clientY);
+      });
+      el.addEventListener('mousemove', function(e){ showGlobeTip(find(), e.clientX, e.clientY); });
+      el.addEventListener('mouseleave', function(){
+        globe.hovering = false;
+        globe.tipFor = null;
+        hideGlobeTip();
+        if(!globe.userStopped) startGlobe();
+      });
+      el.addEventListener('click', function(e){
+        var f = find();
+        // On a touch screen there is no hover, so the tap has to do both jobs. It cannot just
+        // show the card, though: the render below rebuilds the overlay and would throw it
+        // away again. Remember what to show and let the repaint put it back.
+        if(f && globe.tipFor && globe.tipFor.id === f.id){
+          globe.tipFor = null;              // tapping it again puts it away
+          state.globeFocus = null;
+        } else if(f){
+          globe.tipFor = { id:f.id, x:e.clientX, y:e.clientY };
+          state.globeFocus = f.id;
+        }
         render();
       });
     });
@@ -5465,22 +5676,41 @@
   function startGlobe(){
     if(globe.raf) cancelAnimationFrame(globe.raf);
     globe.lastTick = 0;
+    if(globe.userStopped || globe.hovering){ globe.spin = false; return; }
     // Someone who prefers less motion should not be handed a spinning planet.
     globe.spin = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     if(globe.spin) globe.raf = requestAnimationFrame(globeTick);
   }
 
+  var GLOBE_ZOOM_MAX = 8;
   function sizeGlobe(){
     var host = document.getElementById('globe-host');
     if(!host) return false;
     var size = Math.max(200, Math.min(host.clientWidth, isPhone() ? 340 : 460));
     globe.view.size = size;
     globe.view.cx = size / 2; globe.view.cy = size / 2;
-    globe.view.r = size / 2 - 6;
+    globe.view.base = size / 2 - 6;
+    // Zooming grows the sphere; the round window it is drawn into stays the same size, so a
+    // magnified globe is a closer look through the same porthole rather than a bigger blob
+    // spilling over the card.
+    globe.view.r = globe.view.base * globe.zoom;
     host.style.height = size + 'px';
+    var clip = document.getElementById('globe-clip');
+    if(clip){ clip.style.width = size + 'px'; clip.style.height = size + 'px'; }
     var c = document.getElementById('globe-canvas');
     if(c){ c.style.width = size + 'px'; c.style.height = size + 'px'; }
     return true;
+  }
+  function setGlobeZoom(z){
+    var next = Math.max(1, Math.min(GLOBE_ZOOM_MAX, z));
+    if(Math.abs(next - globe.zoom) < 0.001) return;
+    globe.zoom = next;
+    globe.userStopped = true;          // they are looking at something; stop drifting
+    globe.spin = false;
+    globe.view.r = globe.view.base * globe.zoom;
+    paintGlobe();
+    var host = document.getElementById('globe-host');
+    if(host) host.classList.toggle('zoomed', globe.zoom > 1.02);
   }
 
   function bindGlobeDrag(){
@@ -5488,10 +5718,14 @@
     if(!host) return;
     var start = null;
     function down(e){
+      if(!e.target.closest || !e.target.closest('[data-globe-flight]')){
+        if(globe.tipFor){ globe.tipFor = null; hideGlobeTip(); }
+      }
       var t = e.touches ? e.touches[0] : e;
       start = { x:t.clientX, y:t.clientY, lon:globe.view.lon, lat:globe.view.lat };
       globe.drag = true;
       globe.spin = false;
+      globe.userStopped = true;    // they put it where they want it; don't drift away again
     }
     function move(e){
       if(!start) return;
@@ -5506,9 +5740,47 @@
     host.addEventListener('mousedown', down);
     window.addEventListener('mousemove', move);
     window.addEventListener('mouseup', up);
-    host.addEventListener('touchstart', down, { passive:true });
-    host.addEventListener('touchmove', move, { passive:false });
-    host.addEventListener('touchend', up);
+
+    // Two fingers zoom; one finger spins. Tracked separately so a pinch never also whips the
+    // globe round as the fingers land.
+    var pinch = null;
+    function spanOf(e){
+      var a = e.touches[0], b2 = e.touches[1];
+      return Math.sqrt(Math.pow(a.clientX - b2.clientX, 2) + Math.pow(a.clientY - b2.clientY, 2));
+    }
+    host.addEventListener('touchstart', function(e){
+      if(e.touches.length === 2){ pinch = { span: spanOf(e), zoom: globe.zoom }; start = null; return; }
+      pinch = null; down(e);
+    }, { passive:true });
+    host.addEventListener('touchmove', function(e){
+      if(pinch && e.touches.length === 2){
+        var sp = spanOf(e);
+        if(pinch.span > 0) setGlobeZoom(pinch.zoom * (sp / pinch.span));
+        if(e.cancelable) e.preventDefault();
+        return;
+      }
+      move(e);
+    }, { passive:false });
+    host.addEventListener('touchend', function(e){
+      if(e.touches.length < 2) pinch = null;
+      up();
+    });
+
+    host.addEventListener('wheel', function(e){
+      e.preventDefault();
+      setGlobeZoom(globe.zoom * (e.deltaY < 0 ? 1.12 : 1 / 1.12));
+    }, { passive:false });
+
+    var inB = document.getElementById('globe-in');
+    var outB = document.getElementById('globe-out');
+    var resetB = document.getElementById('globe-reset');
+    if(inB) inB.addEventListener('click', function(){ setGlobeZoom(globe.zoom * 1.4); });
+    if(outB) outB.addEventListener('click', function(){ setGlobeZoom(globe.zoom / 1.4); });
+    if(resetB) resetB.addEventListener('click', function(){
+      setGlobeZoom(1);
+      globe.userStopped = false;
+      startGlobe();
+    });
   }
 
   // Turn the globe so a flight's route faces you.
@@ -5533,10 +5805,18 @@
       + flightCountdownHtml()
       + '<div class="globe-card">'
       + '<div id="globe-host" class="globe-host">'
+      + '<div id="globe-clip" class="globe-clip">'
       + '<canvas id="globe-canvas" class="globe-canvas"></canvas>'
       + '<div id="globe-overlay" class="globe-overlay"></div>'
       + '</div>'
-      + '<p class="globe-hint">Drag to spin. Tap a route for its details.</p>'
+      + '<div class="globe-zoom">'
+      + '<button type="button" id="globe-in" aria-label="Zoom in">+</button>'
+      + '<button type="button" id="globe-out" aria-label="Zoom out">\u2212</button>'
+      + '<button type="button" id="globe-reset" aria-label="Fit the whole globe">\u25cb</button>'
+      + '</div>'
+      + '<div id="globe-tip" class="globe-tip" aria-hidden="true"></div>'
+      + '</div>'
+      + '<p class="globe-hint">Drag to spin, pinch or scroll to zoom. Tap a route for its details.</p>'
       // CC BY 4.0 on the airport list and public domain on the coastlines: the credit is a
       // condition of using the first, so it lives on the screen that uses it.
       + '<p class="globe-credit">Airports: OurAirports via airport-data-js (CC BY 4.0) \u00b7 Coastlines: Natural Earth</p>'
