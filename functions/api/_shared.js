@@ -19,7 +19,9 @@ export const KINDS = new Set([
   'gift', 'giftclaim',
   // Photo proof for a 75 Medium item. Deliberately its own kind: see state.js for why these
   // rows are the one thing the sync does NOT hand out.
-  'trackphoto'
+  'trackphoto',
+  // A leg of somebody's trip. Everyone can see everyone's.
+  'flight'
 ]);
 
 export const META_KEYS = new Set(['homeTimezone', 'appTitle', 'appSubtitle']);
